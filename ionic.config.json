@@ -1,0 +1,8 @@
+{
+  "name": "tipm-and-ecm-rebuilders",
+  "integrations": {
+    "capacitor": {}
+  },
+  "type": "vue",
+  "id": "92d00b17"
+}

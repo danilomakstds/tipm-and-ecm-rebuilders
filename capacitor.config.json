@@ -1,0 +1,6 @@
+{
+	"appId": "io.ionic.starter",
+	"appName": "tipm-and-ecm-rebuilders",
+	"webDir": "dist",
+	"bundledWebRuntime": false
+}
