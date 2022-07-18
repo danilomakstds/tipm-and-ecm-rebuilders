@@ -8,6 +8,14 @@ const routes: Array<RouteRecordRaw> = [
     redirect: '/tabs/home'
   },
   {
+    path: '/product-details',
+    component: () => import('@/views/ProductDetails.vue')
+  },
+  {
+    path: '/cart',
+    component: () => import('@/views/CartPage.vue')
+  },
+  {
     path: '/tabs/',
     component: TabsPage,
     children: [

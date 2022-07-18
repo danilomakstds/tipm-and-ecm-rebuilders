@@ -1,6 +1,7 @@
 import { createApp } from 'vue'
 import App from './App.vue'
 import router from './router';
+import store from './store'
 
 import { IonicVue } from '@ionic/vue';
 
@@ -22,10 +23,19 @@ import '@ionic/vue/css/display.css';
 
 /* Theme variables */
 import './theme/variables.css';
+import LoadScript from "vue-plugin-load-script";
+
+
+import mitt from 'mitt';
+const emitter = mitt();
 
 const app = createApp(App)
   .use(IonicVue)
-  .use(router);
+  .use(router)
+  .use(store)
+  .use(LoadScript);
+
+app.config.globalProperties.emitter = emitter;
   
 router.isReady().then(() => {
   app.mount('#app');
