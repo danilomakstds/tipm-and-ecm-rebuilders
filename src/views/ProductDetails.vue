@@ -25,7 +25,7 @@
       <div class="p-4 pb-1" id="product-details">
         <div>
           <ion-chip :class="selectedProduct.badge">
-              <ion-label color="light">{{selectedProduct.name.split(' ')[0]}}</ion-label>
+              <ion-label color="light">{{selectedProduct.name.split(' ')[0].replace('_',' ')}}</ion-label>
           </ion-chip>
 
           <ion-chip class="bg-white float-end">
@@ -81,7 +81,7 @@
               <ion-badge slot="start" :color="defaultColor" class="me-2" v-if="shopperapprovedDetails.total_reviews">{{shopperapprovedDetails.total_reviews}}</ion-badge>
             </ion-item>
             <div class="ion-padding" slot="content">
-              <span v-if="shopperapprovedDetails.total_reviews == 0" class="fst-italic">
+              <span v-if="shopperapprovedDetails.total_reviews == 0 || productRatings == '0 reviews'" class="fst-italic">
               We're currently collecting product reviews for this item.
               In the meantime, here are some reviews from our past customers sharing their overall shopping experience.
               </span>
@@ -93,7 +93,7 @@
                     </ion-avatar>
                     <ion-label class="ion-text-wrap">
                       <h2>{{review.display_name}}</h2>
-                      <h3 v-html="getStars(review.rating ? review.rating:review.overall)"></h3>
+                      <h3 v-html="getStars(review.rating ? review.rating : review.overall)"></h3>
                       <p>{{review.comments}}</p>
                     </ion-label>
                   </ion-item>
@@ -115,12 +115,21 @@
             </h1>
           </div>
           <div class="col-6 p-0">
+
             <ion-button class="w-100"
             style="height: 6vh"
             :color="selectedProduct.badge.includes('ecm') ? 'tertiary' : ''"
-            :disabled="isOutofStock">
+            :disabled="isOutofStock" v-if="!isOutofStock">
               <ion-icon :icon="cartOutline" class="me-2"></ion-icon>
               Add to cart
+            </ion-button>
+
+            <ion-button class="w-100"
+            style="height: 6vh"
+            color="danger"
+            v-if="isOutofStock">
+              <ion-icon :icon="enterOutline" class="me-2"></ion-icon>
+              Join Waitlist
             </ion-button>
           </div>
         </section>
@@ -128,11 +137,9 @@
 
 
       <ion-fab horizontal="start" vertical="top" slot="fixed">
-        <a href="/">
-          <ion-fab-button color="light">
-            <ion-icon :icon="chevronBackOutline"></ion-icon>
-          </ion-fab-button>
-        </a>
+        <ion-fab-button color="light" :href="$router.options.history.state.back">
+          <ion-icon :icon="chevronBackOutline"></ion-icon>
+        </ion-fab-button>
       </ion-fab>
 
     </ion-content>
@@ -148,7 +155,8 @@ import { IonSlide, IonSlides, IonButton, IonAccordion,
     IonFab, IonFabButton, 
 } from '@ionic/vue'
 import { 
-  starOutline, star, chevronBackOutline, heartOutline, cartOutline
+  starOutline, star, chevronBackOutline,
+  heartOutline, cartOutline, enterOutline
 } from 'ionicons/icons'
 import { mapState } from 'vuex'
 import $ from "jquery";
@@ -186,7 +194,8 @@ export default defineComponent({
   },
   setup() {
     return {
-      starOutline, star, chevronBackOutline, heartOutline, cartOutline
+      starOutline, star, chevronBackOutline,
+      heartOutline, cartOutline, enterOutline
     }
   },
   methods: {
@@ -213,6 +222,10 @@ export default defineComponent({
                 this.productRatings = parseFloat(this.shopperapprovedDetails.average_rating).toFixed(1);
               }
             }
+          }.bind(this))
+          .catch( function () {
+            this.productRatings = '0 reviews';
+            this.getSiteReviews();
           }.bind(this));
     },
     getProductReviews: function () {

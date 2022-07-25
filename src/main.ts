@@ -1,4 +1,5 @@
 import { createApp } from 'vue'
+//import VueGoogleMaps from '@fawmi/vue-google-maps'
 import App from './App.vue'
 import router from './router';
 import store from './store'
@@ -25,7 +26,6 @@ import '@ionic/vue/css/display.css';
 import './theme/variables.css';
 import LoadScript from "vue-plugin-load-script";
 
-
 import mitt from 'mitt';
 const emitter = mitt();
 
@@ -34,6 +34,11 @@ const app = createApp(App)
   .use(router)
   .use(store)
   .use(LoadScript);
+  // .use(VueGoogleMaps, {
+  //   load: {
+  //         key: 'AIzaSyDX_bIjjI3y6-CzvDu-p1XAJMeuXyXLxfY',
+  //     },
+  // });
 
 app.config.globalProperties.emitter = emitter;
   

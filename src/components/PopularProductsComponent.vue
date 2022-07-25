@@ -1,5 +1,5 @@
 <template>
-  <div id="popular" class="p-3">
+  <div id="popular" class="p-3 pt-0">
 
     <h5><strong>Popular</strong>
         <!-- <span class="float-end text-muted2" style="font-size:small">View All</span> -->
@@ -26,7 +26,10 @@
                           <ion-card-subtitle class="prod-sub-title">{{product.name_subtitle}}</ion-card-subtitle>
                       </span>
                       <div class="overflow-hidden d-flex align-items-center justify-content-between">
-                        <span class="text-dark fw-bold">$ {{formatRegularPrice(product.regular_price)}}</span>
+                        <span class="price-display">
+                          <span class="text-decoration-line-through text-danger regular-price" v-if="product.on_sale">$ {{formatRegularPrice(product.regular_price)}}</span><br/>
+                          <span class="text-dark fw-bold">$ {{formatRegularPrice(product.price)}}</span>
+                        </span>
                         <ion-button
                         :color="(product.badge == 'ecm-badge') ? 'tertiary': ''"
                         class="float-end add-dimentions"
@@ -58,7 +61,10 @@
                           <ion-card-subtitle class="prod-sub-title">{{product.name_subtitle}}</ion-card-subtitle>
                       </span>
                       <div class="overflow-hidden d-flex align-items-center justify-content-between">
-                        <span class="text-dark fw-bold">$ {{formatRegularPrice(product.regular_price)}}</span>
+                        <span class="price-display">
+                          <span class="text-decoration-line-through text-danger regular-price" v-if="product.on_sale">$ {{formatRegularPrice(product.regular_price)}}</span><br/>
+                          <span class="text-dark fw-bold">$ {{formatRegularPrice(product.price)}}</span>
+                        </span>
                         <ion-button
                         :color="(product.badge == 'ecm-badge') ? 'tertiary': ''"
                         class="float-end add-dimentions"
@@ -76,7 +82,10 @@
 
 <script lang="js">
 import { defineComponent } from 'vue';
-import { IonCard, IonButton, IonCardHeader, IonCardTitle, IonCardSubtitle} from '@ionic/vue';
+import {
+  IonCard, IonButton, IonCardHeader,
+  IonCardTitle, IonCardSubtitle 
+} from '@ionic/vue';
 import { 
   add
 } from 'ionicons/icons';
@@ -96,8 +105,9 @@ export default defineComponent({
       'selectedProduct'
   ]),
   components: {
-    IonCard, IonButton, IonCardHeader, IonCardTitle, IonCardSubtitle,
-    DotLoader
+    IonCard, IonButton, IonCardHeader,
+    IonCardTitle, IonCardSubtitle,
+    DotLoader,
   },
   data () {
     return {
@@ -127,12 +137,12 @@ export default defineComponent({
                         var name = null;
                         if (prod.tags.find(tag => tag.name == 'TIPM')) {
                             prod.badge = 'tipm-badge';
-                            name = prod.name.substr(prod.name.indexOf(' ')+1);
+                            name = prod.name.substr(prod.name.indexOf(' ')+1).replace(/–/g,'-');
                             prod.name_title = name.split('- Part')[0];
                             prod.name_subtitle = '- Part' + name.split('- Part')[1];
                         } else {
                             prod.badge = 'ecm-badge';
-                            name = prod.name.substr(prod.name.indexOf(' ')+1);
+                            name = prod.name.substr(prod.name.indexOf(' ')+1).replace(/–/g,'-');
                             prod.name_title = name.split('with')[0];
                             prod.name_subtitle = 'with' + name.split('with')[1];
                         }
@@ -174,34 +184,7 @@ export default defineComponent({
 </script>
 
 <style scoped>
-.prod-sub-title{
-    /*font-size:1.3vh;*/
-    font-size: 12px;
-}
-
-.prod-title {
-    /*font-size:1.6vh;*/
-    font-size: 15px;
-}
-
-.add-dimentions {
-    width: 44px; height: 42px;
-}
-
-#popular ion-card{
+  #popular ion-card{
     margin-inline: 12px !important;
-}
-
-#popular .sale-banner {
-  z-index: 1000; height: 70px; top: -4px; right: -4px;
-}
-
-#popular .out-of-stock-banner {
-  z-index: 1000; position: absolute; left: 0; right: 0; top: 10px; bottom: 0;
-  height: 100px;
-}
-
-#popular .out-of-stock-banner img {
-  height: 100px;
-}
+  }
 </style>

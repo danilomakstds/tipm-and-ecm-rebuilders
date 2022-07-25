@@ -12,6 +12,10 @@ const routes: Array<RouteRecordRaw> = [
     component: () => import('@/views/ProductDetails.vue')
   },
   {
+    path: '/order-details',
+    component: () => import('@/views/OrderDetails.vue')
+  },
+  {
     path: '/cart',
     component: () => import('@/views/CartPage.vue')
   },
@@ -28,12 +32,12 @@ const routes: Array<RouteRecordRaw> = [
         component: () => import('@/views/HomePage.vue')
       },
       {
-        path: 'tab2',
-        component: () => import('@/views/Tab2Page.vue')
+        path: 'products',
+        component: () => import('@/views/ProductsPage.vue')
       },
       {
-        path: 'tab3',
-        component: () => import('@/views/Tab3Page.vue')
+        path: 'orders',
+        component: () => import('@/views/OrdersPage.vue')
       }
     ]
   }

@@ -144,6 +144,10 @@ ion-button {
     border-radius: 20px;
 }
 
+ion-input input{
+    height: 50px !important;
+}
+
 .popular ion-card {
     margin-inline: 10px !important;
 }
@@ -160,4 +164,49 @@ ion-button {
 
 .opacity {
     opacity: .5;
+}
+
+
+.swal2-modal {
+    border-radius: 20px !important;
+}
+
+
+.prod-sub-title{
+    /*font-size:1.3vh;*/
+    font-size: 12px;
+}
+
+.prod-title {
+    /*font-size:1.6vh;*/
+    font-size: 15px;
+}
+
+.add-dimentions {
+    width: 44px; height: 42px;
+}
+
+.sale-banner {
+  z-index: 1000; height: 70px; top: -4px; right: -4px;
+}
+
+.out-of-stock-banner {
+  z-index: 1000; position: absolute; left: 0; right: 0; top: 10px; bottom: 0;
+  height: 100px;
+}
+
+.out-of-stock-banner img {
+  height: 100px;
+}
+
+.price-display {
+  line-height: 1;
+}
+
+.price-display span.regular-price {
+  font-size: 1.4vh;
+}
+
+.rounded-input {
+    border-radius: 20px !important;
 }

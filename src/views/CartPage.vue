@@ -3,11 +3,9 @@
     <ion-header>
       <ion-toolbar>
         <ion-buttons slot="start">
-            <a href="/">
-                <ion-button color="primary">
-                    <ion-icon slot="icon-only" :ios="arrowBackOutline" :md="arrowBackOutline" color="dark"></ion-icon>
-                </ion-button>
-            </a>
+            <ion-button color="primary" href="/">
+                <ion-icon slot="icon-only" :ios="arrowBackOutline" :md="arrowBackOutline" color="dark"></ion-icon>
+            </ion-button>
         </ion-buttons>
         <ion-title>My Cart</ion-title>
       </ion-toolbar>
@@ -19,7 +17,7 @@
         </ion-toolbar>
       </ion-header> -->
 
-      <ion-list>
+      <ion-list lines="none">
         <ion-item-sliding>
             <ion-item class="ion-no-padding" style="--inner-padding-end:0">
                 <ion-card style="border-radius: 30px;" class="bg-white">

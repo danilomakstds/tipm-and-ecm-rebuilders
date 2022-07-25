@@ -16,6 +16,11 @@
         </ion-buttons>
         <ion-buttons slot="primary">
           <ion-button>
+            <ion-icon slot="icon-only" :icon="scanOutline" color="dark"></ion-icon>
+          </ion-button>
+        </ion-buttons>
+        <ion-buttons slot="primary">
+          <ion-button>
             <ion-icon slot="icon-only" :icon="personCircleOutline" color="dark"></ion-icon>
           </ion-button>
         </ion-buttons>
@@ -23,7 +28,7 @@
       </ion-toolbar>
     </ion-header>
     <ion-content :fullscreen="true" :scroll-events="true" :scroll-y="true">
-      <div class="p-4">
+      <!-- <div class="p-4">
         <div class="row">
           <div class="col-4 p-1">
             <ion-select placeholder="Year">
@@ -47,18 +52,25 @@
             </ion-select>
           </div>
           <div class="col-8 p-1">
-            <ion-input placeholder="Search VIN" maxlength="17"></ion-input>
+            <ion-input placeholder="VIN #  /  Part # /  Keyword"></ion-input>
           </div>
           <div class="col-2 p-1">
             <ion-button color="medium" class="w-100">
-              <ion-icon :icon="barcodeOutline"></ion-icon>
+              <ion-icon :icon="scanOutline"></ion-icon>
             </ion-button>
           </div>
           <div class="col-2 p-1">
             <ion-button color="primary" class="w-100">Go</ion-button>
           </div>
         </div>
-      </div>
+      </div> -->
+
+      <section class="m-3 ms-2 mb-0" @click="openSearchModal()">
+        <ion-chip class="p-4 bg-white me-2 w-100">
+          <ion-icon :icon="search" color="dark"></ion-icon>
+          <ion-label color="dark">Search</ion-label>
+        </ion-chip>
+      </section>
 
       <!-- show items on sale-->
       <slider-component></slider-component>
@@ -76,12 +88,14 @@
   </ion-page>
 </template>
 
-<script lang="ts">
+<script lang="js">
 import { defineComponent } from 'vue';
 import { IonPage, IonHeader, IonToolbar,
 IonTitle, IonContent, IonIcon,
-IonButtons, IonSelect, IonSelectOption,
-IonButton, IonInput} from '@ionic/vue';
+IonButtons, IonChip, IonLabel
+// IonSelect, IonSelectOption,
+// IonButton, IonInput
+} from '@ionic/vue';
 import { 
   ellipsisVertical,
   cartOutline,
@@ -90,7 +104,8 @@ import {
   search, 
   starOutline,
   star,
-  barcodeOutline, apps, add
+  barcodeOutline, apps, add,
+  scanOutline
 } from 'ionicons/icons';
 import SliderComponent from '@/components/SliderComponent.vue';
 import PopularProductsComponent from '@/components/PopularProductsComponent.vue';
@@ -102,10 +117,12 @@ export default  defineComponent({
   components: {
     SliderComponent, PopularProductsComponent, SlidingChips,
 
+    IonChip, IonLabel,
     IonHeader, IonToolbar, IonTitle,
     IonContent, IonPage, IonButtons,
-    IonIcon, IonSelect, IonSelectOption,
-    IonButton, IonInput
+    IonIcon,
+    // IonSelect, IonSelectOption,
+    // IonButton, IonInput
   },
   setup() {
     return {
@@ -114,7 +131,12 @@ export default  defineComponent({
       personCircleOutline, 
       search, star,
       starOutline, cartOutline, barcodeOutline,
-      apps, add
+      apps, add, scanOutline
+    }
+  },
+  methods: {
+    openSearchModal: function () {
+      this.emitter.emit('isShowSearchModal');
     }
   }
 });
