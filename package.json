@@ -26,13 +26,16 @@
     "jquery": "^3.6.0",
     "mitt": "^3.0.0",
     "moment": "^2.29.1",
+    "quagga": "^0.12.1",
     "sweetalert2": "^11.4.8",
+    "v-viewer": "^3.0.10",
     "vue": "^3.2.21",
     "vue-plugin-load-script": "^2.1.1",
     "vue-router": "^4.0.12",
     "vue-spinner": "^1.0.4",
     "vuex": "^4.0.0-0",
-    "vuex-persistedstate": "^4.1.0"
+    "vuex-persistedstate": "^4.1.0",
+    "youtube-vue3": "^0.1.15"
   },
   "devDependencies": {
     "@capacitor/cli": "3.6.0",

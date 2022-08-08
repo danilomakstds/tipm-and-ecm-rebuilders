@@ -24,7 +24,14 @@ import '@ionic/vue/css/display.css';
 
 /* Theme variables */
 import './theme/variables.css';
+
+
+import 'viewerjs/dist/viewer.css'
+import VueViewer from 'v-viewer'
 import LoadScript from "vue-plugin-load-script";
+
+/* Quagga */
+
 
 import mitt from 'mitt';
 const emitter = mitt();
@@ -33,6 +40,7 @@ const app = createApp(App)
   .use(IonicVue)
   .use(router)
   .use(store)
+  .use(VueViewer)
   .use(LoadScript);
   // .use(VueGoogleMaps, {
   //   load: {

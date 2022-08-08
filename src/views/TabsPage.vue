@@ -39,7 +39,7 @@
                 Search by VIN
               </div>
               <div class="col-10 p-1">
-                <ion-input placeholder="VIN" maxlength="17"></ion-input>
+                <ion-input placeholder="VIN" maxlength="17" v-model="searchVinNumber"></ion-input>
               </div>
               <div class="col-2 p-1">
                 <ion-button color="medium" class="w-100">
@@ -53,16 +53,17 @@
                 <ion-input placeholder="Search Part Number / Keyword" v-model="searchKeywordPartNumber"></ion-input>
               </div>
               <div class="col-12 p-0 mt-3">
-                <ion-button color="primary" expand="block" @click="triggerSearch()" style="height:45px">Go</ion-button>
+                <ion-button color="primary" expand="block" @click="triggerSearch()" style="height:45px"
+                :disabled="isSearchDisabled"
+                >Go</ion-button>
               </div>
             </div>
           </div>
         </ion-content>
     </ion-modal>
 
-
     <ion-tabs>
-      <ion-router-outlet></ion-router-outlet>
+      <ion-router-outlet id="main"></ion-router-outlet>
       <ion-tab-bar slot="bottom">
         <ion-tab-button tab="home" href="/tabs/home">
           <ion-icon :icon="homeOutline" />
@@ -78,9 +79,60 @@
           <ion-icon :icon="cubeOutline" />
           <!-- <ion-label>Tab 3</ion-label> -->
         </ion-tab-button>
+
+        <ion-tab-button tab="youtube" href="/tabs/youtube">
+          <ion-icon :icon="logoYoutube" />
+          <!-- <ion-label>Tab 3</ion-label> -->
+        </ion-tab-button>
+
       </ion-tab-bar>
     </ion-tabs>
   </ion-page>
+
+
+  <ion-menu side="start" menu-id="ionicmenu" content-id="main">
+    <ion-header>
+        <ion-toolbar style="--background: #3A3A3A">
+        <!-- --background: linear-gradient(to right, #4B7838, #66AF47 )-->
+            <ion-title style="font-size: 2vh;" class="text-white"><strong>TIPM / ECM REBUILDERS</strong></ion-title>
+        </ion-toolbar>
+    </ion-header>
+    <ion-content>
+        <ion-list>
+            <ion-item href="/cart">
+                <ion-icon :icon="cartOutline" slot="start" />
+                <ion-label>Cart</ion-label>
+            </ion-item>
+            <ion-item href="tabs/orders">
+                <ion-icon :icon="cubeOutline" slot="start" />
+                <ion-label>Orders</ion-label>
+            </ion-item>
+            <ion-item>
+                <ion-icon :icon="informationCircleOutline" slot="start" />
+                <ion-label>About Us</ion-label>
+            </ion-item>
+            <ion-item>
+                <ion-icon :icon="returnDownBackOutline" slot="start" />
+                <ion-label>Returns</ion-label>
+            </ion-item>
+            <ion-item>
+                <ion-icon :icon="briefcaseOutline" slot="start" />
+                <ion-label>Resellers</ion-label>
+            </ion-item>
+            <ion-item>
+                <ion-icon :icon="buildOutline" slot="start" />
+                <ion-label>Repair</ion-label>
+            </ion-item>
+            <ion-item @click="logOutUserModal()">
+                <ion-icon :icon="logOutOutline" slot="start" />
+                <ion-label>Logout</ion-label>
+            </ion-item>
+        </ion-list>
+    </ion-content>
+    <span class="text-center pt-3 text-muted" style="font-size: 9px; background-color: #F6F6F6;">Copyright © 2022<br /><b style="font-size: 11px">Mak's TIPM & ECM Rebuilders</b>
+        <p>All Rights Reserved</p>
+    </span>
+  </ion-menu>
 </template>
 
 <script lang="js">
@@ -88,17 +140,23 @@ import { defineComponent } from 'vue';
 import { IonTabBar, IonTabButton, IonTabs,
 IonIcon, IonPage, IonRouterOutlet,
 IonModal, modalController, IonSelect, IonSelectOption,
-IonInput
+IonInput, alertController, menuController,
+IonMenu, IonHeader, IonToolbar, IonTitle, IonContent, IonList, IonItem, IonLabel
 } from '@ionic/vue';
 import { ellipse, square, triangle, searchOutline,
 heartOutline, homeOutline, scanOutline,
-cubeOutline
+cubeOutline, logOutOutline, cartOutline,
+openOutline, informationCircleOutline, returnDownBackOutline,
+buildOutline, briefcaseOutline, logoYoutube
 } from 'ionicons/icons';
 import axios from 'axios'
 import DotLoader from 'vue-spinner/src/DotLoader.vue'
 import SettingsConstants from '../constants/settings.constants'
 import store from '../store'
 import $ from 'jquery'
+import Swal from 'sweetalert2'
+
+
 
 export default defineComponent({
   name: 'TabsPage',
@@ -107,7 +165,9 @@ export default defineComponent({
     IonTabs, IonTabBar, IonTabButton,
     IonIcon, IonPage, IonRouterOutlet,
     IonModal, IonSelect, IonSelectOption,
-    IonInput
+    IonInput, IonMenu, IonHeader, IonToolbar,
+    IonTitle, IonContent, IonList, IonItem,
+    IonLabel
   },
   setup() {
     return {
@@ -118,7 +178,14 @@ export default defineComponent({
       heartOutline,
       homeOutline,
       scanOutline,
-      cubeOutline
+      cubeOutline,
+      logOutOutline,
+      cartOutline,
+      openOutline,
+      informationCircleOutline,
+      returnDownBackOutline, buildOutline,
+      briefcaseOutline,
+      logoYoutube
     }
   },
   watch: {
@@ -128,6 +195,7 @@ export default defineComponent({
         this.selectedModel = null;
         store.commit('SET_SELECTED_YEAR', newVal);
         this.searchKeywordPartNumber = null;
+        this.searchVinNumber = null;
       }
     },
     selectedMake: function (newVal) {
@@ -135,24 +203,63 @@ export default defineComponent({
         this.selectedModel = null;
         store.commit('SET_SELECTED_MAKE', newVal);
         this.searchKeywordPartNumber = null;
+        this.searchVinNumber = null;
       }
     },
     selectedModel: function (newVal) {
       if (newVal) {
         store.commit('SET_SELECTED_MODEL', newVal);
         store.commit('SET_SEARCH_KEYWORD', null);
+        store.commit('SET_SEARCH_VIN_NUMBER', null);
         this.searchKeywordPartNumber = null;
+        this.searchVinNumber = null;
+        this.isSearchDisabled = false;
+      } else {
+        this.isSearchDisabled = true;
       }
     },
     searchKeywordPartNumber: function (newVal) {
       if (newVal) {
         store.commit('SET_SEARCH_KEYWORD', newVal);
-        store.commit('SET_SELECTED_MODEL', null);
-        this.selectedYear = null;
-        this.selectedMake = null;
-        this.selectedModel = null;
+
+          store.commit('SET_SELECTED_MODEL', null);
+          store.commit('SET_SELECTED_MAKE', null);
+          store.commit('SET_SELECTED_MAKE', null);
+          store.commit('SET_SEARCH_VIN_NUMBER', null);
+          this.selectedYear = null;
+          this.selectedMake = null;
+          this.selectedModel = null;
+          this.searchVinNumber = null;
+        
+        if (newVal.length >= 4) {
+          this.isSearchDisabled = false;
+        } else {
+          this.isSearchDisabled = true;
+        }
       } else {
         store.commit('SET_SEARCH_KEYWORD', null);
+      }
+    },
+    searchVinNumber: function (newVal) {
+      if (newVal) {
+        store.commit('SET_SEARCH_VIN_NUMBER', newVal);
+
+          store.commit('SET_SEARCH_KEYWORD', null);
+          store.commit('SET_SELECTED_MODEL', null);
+          store.commit('SET_SELECTED_MAKE', null);
+          store.commit('SET_SELECTED_MAKE', null);
+          this.selectedYear = null;
+          this.selectedMake = null;
+          this.selectedModel = null;
+          this.searchKeywordPartNumber = null;
+        
+        if (newVal.length == 17) {
+          this.isSearchDisabled = false;
+        } else {
+          this.isSearchDisabled = true;
+        }
+      } else {
+        store.commit('SET_SEARCH_VIN_NUMBER', null);
       }
     },
     '$route': function () {
@@ -171,6 +278,7 @@ export default defineComponent({
       selectedMake: null,
       selectedModel: null,
       searchKeywordPartNumber: null,
+      searchVinNumber: null,
 
       year_ecm: [],
       year_tipm: [],
@@ -182,7 +290,9 @@ export default defineComponent({
 
       model_ecm: [],
       model_tip: [],
-      model: []
+      model: [],
+
+      isSearchDisabled: true,
     }
   },
   methods: {
@@ -191,8 +301,54 @@ export default defineComponent({
         'dismissed': true
       });
     },
+    async logOutUserModal() {
+      const alert = await alertController
+          .create({
+              cssClass: 'my-custom-class',
+              header: 'Log Out!',
+              message: 'Are you sure you would like to <strong>log out</strong>!',
+              buttons: [{
+                      text: 'Cancel',
+                      role: 'cancel',
+                      cssClass: 'secondary',
+                      id: 'cancel-button',
+                      handler: blah => {
+                          console.log('Confirm Cancel:', blah)
+                      },
+                  },
+                  {
+                      text: 'Logout',
+                      id: 'confirm-button',
+                      handler: () => {
+                          console.log('Confirm Okay');
+                          this.logOutUser();
+                      },
+                  },
+              ],
+          });
+      return alert.present();
+    },
+    logOutUser: function () {
+        store.commit('RESET_SESSION_DATA');
+        store.commit('RESET_CUSTOMER_ORDER_LIST');
+        store.commit('RESET_CUSTOMER_ORDER_WATCHLIST');
+        store.commit('RESET_CUSTOMER_ORDERNUMBER_LIST');
+        store.commit('RESET_SELECTED_PRODUCT');
+        Swal.fire({
+          title: 'Logout!',
+          text: 'You have been logged out!',
+          icon:'success',
+          confirmButtonColor: '#4b7838',
+        });
+    },
+    openMenu: function() {
+      menuController.enable(true, 'ionicmenu');
+      menuController.open('ionicmenu');
+    },
     toggleSearchModal: function () {
       this.isSearchModalOpen = !this.isSearchModalOpen;
+      //this.initQuagga();
+      //Quagga.start();
     },
     triggerSearch: function () {
       this.dismiss();
@@ -334,6 +490,9 @@ export default defineComponent({
     this.getYear(SettingsConstants.ECMSITE);
     this.emitter.on('isShowSearchModal', function () {
       this.toggleSearchModal();
+    }.bind(this));
+    this.emitter.on('openMenu', function () {
+      this.openMenu();
     }.bind(this));
   }
 });

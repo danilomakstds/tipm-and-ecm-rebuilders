@@ -19,7 +19,7 @@
                     </span>
                     <ion-card-header class="overflow-hidden">
                       <ion-card-subtitle @click="setSelectedProduct(product)">
-                          <span :class="'pe-2 ps-2 pb-0 pt-0 text-white '+ product.badge">{{product.name.split(' ')[0]}}</span>
+                          <span :class="'pe-2 ps-2 pb-0 pt-0 text-white '+ product.badge">{{product.name.split(' ')[0].replace('_',' ')}}</span>
                       </ion-card-subtitle>
                       <span @click="setSelectedProduct(product)">
                           <ion-card-title class="prod-title fw-normal">{{cleanString(product.name_title)}}</ion-card-title>
@@ -91,18 +91,17 @@ import {
 } from 'ionicons/icons';
 import axios from 'axios'
 import DotLoader from 'vue-spinner/src/DotLoader.vue'
-//import Swal from 'sweetalert2'
-//import store from '../store'
-//import moment from 'moment'
-//import AppConstants from '../constants/app.constants'
 import SettingsConstants from '../constants/settings.constants'
 import store from '../store';
 import { mapState } from 'vuex';
+import Mixin from '../mixins/global.mixin'
 
 export default defineComponent({
   name: 'PopularProductsComponent',
+  mixins: [Mixin],
   computed: mapState([
-      'selectedProduct'
+      'selectedProduct',
+      'popularProducList'
   ]),
   components: {
     IonCard, IonButton, IonCardHeader,
@@ -147,6 +146,7 @@ export default defineComponent({
                             prod.name_subtitle = 'with' + name.split('with')[1];
                         }
                     }.bind(this));
+                    store.commit('SET_POPULAR_PRODUCT_LIST', this.productList);
                 }
             }
           }.bind(this));
@@ -162,23 +162,15 @@ export default defineComponent({
         this.$router.push('/product-details');
       }
     },
-    cleanString: function (string) {
-      return string.replace(/&amp;/g,'&');
-    },
-    formatRegularPrice (price) {
-      var finalPrice = null;
-      if (!price.includes('.')) {
-        finalPrice = price+'.00';
-      } else {
-        finalPrice = price;
-      }
-      return finalPrice;
-    }
   },
   mounted () {
-    this.isLoading = true;
-    this.getPopularProducts(SettingsConstants.TIPMSITE);
-    this.getPopularProducts(SettingsConstants.ECMSITE);
+    if (!this.popularProducList.length) {
+      this.isLoading = true;
+      this.getPopularProducts(SettingsConstants.TIPMSITE);
+      this.getPopularProducts(SettingsConstants.ECMSITE);
+    } else {
+      this.productList = this.popularProducList;
+    }
   }
 });
 </script>

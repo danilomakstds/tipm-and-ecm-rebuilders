@@ -126,6 +126,11 @@ ion-content{
     --ion-background-color:#f6f6f6;
 }
 
+ion-toolbar, ion-tabs, ion-tab-bar, ion-tab-button, .toolbar-background {
+    --ion-background-color:#fff;
+    background-color: #fff
+}
+
 .text-muted2 {
     color: #bbb !important;
 }
@@ -209,4 +214,9 @@ ion-input input{
 
 .rounded-input {
     border-radius: 20px !important;
+}
+
+div.ytp-gradient-bottom, div.ytp-gradient-top {
+    display: none;
+    background: none !important;
 }

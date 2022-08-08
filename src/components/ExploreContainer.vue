@@ -9,7 +9,7 @@
     :is-open="isRegisterModalOpen"
     @willDismiss="onWillDismiss">
       <ion-header>
-        <ion-toolbar>
+        <ion-toolbar color="white">
           <ion-buttons slot="start">
             <ion-button @click="cancel()">Cancel</ion-button>
           </ion-buttons>
@@ -19,9 +19,9 @@
         </ion-toolbar>
       </ion-header>
       <ion-content>
-        <img src="https://tipmrebuilders.com/wp-content/uploads/2022/01/email_banner.png" style="height: 80px"/>
+        <img src="https://tipmrebuilders.com/wp-content/uploads/2022/01/email_banner.png" style="height: 80px" class="w-100"/>
         <div class="alert alert-danger mt-3 mb-0" role="alert" v-if="(!validateEmail(userEmail) && userEmail) || (userPassword !== confirmPassword) || (userPassword && userPassword == confirmPassword && !userEmail)">
-            <span v-if="userPassword !== confirmPassword">
+            <span v-if="userPassword !== confirmPassword && userPassword">
               Passwords don't match!
             </span>
             <span v-if="userPassword && userPassword == confirmPassword && !userEmail">
@@ -40,15 +40,25 @@
         
         <div class="pt-2">
           <ion-item lines="none">
-            <ion-label position="stacked">Password <span class="text-danger">*</span></ion-label>
-            <ion-input ref="input" type="password" placeholder="Password" v-model="userPassword" class="mt-3"></ion-input>
+            <ion-label position="stacked">Password <span class="text-danger">*</span>
+            </ion-label>
+            <div class="position-relative w-100">
+              <ion-icon :icon="eyeOffOutline" color="dark" class="position-absolute eye-forpass" v-if="!showPasswordStatus" @click="showPassword('password-field-reg', true)"></ion-icon>
+              <ion-icon :icon="eyeOutline" color="dark" class="position-absolute eye-forpass" v-else @click="showPassword('password-field-reg', false)"></ion-icon>
+              <ion-input ref="input" type="password" placeholder="Password" v-model="userPassword" class="mt-3" id="password-field-reg"></ion-input>
+            </div>
           </ion-item>
         </div>
 
         <div class="pt-2">
           <ion-item lines="none">
-            <ion-label position="stacked">Confirm password <span class="text-danger">*</span></ion-label>
-            <ion-input ref="input" type="password" placeholder="Confirm Password" v-model="confirmPassword" class="mt-3"></ion-input>
+            <ion-label position="stacked" class="w-100">Confirm password <span class="text-danger">*</span>
+            </ion-label>
+            <div class="position-relative w-100">
+              <ion-icon :icon="eyeOffOutline" color="dark" class="position-absolute eye-forpass" v-if="!showConfirmPasswordStatus" @click="showPassword('confirm-password-field-reg', true)"></ion-icon>
+              <ion-icon :icon="eyeOutline" color="dark" class="position-absolute eye-forpass" v-else @click="showPassword('confirm-password-field-reg', false)"></ion-icon>
+              <ion-input ref="input" type="password" placeholder="Confirm Password" v-model="confirmPassword" class="mt-3" id="confirm-password-field-reg"></ion-input>
+            </div>
           </ion-item>
         </div>
       </ion-content>
@@ -63,17 +73,24 @@ IonContent, IonButton, IonButtons,
 IonModal, IonInput, modalController,
 IonItem, IonLabel
 } from '@ionic/vue';
+import { 
+eyeOffOutline, eyeOutline
+} from 'ionicons/icons'
 import Swal from 'sweetalert2'
 import $ from 'jquery'
 import axios from 'axios'
 import SettingsConstants from '../constants/settings.constants'
 import DotLoader from 'vue-spinner/src/DotLoader.vue'
+import store from '../store';
+import { mapState } from 'vuex';
+import Mixin from '../mixins/global.mixin'
 
 export default defineComponent({
   name: 'ExploreContainer',
-  props: {
-    name: String
-  },
+  mixins: [Mixin],
+  computed: mapState([
+      'sessionData'
+  ]),
   components: {
     DotLoader,
 
@@ -81,6 +98,11 @@ export default defineComponent({
     IonContent, IonButton, IonButtons,
     IonModal, IonInput, IonItem,
     IonLabel
+  },
+  setup() {
+    return {
+      eyeOffOutline, eyeOutline
+    }
   },
   data() {
     return {
@@ -90,7 +112,10 @@ export default defineComponent({
 
       userEmail: null,
       userPassword: null,
-      confirmPassword: null
+      confirmPassword: null,
+
+      showPasswordStatus: false,
+      showConfirmPasswordStatus: false
     }
   },
   methods: {
@@ -98,11 +123,6 @@ export default defineComponent({
       modalController.dismiss({
         'dismissed': true
       });
-    },
-    validateEmail: function (email) 
-    {
-        var re = /\S+@\S+\.\S+/;
-        return re.test(email);
     },
     openLoginModal: function () {
       this.loginSwalModal = Swal.mixin({
@@ -117,8 +137,14 @@ export default defineComponent({
           <input type="email" class="form-control form-control-lg" id="wp-email" aria-describedby="emailHelp">
         </div>
         <div class="mb-3 ms-1 me-1">
-          <label for="exampleInputPassword1" class="form-label">Password <span class="text-danger">*</span></label>
-          <input type="password" class="form-control form-control-lg" id="wp-password">
+          <label for="exampleInputPassword1" class="form-label w-100">
+            Password <span class="text-danger">*</span>
+            <span></span>
+          </label>
+          <div class="w-100 position-relative">
+            <input type="password" class="form-control form-control-lg" id="wp-password">
+            <img src="./assets/eye-off-outline.svg" class="position-absolute eye-password" style="top: 40%; right: 20px; z-index: 1000; height:15px"/>
+            <img src="./assets/eye-outline.svg" class="position-absolute eye-password d-none" style="top: 40%; right: 20px; z-index: 1000; height:15px"/>
         </div>
       </form>`,
         preConfirm: function () {
@@ -133,7 +159,8 @@ export default defineComponent({
         footer: "<a id='open-register-modal' class='text-decoration-none text-dark'>Don't have an account? <span class='text-success'>Sign-up</span></a>"
       }).then(function (result) {
         if (result.isConfirmed && result.value[0].length && result.value[1].length) {
-          this.loginUser(result.value[0], result.value[1]);
+          //this.loginUser(result.value[0], result.value[1]);
+          this.loginUserDEV(result.value[0]);
         } else {
           if (result.isConfirmed) {
             Swal.fire({
@@ -179,7 +206,8 @@ export default defineComponent({
               text: 'you are now logged in!',
               icon:'success',
               confirmButtonColor: '#4b7838',
-            })
+            });
+            this.getUserDetails(email);
           }
         }.bind(this)).catch(function (error){
             this.isLoading = false;
@@ -209,6 +237,11 @@ export default defineComponent({
             console.log(error.config);
         }.bind(this));
     },
+    loginUserDEV: function (email) {
+      this.isLoading = true;
+      this.getUserDetails(email);
+      this.isLoading = false;
+    },
     createAccount: function (email, password) {
       var bodyFormData = new FormData();
       bodyFormData.append('email', email);
@@ -221,17 +254,68 @@ export default defineComponent({
       })
         .then(function (response) {
           if (response.data) {
+            Swal.fire({
+              title: 'Great!',
+              text: 'Account created!',
+              icon:'success',
+              confirmButtonColor: '#4b7838',
+            });
+            store.commit('SET_SESSION_DATA', response.data[0]);
+            // if (this.sessionData) {
+
+            // }
             console.log(response.data)
           }
         }.bind(this));
-    }
+    },
+    getUserDetails: function (username) {
+      var url = null;
+      if (username.includes('@')) {
+        url = 'https://tipmrebuilders.com/rest/users.php?type=get_user_by_email&email=';
+      } else {
+        url = 'https://tipmrebuilders.com/rest/users.php?type=get_user_by_username&username=';
+      }
+      axios.get(url+username
+      ).then(function (response) {
+        if (response.data) {
+          store.commit('SET_SESSION_DATA',
+          {
+            'email': response.data[0].user_email,
+            'id': response.data[0].ID
+          });
+        }
+      }.bind(this));
+    },
+    showPassword: function (elem, show) {
+      if ('password-field-reg' == elem) {
+        this.showPasswordStatus = !this.showPasswordStatus;
+      } else {
+        this.showConfirmPasswordStatus = !this.showConfirmPasswordStatus;
+      }
+      if (show) {
+        $('#'+elem+' input').attr('type', 'text');
+      } else {
+        $('#'+elem+' input').attr('type', 'password');
+      }
+    },
   },
   mounted() {
+
     $(document).on('click', '#open-register-modal', function() {
-        //Some code 1
-        this.loginSwalModal.close();
-        this.openRegisterModal();
+      this.loginSwalModal.close();
+      this.openRegisterModal();
     }.bind(this));
+
+    $(document).on('click', '.eye-password', function () {
+      $('.eye-password').removeClass('d-none');
+      $(this).addClass('d-none');
+      if ($(this).attr('src').includes('eye-off-outline.svg')) {
+        $('#wp-password').attr('type', 'text');
+      } else {
+        $('#wp-password').attr('type', 'password');
+      }
+    });
+
   }
 });
 </script>
@@ -260,5 +344,8 @@ export default defineComponent({
 
 #container a {
   text-decoration: none;
+}
+.eye-forpass {
+  top: 50%; right: 20px; z-index: 1000
 }
 </style>

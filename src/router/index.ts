@@ -18,6 +18,10 @@ const routes: Array<RouteRecordRaw> = [
   {
     path: '/cart',
     component: () => import('@/views/CartPage.vue')
+  },//ReviewPage\{
+  {
+    path: '/reviews',
+    component: () => import('@/views/ReviewPage.vue')
   },
   {
     path: '/tabs/',
@@ -38,6 +42,10 @@ const routes: Array<RouteRecordRaw> = [
       {
         path: 'orders',
         component: () => import('@/views/OrdersPage.vue')
+      },
+      {
+        path: 'youtube',
+        component: () => import('@/views/YoutubePlayer.vue')
       }
     ]
   }

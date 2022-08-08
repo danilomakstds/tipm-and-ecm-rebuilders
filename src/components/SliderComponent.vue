@@ -1,6 +1,12 @@
 <template>
   <div id="slider">
     <ion-slides pager="true" >
+        <!-- <ion-slide>
+          <ion-card class="w-100 bg-dark" style="height:255px">
+            <youtube-vue3 width="100%" height="100%" videoid="YPU4yfTp3nI?theme=light" style="background:none"  autoplay="1" loop="0" listType="search" theme="dark" 
+            controls="1"/>
+          </ion-card>
+        </ion-slide> -->
         <ion-slide>
           <ion-card class="w-100">
             <div class="w-100 bg-ecm">
@@ -69,26 +75,39 @@
   </div>
 </template>
 
-<script lang="ts">
+<script lang="js">
 import { defineComponent } from 'vue';
 import { IonSlide, IonSlides} from '@ionic/vue';
+// import { YoutubeVue3 } from 'youtube-vue3'
+//import $ from 'jquery'
 import { 
   starOutline
 } from 'ionicons/icons';
+import Mixin from '../mixins/global.mixin'
 
 export default defineComponent({
   name: 'SliderComponent',
-  props: {
-    //name: String
-  },
+  mixins: [Mixin],
   components: {
-    IonSlide, IonSlides
+    IonSlide, IonSlides,
+    //YoutubeVue3
   },
   setup() {
     return {
       starOutline
     }
-  }
+  },
+  //mounted() {
+    // if (this.isMobile()) {
+    //   var checkExist = setInterval(function() {
+    //       if ($('.ytp-gradient-bottom').length) {
+    //           $('.ytp-gradient-bottom').remove();
+    //           $('.ytp-gradient-top').remove();
+    //           clearInterval(checkExist);
+    //       }
+    //   }, 100);
+    // }
+  //}
 });
 </script>
 
@@ -120,4 +139,6 @@ ion-card {
     --bullet-background-active: #3A7CA5 !important;
     --bullet-background: #bbb !important;
 }
+
+
 </style>
