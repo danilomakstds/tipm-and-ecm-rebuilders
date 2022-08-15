@@ -30,7 +30,8 @@ import 'viewerjs/dist/viewer.css'
 import VueViewer from 'v-viewer'
 import LoadScript from "vue-plugin-load-script";
 
-/* Quagga */
+// Above the createApp() line
+import { defineCustomElements } from '@ionic/pwa-elements/loader';
 
 
 import mitt from 'mitt';
@@ -53,3 +54,5 @@ app.config.globalProperties.emitter = emitter;
 router.isReady().then(() => {
   app.mount('#app');
 });
+
+defineCustomElements(window);

@@ -3,9 +3,11 @@
     <ion-header>
       <ion-toolbar color="white">
         <ion-buttons slot="start">
-          <ion-button color="primary" href="/">
-              <ion-icon slot="icon-only" :ios="arrowBackOutline" :md="arrowBackOutline" color="dark"></ion-icon>
-          </ion-button>
+          <router-link to="/">
+            <ion-button color="primary">
+                <ion-icon slot="icon-only" :ios="arrowBackOutline" :md="arrowBackOutline" color="dark"></ion-icon>
+            </ion-button>
+          </router-link>
         </ion-buttons>
         <ion-title>Track Orders</ion-title>
       </ion-toolbar>
@@ -32,24 +34,28 @@
 
       <explore-container v-if="!sessionData"></explore-container>
       <div v-else class="mb-5">
+
+      <ion-segment @ionChange="segmentChanged($event)" v-model="selectedSegment">
+        <ion-segment-button value="myOrders">
+          <ion-label>My Orders</ion-label>
+        </ion-segment-button>
+        <ion-segment-button value="orderWatchlist">
+          <ion-label>Order Watchlist</ion-label>
+        </ion-segment-button>
+      </ion-segment>
         
-        
-        <ion-list v-if="!isLoading && orderList.length" lines="none" class="mb-0 p-0">
+      <section v-if="!isLoading">
+        <ion-list v-if="orderList.length && selectedSegment =='myOrders'" lines="none" class="mb-0 p-0">
           <ion-item-group>
-            <ion-item-divider style="--background: #393939">
-              <ion-label class="fw-normal text-white" style="font-size: 1.8vh">
-                MY ORDERS
-              </ion-label>
-            </ion-item-divider>
             <ion-item v-for="orderitem in orderList" :key="orderitem.id" class="ion-no-padding" style="--inner-padding-end:0">
-              <section class="mt-3 w-100">
-                <ion-card-content class="bg-white p-0" style="box-shadow: 0px 3px 5px -3px rgba(0,0,0,0.1);">
+              <section class="m-3 mb-1 w-100" style="border-radius: 15px">
+                <ion-card-content class="bg-white p-0" style="box-shadow: 0px 3px 5px -3px rgba(0,0,0,0.1); border-radius: 15px" >
                   <div class="row w-100 p-0 me-0 ms-0">
                     <div class="col-9">
-                      <div style="font-size:1.5vh" @click="trackOrder(orderitem.number)" class="pt-3 pe-2 ps-2 pb-3">
+                      <div style="font-size:1.4vh" @click="trackOrder(orderitem.number)" class="pt-3 pe-2 ps-2 pb-3">
                         <ol class="breadcrumb mb-0">
                           <li class="breadcrumb-item fw-bold">Order #: {{orderitem.number}}</li>
-                          <li class="breadcrumb-item text-muted">{{orderitem.modified_date}} <ion-icon :icon="arrowForwardOutline" class="ms-1"></ion-icon></li>
+                          <li class="breadcrumb-item text-muted">{{orderitem.modified_date}}</li>
                         </ol>
                       </div>
                       <div class="row w-100 p-0 me-0 ms-0" v-for="order in orderitem.line_items" :key="order.id">
@@ -59,52 +65,37 @@
                         <div class="col-8 p-3 pt-0 pe-0 pb-3" style="font-size:1.8vh">  
                           <span @click="setSelectedProduct(order.product_id, orderitem.number)">     
                             <section v-if="!order.isNonECMTIPM">
-                              <span :class="'pe-2 ps-2 pb-0 pt-0 text-white me-1 '+ order.pr_badge">{{order.badge.replace('_',' ')}}</span>
-                              <span class="fw-normal" >{{cleanString(order.name_title)}}</span>
-                              <span class="text-muted">{{order.name_subtitle}}</span>
+                              <span :class="'badge rounded-pill text-white me-1 '+ order.pr_badge">{{order.badge.replace('_',' ')}}</span>
+                              <span class="fw-normal">{{cleanString(order.name_title)}}</span>
+                              <span class="text-muted" style="font-size: 1.4vh">{{order.name_subtitle}}</span>
                             </section>
                             <section v-else>
                               <span>{{order.name}}</span>
                             </section>
                           </span> 
                           <section class="d-flex justify-content-between">
-                            <span class="float-start fw-bold mt-3" @click="setSelectedProduct(order.product_id, orderitem.number)">$ {{order.total}}</span>
+                            <span class="float-start fw-bold mt-3" style="font-size: 1.4vh" @click="setSelectedProduct(order.product_id, orderitem.number)">$ {{order.total}}</span>
                             <ion-chip class="bg-light mt-2" style="font-size:1.5vh">
                                 <ion-icon :icon="star" color="warning"></ion-icon>
-                                <ion-label color="dark">Rating</ion-label>
+                                <ion-label color="dark">Review</ion-label>
                             </ion-chip>
                           </section>
                         </div>
                       </div>
 
-                      <!-- <section>
-                        <hr style="background: #ccc;" class="p-0 mb-2 m-0"/>
-                        <ion-chip color="success" class="float-start mb-3" :id="'status-'+orderitem.id" style="font-size:1.5vh; max-width: 40%;">
-                            <ion-icon :icon="locateOutline" color="dark"></ion-icon>
-                            <ion-label color="dark"><span class="fw-bold text-overflow" style="">Awaiting Shipment</span></ion-label>
-                        </ion-chip>
-                        <ion-popover :trigger="'status-'+orderitem.id" trigger-action="click">
-                          <ion-content class="ion-padding">
-                            <ion-icon :icon="locateOutline" color="dark" class="me-2"></ion-icon> Awaiting Shipment
-                          </ion-content>
-                        </ion-popover>
-
-                        <ion-chip class="bg-light float-start mb-3" :id="'eta-'+orderitem.id" style="font-size:1.5vh; max-width: 50%;">
-                            <ion-icon :icon="calendarOutline" color="dark"></ion-icon>
-                            <ion-label color="dark">ETA: 08/02/2022</ion-label>
-                        </ion-chip>
-                        <ion-popover :trigger="'eta-'+orderitem.id" trigger-action="click">
-                          <ion-content class="ion-padding">
-                            <ion-icon :icon="calendarOutline" color="dark" class="me-2"></ion-icon>
-                            ETA: 08/02/2022
-                          </ion-content>
-                        </ion-popover>
-                      </section> -->
-
                     </div>
-                    <div class="col-3 price-div" @click="trackOrder(orderitem.number)">
+                    <div class="col-3 price-div">
                       <div class="text-center d-flex flex-column align-items-center justify-content-center h-100">
-                        <span class="fw-bold" style="font-size: 2vh">$ {{orderitem.total}}</span>
+                        <ion-icon id="more-options" :icon="ellipsisHorizontal" color="medium" style="font-size: 24px;" @click="presentActionSheet"></ion-icon>
+                        
+                        <section @click="trackOrder(orderitem.number)" class="d-flex flex-column">
+                          <span style="font-size: 1.2vh">Total (1 item)</span>
+                          <span class="fw-bold" style="font-size: 2vh"  >$ {{orderitem.total}}</span>
+                        </section>
+
+                        <ion-icon id="show-tracking" :icon="arrowForwardOutline"
+                        color="medium" style="font-size: 20px;"
+                         @click="trackOrder(orderitem.number)"></ion-icon>
                       </div>
                     </div>
                   </div>
@@ -115,22 +106,17 @@
           </ion-item-group>
         </ion-list>
         
-        <ion-list v-if="!isLoading && watchList.length" lines="none" class="mt-3 mb-0 p-0">
+        <ion-list v-if="watchList.length && selectedSegment =='orderWatchlist'" lines="none" class="mb-0 p-0">
           <ion-item-group>
-            <ion-item-divider style="--background: #393939">
-              <ion-label class="fw-normal text-white" style="font-size: 1.8vh">
-                ORDER WATCHLIST
-              </ion-label>
-            </ion-item-divider>
             <ion-item v-for="orderitem in watchList" :key="orderitem.id" class="ion-no-padding" style="--inner-padding-end:0">
-              <section class="mt-3 w-100">
-                <ion-card-content class="bg-white p-0" style="box-shadow: 0px 3px 5px -3px rgba(0,0,0,0.1);">
+              <section class="m-3 mb-1 w-100" style="border-radius: 15px">
+                <ion-card-content class="bg-white p-0" style="box-shadow: 0px 3px 5px -3px rgba(0,0,0,0.1); border-radius: 15px">
                   <div class="row w-100 p-0 me-0 ms-0">
                     <div class="col-9">
-                      <div style="font-size:1.5vh" @click="trackOrder(orderitem.number)" class="pt-3 pe-2 ps-2 pb-3">
+                      <div style="font-size:1.4vh" @click="trackOrder(orderitem.number)" class="pt-3 pe-2 ps-2 pb-3">
                         <ol class="breadcrumb mb-0">
                           <li class="breadcrumb-item fw-bold">Order #: {{orderitem.number}}</li>
-                          <li class="breadcrumb-item text-muted">{{orderitem.modified_date}} <ion-icon :icon="arrowForwardOutline" class="ms-1"></ion-icon></li>
+                          <li class="breadcrumb-item text-muted">{{orderitem.modified_date}}</li>
                         </ol>
                       </div>
                       <div class="row w-100 p-0 me-0 ms-0" v-for="order in orderitem.line_items" :key="order.id">
@@ -140,28 +126,37 @@
                         <div class="col-8 p-3 pt-0 pe-0 pb-3" style="font-size:1.8vh">        
                           <span @click="setSelectedProduct(order.product_id, orderitem.number)">
                             <section v-if="!order.isNonECMTIPM">
-                              <span :class="'pe-2 ps-2 pb-0 pt-0 text-white me-1 '+ order.pr_badge">{{order.badge.replace('_',' ')}}</span>
+                              <span :class="'badge rounded-pill text-white me-1 '+ order.pr_badge">{{order.badge.replace('_',' ')}}</span>
                               <span class="fw-normal">{{cleanString(order.name_title)}}</span>
-                              <span class="text-muted">{{order.name_subtitle}}</span>
+                              <span class="text-muted" style="font-size: 1.4vh">{{order.name_subtitle}}</span>
                             </section>
                             <section v-else>
                               <span>{{order.name}}</span>
                             </section>
                           </span>
                           <section class="d-flex justify-content-between">
-                            <span class="float-start fw-bold mt-3" @click="setSelectedProduct(order.product_id, orderitem.number)">$ {{order.total}}</span>
+                            <span class="float-start fw-bold mt-3" style="font-size: 1.4vh" @click="setSelectedProduct(order.product_id, orderitem.number)">$ {{order.total}}</span>
                             <ion-chip class="bg-light mt-2" style="font-size:1.5vh" disabled>
                                 <ion-icon :icon="star" color="warning"></ion-icon>
-                                <ion-label color="dark">Rating</ion-label>
+                                <ion-label color="dark">Review</ion-label>
                             </ion-chip>
                           </section>
                         </div>
                       </div>
 
                     </div>
-                    <div class="col-3 price-div" @click="trackOrder(orderitem.number)">
+                    <div class="col-3 price-div">
                       <div class="text-center d-flex flex-column align-items-center justify-content-center h-100">
-                        <span class="fw-bold" style="font-size: 2vh">$ {{orderitem.total}}</span>
+                        <ion-icon id="more-options" :icon="ellipsisHorizontal" color="medium" style="font-size: 24px;" @click="presentActionSheet"></ion-icon>
+                        
+                        <section @click="trackOrder(orderitem.number)" class="d-flex flex-column">
+                          <span style="font-size: 1.2vh">Total (1 item)</span>
+                          <span class="fw-bold" style="font-size: 2vh">$ {{orderitem.total}}</span>
+                        </section>
+
+                        <ion-icon id="show-tracking" :icon="arrowForwardOutline"
+                        color="medium" style="font-size: 20px;"
+                         @click="trackOrder(orderitem.number)"></ion-icon>
                       </div>
                     </div>
                   </div>
@@ -171,13 +166,14 @@
             </ion-item>
           </ion-item-group>
         </ion-list>
-        
 
-        <div v-if="!orderList.length && !isLoading" class="text-center order-page">
-          <!-- <img src="../../resources/to-do-list.png" attribute="Freepik" style="height: 20vh; border-radius: 30px; opacity: .3;" /> -->
+        <div v-if="showZeroResult" class="text-center order-page">
           <ion-icon :icon="listOutline" style="font-size: 200px;  opacity: .1"></ion-icon>
           <p class="text-muted fst-italic">No orders to display</p>
         </div>
+      </section>
+
+        
       </div>
       <br/>
       
@@ -204,7 +200,7 @@
           <div class="pt-3">
             <ion-item lines="none">
               <ion-label position="stacked">Order Number <span class="text-danger">*</span></ion-label>
-              <ion-input ref="input" type="text" placeholder="Order Number" v-model="orderNumber" class="mt-3"></ion-input>
+              <ion-input ref="input" type="text" placeholder="Order Number" v-model="orderNumber" class="mt-3 input-modif"></ion-input>
             </ion-item>
           </div>
         </ion-content>
@@ -217,17 +213,20 @@
 
 <script lang="js">
 import { defineComponent } from 'vue';
-import { IonPage, IonHeader, IonToolbar,
+import { IonPage, IonHeader, IonToolbar, actionSheetController,
   IonTitle, IonContent, IonButton, IonButtons,
   IonIcon, IonModal, IonInput, IonFab, IonFabButton,
   IonItem, IonCardContent, IonLabel, IonChip,
-  IonRefresher, IonRefresherContent, IonItemDivider,
+  IonRefresher, IonRefresherContent,
+  IonSegment, IonSegmentButton,
+  //IonItemDivider,
   IonItemGroup
 } from '@ionic/vue';
 import { 
   arrowBackOutline, locateOutline, carSportOutline,
   listOutline, starOutline, arrowForwardOutline, star,
-  mapOutline, navigateOutline, timeOutline, calendarOutline
+  mapOutline, navigateOutline, timeOutline, calendarOutline,
+  ellipsisHorizontal, trashOutline, close
 } from 'ionicons/icons'
 import store from '../store'
 import { mapState } from 'vuex'
@@ -248,8 +247,38 @@ export default defineComponent({
     IonContent, IonPage, IonButton, IonButtons,
     IonIcon, IonModal, IonInput, IonFab, IonFabButton,
     IonItem, IonCardContent, IonLabel, IonChip,
-    IonRefresher, IonRefresherContent, IonItemDivider,
+    IonRefresher, IonRefresherContent,
+    IonSegment, IonSegmentButton, 
+    //IonItemDivider,
     IonItemGroup
+  },
+  setup() {
+    const doRefresh = function (event) {
+      store.commit('RESET_CUSTOMER_ORDER_LIST', []);
+      location.reload(true);
+      setTimeout(function () {
+        event.target.complete();
+      }, 2000);
+    }
+    return {
+      doRefresh,
+      arrowBackOutline, locateOutline, carSportOutline,
+      listOutline, starOutline, arrowForwardOutline, star,
+      mapOutline, navigateOutline, timeOutline, calendarOutline,
+      ellipsisHorizontal, trashOutline, close
+    }
+  },
+  data() {
+    return {
+      orderNumber: null,
+      queryCounter: 0,
+      isLoading: false,
+      orderList: [],
+      watchList: [],
+      lastPath: null,
+      selectedSegment: 'myOrders',
+      showZeroResult: false
+    }
   },
   computed: mapState([
       'trackedOrderNumber',
@@ -272,32 +301,57 @@ export default defineComponent({
       }
     }
   },
-  setup() {
-    const doRefresh = function (event) {
-      store.commit('RESET_CUSTOMER_ORDER_LIST', []);
-      location.reload(true);
-      setTimeout(function () {
-        event.target.complete();
-      }, 2000);
-    }
-    return {
-      doRefresh,
-      arrowBackOutline, locateOutline, carSportOutline,
-      listOutline, starOutline, arrowForwardOutline, star,
-      mapOutline, navigateOutline, timeOutline, calendarOutline
-    }
-  },
-  data() {
-    return {
-      orderNumber: null,
-      queryCounter: 0,
-      isLoading: false,
-      orderList: [],
-      watchList: [],
-      lastPath: null
-    }
-  },
+  
   methods: {
+      async presentActionSheet() {
+        const actionSheet = await actionSheetController
+        .create({
+          header: 'Options',
+          //cssClass: 'my-custom-class',
+          buttons: [
+            {
+              text: 'Remove',
+              icon: trashOutline,
+              id: 'delete-button',
+              role: 'destructive', 
+              data: null,
+              htmlAttributes: { disabled: 'true' },
+              handler: () => {
+                console.log('remove');
+              },
+            },
+            {
+              text: 'Review',
+              icon: starOutline,
+              id: 'review-button',
+              cssClass: 'text-dark',
+              data: null,
+              handler: () => {
+                console.log('remove');
+              },
+            },
+            {
+              text: 'Cancel',
+              icon: close,
+              cssClass: 'text-dark',
+              role: 'cancel',
+            },
+          ],
+        });
+      await actionSheet.present();
+
+      const { role, data } = await actionSheet.onDidDismiss();
+      console.log('onDidDismiss resolved with role and data', role, data);
+    },
+    segmentChanged: function (event) {
+      var listLength = 0;
+      event.detail.value == 'myOrders' ? listLength = this.orderList.length : listLength = this.watchList.length;
+      if (!listLength) {
+        this.showZeroResult = true;
+      } else {
+        this.showZeroResult = false;
+      }
+    },
     cancel() {
       this.$refs.modal.$el.dismiss(null, 'cancel');
     },
@@ -366,6 +420,8 @@ export default defineComponent({
           //this.orderList = [].concat(this.orderList, response.data);
           if (this.queryCounter == 2) {
             this.isLoading = false;
+            var seg = { detail : { value: 'myOrders'}};
+            this.segmentChanged(seg);
           }
         }
       }.bind(this));
@@ -456,6 +512,17 @@ export default defineComponent({
 }
 
 .price-div {
-  background-color: #fbfbfb
+  background-color: #fbfbfb;
+  border-radius: 0px 15px 15px 0;
+  position: relative;
+}
+
+.price-div ion-icon#more-options {
+  position: absolute;
+  top: 10px;
+}
+.price-div ion-icon#show-tracking {
+  position: absolute;
+  bottom: 10px;
 }
 </style>

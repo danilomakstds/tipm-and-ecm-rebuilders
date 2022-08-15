@@ -19,6 +19,7 @@ export default createStore({
     customerOrderWatchList: [],
     customerOrderList: [],
     shopperApprovedData: null,
+    productBackRoute: null,
   },
   mutations: {
     SET_SESSION_DATA: function (state, sessionData) {
@@ -86,7 +87,13 @@ export default createStore({
     },
     RESET_SA_DATA: function (state) {
       state.shopperApprovedData = null;
-    }
+    },
+    SET_PRODUCT_BACK_ROUTE: function (state, productBackRoute) {
+      state.productBackRoute = productBackRoute;
+    },
+    RESET_PRODUCT_BACK_ROUTE: function (state) {
+      state.productBackRoute = null;
+    },
   },
   getters: {
 

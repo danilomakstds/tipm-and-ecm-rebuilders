@@ -19,7 +19,7 @@
                     </span>
                     <ion-card-header class="overflow-hidden">
                       <ion-card-subtitle @click="setSelectedProduct(product)">
-                          <span :class="'pe-2 ps-2 pb-0 pt-0 text-white '+ product.badge">{{product.name.split(' ')[0].replace('_',' ')}}</span>
+                          <span :class="'badge rounded-pill mb-2 text-white '+ product.badge">{{product.name.split(' ')[0].replace('_',' ')}}</span>
                       </ion-card-subtitle>
                       <span @click="setSelectedProduct(product)">
                           <ion-card-title class="prod-title fw-normal">{{cleanString(product.name_title)}}</ion-card-title>
@@ -54,7 +54,7 @@
                     </span>
                     <ion-card-header class="overflow-hidden">
                       <ion-card-subtitle @click="setSelectedProduct(product)">
-                          <span :class="'pe-2 ps-2 pb-0 pt-0 text-white '+ product.badge">{{product.name.split(' ')[0]}}</span>
+                          <span :class="'badge rounded-pill mb-2 text-white '+ product.badge">{{product.name.split(' ')[0]}}</span>
                       </ion-card-subtitle>
                       <span @click="setSelectedProduct(product)">
                           <ion-card-title class="prod-title fw-normal">{{cleanString(product.name_title)}}</ion-card-title>

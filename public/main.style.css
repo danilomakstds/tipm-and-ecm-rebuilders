@@ -29,7 +29,7 @@ html body.swal2-height-auto {
 
 ion-card {
     border-radius: 14px;
-    box-shadow: rgb(0 0 0 / 12%) 0px 4px 16px;
+    box-shadow: rgb(0 0 0 / 12%) 0px 4px 8px;
     margin-left: unset;
     margin-right: unset;
     margin-inline: 16px;
@@ -42,6 +42,10 @@ ion-datetime {
 
 ion-header {
     z-index: 100;
+}
+
+ion-toolbar {
+    --border-color: #fff;
 }
 
 .modal .modal-dialog .modal-content {
@@ -140,17 +144,15 @@ ion-select, ion-input {
     border-radius: 20px !important;
 }
 
-ion-input input {
-    padding-left: 15px !important;
-}
 
 ion-button {
     --border-radius: 20px;
     border-radius: 20px;
 }
 
-ion-input input{
+.input-modif input {
     height: 50px !important;
+    padding-left: 15px !important;
 }
 
 .popular ion-card {
@@ -219,4 +221,8 @@ ion-input input{
 div.ytp-gradient-bottom, div.ytp-gradient-top {
     display: none;
     background: none !important;
+}
+
+.center-absolute {
+    margin-left: auto; margin-right: auto; left: 0; right: 0;
 }

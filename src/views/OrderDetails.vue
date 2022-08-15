@@ -129,7 +129,7 @@
           </ion-button>
       </div>
 
-      <ion-fab horizontal="start" vertical="top" slot="fixed">
+      <ion-fab horizontal="start" vertical="top" slot="fixed" mode="ios">
         <ion-fab-button color="light" href="/tabs/orders">
           <ion-icon :icon="chevronBackOutline"></ion-icon>
         </ion-fab-button>
@@ -422,7 +422,7 @@ export default defineComponent({
       this.isLoadingButton = true;
 
       var site = null;
-      if (this.trackedOrderNumber.includes('E-')) {
+      if (this.productType == 'ecm') {
         site = SettingsConstants.ECMSITE;
       } else {
         site = SettingsConstants.TIPMSITE;
@@ -466,7 +466,7 @@ export default defineComponent({
     checkifExistInWatchlist: function () {
       // disableWatchlistButton
       // if ()
-      if (this.customerOrderWatchList.find(order => order.number == this.trackedOrderNumber)) {
+      if (this.customerOrderWatchList.find(order => order.number == this.trackedOrderNumber.toUpperCase())) {
         this.disableWatchlistButton = true;
       } else {
         this.disableWatchlistButton = false;

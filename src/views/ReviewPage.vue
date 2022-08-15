@@ -3,9 +3,9 @@
     <ion-header>
       <ion-toolbar color="white">
         <ion-buttons slot="start">
-            <ion-button color="primary" href="/product-details">
-                <ion-icon slot="icon-only" :ios="arrowBackOutline" :md="arrowBackOutline" color="dark"></ion-icon>
-            </ion-button>
+          <ion-button color="primary" href="/product-details">
+              <ion-icon slot="icon-only" :ios="arrowBackOutline" :md="arrowBackOutline" color="dark"></ion-icon>
+          </ion-button>
         </ion-buttons>
         <ion-title>Reviews</ion-title>
       </ion-toolbar>
@@ -26,7 +26,7 @@
           <div class="d-flex justify-content-center" v-html="getStars(averageRating, 13)">
           </div>
           <p class="text-muted" style="font-size: 1.5vh">
-            based on {{this.totalReviews}} Reviews
+            based on {{totalReviews}} Review<span v-if="totalReviews > 1">s</span>
           </p>
           <div class="d-flex text-start">
             <div style="width: 37%; font-size: 1.5vh;">Excellent</div>
@@ -102,7 +102,7 @@
                     <img :src="img.mediaURL+img.mime" />
                   </div>
                 </section>
-                <hr style="background-color: #aaa" />
+                <hr style="background-color: #ddd" />
               </span>
             </ion-list>
 
@@ -231,7 +231,6 @@ export default defineComponent({
           }.bind(this));
     },
     getSiteReviews: function () {
-      
       axios.get(SettingsConstants.SA_SITE_REVIEWS +'/'+this.storeID +'/'+this.token+'&asArray=false&limit=2000', { crossdomain: true })
           .then(function (response) {
             if (response.data) {

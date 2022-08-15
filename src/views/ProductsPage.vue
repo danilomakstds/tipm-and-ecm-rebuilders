@@ -3,9 +3,11 @@
     <ion-header>
       <ion-toolbar color="white">
         <ion-buttons slot="start">
-          <ion-button color="primary" href="/">
-              <ion-icon slot="icon-only" :ios="arrowBackOutline" :md="arrowBackOutline" color="dark"></ion-icon>
-          </ion-button>
+          <router-link to="/">
+            <ion-button color="primary">
+                <ion-icon slot="icon-only" :ios="arrowBackOutline" :md="arrowBackOutline" color="dark"></ion-icon>
+            </ion-button>
+          </router-link>
         </ion-buttons>
         <ion-title>Search Results</ion-title>
       </ion-toolbar>
@@ -90,20 +92,21 @@
           <!-- for could not find ecm thumbnail-->
           
           <div class="col-6 p-0" v-if="!isVinInvalid">
-            <a href="tel://+1-818-798-5558" class="text-decoration-none">
-              <ion-card class="position-relative m-2">
-                  <img src="https://ecmrebuilders.com/wp-content/uploads/2022/07/no_ecm.png" class="bg-white"/>
-                  <ion-card-header class="overflow-hidden">
-                    <span>
-                        <ion-card-title class="prod-title fw-bold" style="font-size:2vh">CANT FIND YOUR <span style="color: #3A7CA5">ECM</span>?</ion-card-title>
-                    </span>
-                    <div class="overflow-hidden">
-                      <!-- <p>We're here to help! We will contact you regarding the availability of your part #</p> -->
-                      <p class="mt-3 text-dark" style="font-size:1.8vh"><b>Call us</b> or Send us a message and we'll find it for you!</p>
-                    </div>
-                  </ion-card-header>
-              </ion-card>
-            </a>
+            <!-- <a href="tel://+1-818-798-5558" class="text-decoration-none"> -->
+            <ion-card class="position-relative m-2" @click="presentActionSheet">
+                <img src="https://ecmrebuilders.com/wp-content/uploads/2022/07/no_ecm.png" class="bg-white"/>
+                <ion-card-header class="overflow-hidden">
+                  <span>
+                      <ion-card-title class="prod-title fw-bold" style="font-size:2vh">
+                      CANT FIND YOUR <span style="color: #3A7CA5">ECM</span> / <span style="color: #3A7CA5">PCM</span>?</ion-card-title>
+                  </span>
+                  <div class="overflow-hidden">
+                    <!-- <p>We're here to help! We will contact you regarding the availability of your part #</p> -->
+                    <p class="mt-3 text-dark" style="font-size:1.8vh">Call us or Send us a message and we'll find it for you!</p>
+                  </div>
+                </ion-card-header>
+            </ion-card>
+            <!-- </a> -->
           </div>
 
 
@@ -128,11 +131,15 @@ import { IonPage, IonHeader, IonToolbar,
 IonTitle, IonContent, IonChip, IonIcon,
 IonLabel, IonButtons, IonButton,
 IonBreadcrumbs, IonBreadcrumb,
-IonRefresher, IonRefresherContent
+IonRefresher, IonRefresherContent,
+actionSheetController
 } from '@ionic/vue';
 
 import { 
-  arrowBackOutline, search, add, listOutline
+  arrowBackOutline, search, add, listOutline,
+  trash, share, heart, caretForwardCircle, close,
+  callOutline, sendOutline, chatbubbleEllipsesOutline,
+  mailOutline, paperPlaneOutline, logoFacebook
 } from 'ionicons/icons'
 import axios from 'axios'
 import DotLoader from 'vue-spinner/src/DotLoader.vue'
@@ -150,7 +157,7 @@ export default defineComponent({
     IonTitle, IonContent, IonPage, IonChip,
     IonIcon, IonLabel, IonButtons, IonButton,
     IonBreadcrumbs, IonBreadcrumb,
-    IonRefresher, IonRefresherContent,
+    IonRefresher, IonRefresherContent
   },
   computed: mapState([
     'selectedYear',
@@ -169,7 +176,10 @@ export default defineComponent({
     }
     return {
       doRefresh,
-      arrowBackOutline, search, add, listOutline
+      arrowBackOutline, search, add, listOutline,
+      trash, share, heart, caretForwardCircle, close,
+      callOutline, sendOutline, chatbubbleEllipsesOutline,
+      mailOutline, paperPlaneOutline, logoFacebook
     }
   },
   data() {
@@ -189,6 +199,61 @@ export default defineComponent({
     }
   },
   methods: {
+    async presentActionSheet() {
+      const actionSheet = await actionSheetController
+        .create({
+          //header: 'WE\'LL FIND IT FOR YOU!',
+          //cssClass: 'my-custom-class',
+          buttons: [
+            {
+              text: 'Call Us',
+              icon: callOutline,
+              id: 'call-button', 
+              data: null,
+              handler: () => {
+                location.href = "tel:+1-818-798-5558";
+              },
+            },
+            {
+              text: 'Facebook Messenger',
+              icon: logoFacebook,
+              data: null,  
+              handler: () => {
+                location.href = "http://facebook.com/messages/t/104450115104533";
+                console.log('Messenger clicked')
+              },
+            },
+            {
+              text: 'Email Us',
+              icon: mailOutline,
+              data: null,
+              handler: () => {
+                console.log('Email us clicked')
+              },
+            },
+            {
+              text: 'Contact Us',
+              icon: paperPlaneOutline,
+              data: null,
+              handler: () => {
+                console.log('Contact Us clicked')
+              },
+            },
+            {
+              text: 'Cancel',
+              icon: close,
+              role: 'cancel',
+              handler: () => {
+                console.log('Cancel clicked')
+              },
+            },
+          ],
+        });
+      await actionSheet.present();
+
+      const { role, data } = await actionSheet.onDidDismiss();
+      console.log('onDidDismiss resolved with role and data', role, data);
+    },
     openSearchModal: function () {
       this.emitter.emit('isShowSearchModal');
     },
@@ -445,7 +510,7 @@ export default defineComponent({
           console.log(error);
           Swal.fire({
             title: 'VIN Search unavailable!',
-            text: 'vPIC API application is currently undergoing Maintenance. Please check back at a later time.',
+            text: 'vPIC API application is currently undergoing Maintenance. You may search by Vehicle or Part Number instead.',
             icon:'info',
             confirmButtonColor: '#4b7838',
           });

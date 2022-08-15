@@ -7,14 +7,6 @@
       
       <section v-if="selectedProduct.id">
         <div class="position-relative">
-          <!-- <a href="/">
-            <ion-button color="light" class="text-dark position-absolute back-button">
-              <ion-icon :icon="chevronBackOutline" color="dark"></ion-icon>
-            </ion-button>
-          </a> -->
-          <!-- <ion-button color="light" class="text-dark position-absolute heart-button">
-            <ion-icon :icon="heartOutline" color="dark"></ion-icon>
-          </ion-button> -->
           <span class="text-center position-absolute out-of-stock-banner" v-if="isOutofStock">
             <img src="../../resources/OutOfStock.png" />
           </span>
@@ -39,7 +31,7 @@
             </ion-chip>
           </div>
           <h5 class="mb-0">{{cleanString(selectedProduct.name_title)}}</h5>
-          <p class="text-muted">
+          <p class="text-muted" style="font-size: 1.8vh">
             {{cleanPartNumber(selectedProduct.name_subtitle)}}
           </p>
 
@@ -122,7 +114,7 @@
               
             </ion-accordion>
             <p class="ion-text-wrap text-center mb-3" @click="seeAllReviews()" style="color: #487436">
-              All <span v-if="shopperapprovedDetails.total_reviews == 0 || productRatings == '0 reviews'">Site</span>Reviews
+              All <span v-if="shopperapprovedDetails.total_reviews == 0 || productRatings == '0 reviews'">Site </span>Reviews
               <ion-icon :icon="openOutline" class="ms-1" color="primary"></ion-icon>
             </p>
         </ion-accordion-group>
@@ -159,8 +151,8 @@
           </section>
         </div>
 
-        <ion-fab horizontal="start" vertical="top" slot="fixed">
-          <ion-fab-button color="light" href="/">
+        <ion-fab horizontal="start" vertical="top" slot="fixed" mode="ios">
+          <ion-fab-button color="light" :href="productBackRoute">
             <ion-icon :icon="chevronBackOutline"></ion-icon>
           </ion-fab-button>
         </ion-fab>
@@ -210,7 +202,8 @@ export default defineComponent({
   },
   computed: mapState([
       'selectedProduct',
-      'shopperApprovedData'
+      'shopperApprovedData',
+      'productBackRoute'
   ]),
   data() {
     return {
@@ -387,7 +380,10 @@ export default defineComponent({
     }
   },
   created () {
-    this.lastPath = this.$router.options.history.state.back
+    this.lastPath = this.$router.options.history.state.back;
+    if (this.lastPath) {
+      store.commit('SET_PRODUCT_BACK_ROUTE', this.lastPath);
+    }
   },
 });
 </script>

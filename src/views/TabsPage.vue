@@ -2,6 +2,7 @@
   <ion-page>
 
     <ion-modal
+      ref="searchmodal"
       :is-open="isSearchModalOpen"
       :breakpoints="[0.0, 0.7, 0.95]"
       :initialBreakpoint="0.7"
@@ -39,10 +40,10 @@
                 Search by VIN
               </div>
               <div class="col-10 p-1">
-                <ion-input placeholder="VIN" maxlength="17" v-model="searchVinNumber"></ion-input>
+                <ion-input placeholder="VIN" maxlength="17" v-model="searchVinNumber" class="input-modif"></ion-input>
               </div>
               <div class="col-2 p-1">
-                <ion-button color="medium" class="w-100">
+                <ion-button color="medium" class="w-100" @click="openScannerModal()">
                   <ion-icon :icon="scanOutline"></ion-icon>
                 </ion-button>
               </div>
@@ -50,7 +51,7 @@
                 Search by part # or keyword
               </div>
               <div class="col-12 p-1">
-                <ion-input placeholder="Search Part Number / Keyword" v-model="searchKeywordPartNumber"></ion-input>
+                <ion-input placeholder="Search Part Number / Keyword" v-model="searchKeywordPartNumber" class="input-modif"></ion-input>
               </div>
               <div class="col-12 p-0 mt-3">
                 <ion-button color="primary" expand="block" @click="triggerSearch()" style="height:45px"
@@ -62,9 +63,9 @@
         </ion-content>
     </ion-modal>
 
-    <ion-tabs>
+    <ion-tabs mode="md">
       <ion-router-outlet id="main"></ion-router-outlet>
-      <ion-tab-bar slot="bottom">
+      <ion-tab-bar slot="bottom" style="--border:#fff">
         <ion-tab-button tab="home" href="/tabs/home">
           <ion-icon :icon="homeOutline" />
           <!-- <ion-label>Tab 1</ion-label> -->
@@ -91,10 +92,10 @@
 
 
   <ion-menu side="start" menu-id="ionicmenu" content-id="main">
-    <ion-header>
+    <ion-header mode="md">
         <ion-toolbar style="--background: #3A3A3A">
         <!-- --background: linear-gradient(to right, #4B7838, #66AF47 )-->
-            <ion-title style="font-size: 2vh;" class="text-white"><strong>TIPM / ECM REBUILDERS</strong></ion-title>
+            <ion-title style="font-size: 2vh;" class="text-white"><strong>TIPM & ECM REBUILDERS</strong></ion-title>
         </ion-toolbar>
     </ion-header>
     <ion-content>
@@ -292,7 +293,7 @@ export default defineComponent({
       model_tip: [],
       model: [],
 
-      isSearchDisabled: true,
+      isSearchDisabled: true
     }
   },
   methods: {
@@ -347,8 +348,6 @@ export default defineComponent({
     },
     toggleSearchModal: function () {
       this.isSearchModalOpen = !this.isSearchModalOpen;
-      //this.initQuagga();
-      //Quagga.start();
     },
     triggerSearch: function () {
       this.dismiss();
@@ -483,6 +482,9 @@ export default defineComponent({
           }
         }.bind(this));
       }
+    },
+    openScannerModal: function () {
+      this.emitter.emit('isShowScannerModal');
     }
   },
   mounted() {
@@ -494,6 +496,23 @@ export default defineComponent({
     this.emitter.on('openMenu', function () {
       this.openMenu();
     }.bind(this));
+    this.emitter.on('isScannedValueAvailable', function (code) {
+      this.searchVinNumber = code;
+      this.$refs.searchmodal.$el.dismiss(null, 'cancel');
+      setTimeout( function () {
+        this.triggerSearch();
+      }.bind(this), 100);
+    }.bind(this));
+    //
   }
 });
 </script>
+
+<style scoped>
+
+ion-item {
+  --border-color: #ddd !important;
+  padding-bottom: 5px;
+  padding-top: 0px;
+}
+</style>

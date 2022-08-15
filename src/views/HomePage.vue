@@ -1,6 +1,6 @@
 <template>
   <ion-page>
-    <ion-header>
+    <ion-header mode="md">
       <ion-toolbar color="white">
         <ion-buttons slot="start">
           <ion-button color="primary" @click="openSideMenu()">
@@ -8,11 +8,9 @@
           </ion-button>
         </ion-buttons>
         <ion-buttons slot="primary">
-          <router-link to="/cart">
-            <ion-button>
-              <ion-icon slot="icon-only" :icon="cartOutline" color="dark"></ion-icon>
-            </ion-button>
-          </router-link>
+          <ion-button href="/cart">
+            <ion-icon slot="icon-only" :icon="cartOutline" color="dark"></ion-icon>
+          </ion-button>
         </ion-buttons>
         <ion-buttons slot="primary" @click="toggleScannerModal()">
           <ion-button>
@@ -20,9 +18,11 @@
           </ion-button>
         </ion-buttons>
         <ion-buttons slot="primary">
-          <ion-button>
-            <ion-icon slot="icon-only" :icon="personCircleOutline" color="dark"></ion-icon>
-          </ion-button>
+          <router-link to="/profile">
+            <ion-button>
+              <ion-icon slot="icon-only" :icon="personCircleOutline" color="dark"></ion-icon>
+            </ion-button>
+          </router-link>
         </ion-buttons>
         <ion-title><img src="../../resources/icon.png" style="height:35px"></ion-title>
       </ion-toolbar>
@@ -97,17 +97,23 @@
         <ion-header>
           <ion-toolbar>
             <ion-buttons slot="start">
-              <ion-button @click="cancel()">Cancel</ion-button>
-            </ion-buttons>
-            <ion-buttons slot="end">
-              <ion-button :strong="true" @click="confirm()">Confirm</ion-button>
+              <ion-button @click="cancel()">Close</ion-button>
             </ion-buttons>
           </ion-toolbar>
         </ion-header>
-        <ion-content>
-          <div>
-            <div id="interactive" class="viewport"></div>
-            <ion-input ref="input" type="text" placeholder="Order Number" v-model="orderNumber" class="mt-3"></ion-input>
+        <ion-content :fullscreen="true" class="h-100 position-relative">
+          <div id="interactive" class="viewport h-100"></div>
+
+          <div v-if="isCamLoading" class="d-flex justify-content-center align-items-center h-100 position-absolute top-0 center-absolute bg-light">
+            <dot-loader :loading="isCamLoading" :color="color" :size="size"></dot-loader>
+          </div>
+          <div v-if="!isCamLoading" class="d-flex justify-content-center align-items-center h-100 position-absolute top-0 center-absolute">
+            <div class="overlay">
+              <p style="writing-mode: vertical-rl; font-size: 1.7vh; z-index: 2" class="text-center mt-5 h-100 text-white position-absolute">
+                Place VIN barcode inside the viewfinder rectangle to scan it.
+              </p>
+            </div>
+            <div class="here h-75"></div>
           </div>
         </ion-content>
       </ion-modal>
@@ -141,24 +147,28 @@ import PopularProductsComponent from '@/components/PopularProductsComponent.vue'
 import SlidingChips from '@/components/SlidingChips.vue';
 import Mixin from '../mixins/global.mixin'
 import store from '../store';
+import $ from 'jquery'
 import Quagga from 'quagga';
-
+import DotLoader from 'vue-spinner/src/DotLoader.vue'
 
 export default  defineComponent({
   name: 'HomePage',
   mixins: [Mixin],
   components: {
     SliderComponent, PopularProductsComponent, SlidingChips,
+    DotLoader,
 
     IonChip, IonLabel,
     IonHeader, IonToolbar, IonTitle,
     IonContent, IonPage, IonButtons,
     IonIcon, IonRefresher, IonRefresherContent,
-    IonModal
+    IonModal, 
   },
   data() {
     return {
-      isScannerModalOpen: false
+      isScannerModalOpen: false,
+      lastBarcodeResult: null,
+      isCamLoading: false
     }
   },
   setup() {
@@ -186,27 +196,20 @@ export default  defineComponent({
       });
     },
     cancel() {
+      Quagga.stop();
       this.$refs.modal.$el.dismiss(null, 'cancel');
     },
-    confirm() {
-      //const name = this.$refs.input.$el.value;
-      //this.$refs.modal.$el.dismiss(name, 'confirm');
+    scanResultConfirm(code) {
+      this.cancel();
+      this.emitter.emit('isScannedValueAvailable', code);
     },
     toggleScannerModal: function () {
-      //
       this.isScannerModalOpen = !this.isScannerModalOpen;
       this.initQuagga();
-      if (this.isScannerModalOpen) {
-        Quagga.start();
-      } else {
+      if (!this.isScannerModalOpen) {
         Quagga.stop();
       }
     },
-    // onWillDismiss(ev) {
-    //   if (ev.detail.role === 'confirm') {
-    //     this.message = `Hello, ${ev.detail.data}!`;
-    //   }
-    // },
     openSearchModal: function () {
       this.emitter.emit('isShowSearchModal');
     },
@@ -214,32 +217,113 @@ export default  defineComponent({
       this.emitter.emit('openMenu');
     },
     initQuagga: function () {
-      setTimeout(() => {
+      this.isCamLoading = true;
+      this.lastBarcodeResult = null;
+      setTimeout( function () {
+        
         Quagga.init({
-          inputStream : {
-            name : "Live",
-            type : "LiveStream",
-            target: document.querySelector('#interactive')    // Or '#yourElement' (optional)
+          inputStream: {
+              type : "LiveStream"
           },
-          decoder : {
-            readers : ["code_128_reader"]
-          }
+          locator: {
+            patchSize: "medium",
+            halfSample: true
+          },
+          numOfWorkers: 4,
+          frequency: 10,
+          decoder: {
+            readers : [{
+              format: "code_128_reader",
+              config: {}
+            },
+            {
+              format: "code_39_vin_reader",
+              config: {}
+            }
+            ]
+          },
+          locate: true
         }, function(err) {
             if (err) {
-                console.log(err);
-                return
+              console.log(err);
+              return
             }
             console.log("Initialization finished. Ready to start");
             Quagga.start();
-        });
-        Quagga.start();
-      }, 1000);
+            this.isCamLoading = false;
+            $('.drawingBuffer').addClass('d-none');
+            $('video').addClass('h-100');
+            Quagga.onDetected(function(result) {
+              var code = result.codeResult.code;
+              if (this.lastBarcodeResult != code && code.length == 17) {
+                var audio = new Audio('./assets/beep-08b.mp3');
+                audio.volume = 0.2;
+                audio.play();
+                this.lastBarcodeResult = code;
+                Quagga.stop();
+                this.scanResultConfirm(code);
+              }
+            }.bind(this));
+        }.bind(this));
+      }.bind(this), 500);
     }
   },
   mounted() {
-    //this.initQuagga();
+    this.emitter.on('isShowScannerModal', function () {
+      this.toggleScannerModal();
+    }.bind(this));
   }
 });
 </script>
 
+<style scoped>
+.overlay {
+  position: fixed; /* Sit on top of the page content */
+  width: 100%; /* Full width (cover the whole page) */
+  height: 100%; /* Full height (cover the whole page) */
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 2; /* Specify a stack order in case you're using a different order for other elements */
+  cursor: pointer; /* Add a pointer on hover */
+  overflow: hidden;
+}
 
+.overlay::before {
+  content: "";
+  display: block;
+  
+  /* Scale */
+  width: 100%;
+  height: 100%;
+  
+  /* Position */
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  z-index: 2;
+  transform: translate(-50%, -50%);
+  
+  /* Border */
+  border-width: 105px 60px 60px 60px;
+  border-style: solid;
+  border-color: rgba(0,0,0,0.3);
+}
+
+.here:after {
+    content:"";
+    position: absolute;
+    z-index: 3;
+    top: 0;
+    bottom: 0;
+    left: 50%;
+    border-left: 1px solid #ff0000;
+    transform: translate(-50%);
+}
+
+.here {
+  height: 100px;
+  position:relative;
+}
+</style>

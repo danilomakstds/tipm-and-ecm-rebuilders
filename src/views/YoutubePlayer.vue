@@ -1,11 +1,13 @@
 <template>
-  <ion-page id="cart">
+  <ion-page id="youtube">
     <ion-header>
       <ion-toolbar color="white">
         <ion-buttons slot="start">
-          <ion-button color="primary" href="/">
-              <ion-icon slot="icon-only" :ios="arrowBackOutline" :md="arrowBackOutline" color="dark"></ion-icon>
-          </ion-button>
+          <router-link to="/">
+            <ion-button color="primary">
+                <ion-icon slot="icon-only" :ios="arrowBackOutline" :md="arrowBackOutline" color="dark"></ion-icon>
+            </ion-button>
+          </router-link>
         </ion-buttons>
         <ion-buttons slot="primary">
           <ion-button @click="showYoutubeInfo()">
@@ -41,10 +43,10 @@
       </div>
       
 
-      <ion-list v-if="youtubeVideoList.length">
+      <ion-list v-if="youtubeVideoList.length" lines="none">
           <ion-list-header> Videos </ion-list-header>
 
-          <ion-item v-for="videos in youtubeVideoList" :key="videos.id" class="ion-no-padding" style="--inner-padding-end:0" >
+          <ion-item v-for="videos in youtubeVideoList" :key="videos.id" class="ion-no-padding" style="--inner-padding-end:0">
             <!-- <img :src="videos.snippet.thumbnails.high.url" style="height: 100"/> -->
             <a :href="'https://youtube.com/watch?v='+videos.id" class="text-decoration-none text-dark">
               <section class="bg-white row p-3">
@@ -58,7 +60,9 @@
                   </span>
                 </div>
               </section>
+              <hr class="m-0 bg-light"/>
             </a>
+            
           </ion-item>
       </ion-list>
 

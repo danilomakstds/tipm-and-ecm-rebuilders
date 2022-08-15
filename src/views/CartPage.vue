@@ -3,9 +3,11 @@
     <ion-header>
       <ion-toolbar color="white">
         <ion-buttons slot="start">
-            <ion-button color="primary" href="/">
+          <router-link to="/">
+            <ion-button color="primary">
                 <ion-icon slot="icon-only" :ios="arrowBackOutline" :md="arrowBackOutline" color="dark"></ion-icon>
             </ion-button>
+          </router-link>
         </ion-buttons>
         <ion-title>My Cart</ion-title>
       </ion-toolbar>
@@ -22,35 +24,177 @@
       </ion-refresher>
 
       <ion-list lines="none">
-        <ion-item-sliding>
+        <ion-item-sliding style="border-bottom: 1px solid #eee">
             <ion-item class="ion-no-padding" style="--inner-padding-end:0">
-                <ion-card style="border-radius: 30px;" class="bg-white">
+                <ion-card class="bg-white m-0 p-0" style="border-radius:0px">
                     <div class="row m-0">
                         <div class="col-4 d-flex align-items-center">
-                            <img src="../../resources/tipm.png" class="w-100 h-75"/>
+                          <img src="../../resources/tipm.png" class="w-100"/>
                         </div>
                         <div class="col-8 p-3">
-                            <ion-card-header class="ion-no-padding">
-                                <ion-card-title>$ 123.00</ion-card-title>
-                            </ion-card-header>
-                            <ion-card-content class="ion-no-padding">
-                                REBUILT OEM TIPM for 2010 Dodge RAM 1500 / 2500 / 3500 - Part # 04692194
-                            </ion-card-content>
+                          <ion-card-content class="ion-no-padding">
+                            <span :class="'text-white tipm-badge badge mb-1 rounded-pill'">REBUILT</span><br/>
+                            OEM TIPM for 2010 Dodge RAM 1500 / 2500 / 3500 Part # 04692194
+                          </ion-card-content>
+                          <hr class="mt-1 mb-1 bg-light"/>
+                          <ion-card-header class="ion-no-padding mt-2">
+                              <ion-card-title style="font-size: 15px" class="fw-bold">
+                                $ 123.00
+                                <span class="fw-normal text-decoration-line-through text-danger" style="font-size: 1.3vh">$ 100.00</span>
+                                <span class="float-end fw-bold text-muted2" style="font-size: 1.4vh">x1</span>
+                              </ion-card-title>
+                          </ion-card-header>
                         </div>
                     </div>
                 </ion-card>
             </ion-item>
 
-            <ion-item-options side="start">
-              <ion-item-option color="primary">Mark Unread</ion-item-option>
-            </ion-item-options>
-
             <ion-item-options side="end">
+              <ion-item-option class="bg-light" style="max-width: 70px">
+                <div class="d-flex flex-column w-100">
+                  <ion-button color="light" mode="ios">
+                    <ion-icon :icon="removeOutline" color="dark"></ion-icon>
+                  </ion-button>
+                  <input type="number" class="form-control text-center mt-1 mb-1" style="border-radius: 100px !important" value="1">
+                  <ion-button color="light" mode="ios">
+                    <ion-icon :icon="addOutline" color="dark"></ion-icon>
+                  </ion-button>
+                </div>
+              </ion-item-option>
               <ion-item-option class="bg-danger" style="min-width: 60px">
                 <ion-icon :icon="trashOutline"></ion-icon>
               </ion-item-option>
             </ion-item-options>
-          </ion-item-sliding>
+            
+        </ion-item-sliding>
+
+        <ion-item-sliding style="border-bottom: 1px solid #eee">
+            <ion-item class="ion-no-padding" style="--inner-padding-end:0">
+                <ion-card class="bg-white m-0 p-0" style="border-radius:0px">
+                    <div class="row m-0">
+                        <div class="col-4 d-flex align-items-center">
+                          <img src="https://ecmrebuilders.com/wp-content/uploads/2019/05/4-back-angle.png" class="w-100"/>
+                        </div>
+                        <div class="col-8 p-3">
+                          <ion-card-content class="ion-no-padding">
+                            <span :class="'text-white ecm-badge badge mb-1 rounded-pill me-2'">REBUILT</span>
+                            <br/>
+                            OEM ECM PCM ECU for 2011 Chrysler Town & Country with 3.6L Engine - 05150562
+                          </ion-card-content>
+                          <hr class="mt-1 mb-1" style="background-color: #eee"/>
+                          <ion-card-header class="ion-no-padding mt-2">
+                              <ion-card-title style="font-size: 15px" class="fw-bold">
+                                $ 375.00
+                                <span class="fw-normal text-decoration-line-through text-danger" style="font-size: 1.3vh"></span>
+                              </ion-card-title>
+                          </ion-card-header>
+                        </div>
+                    </div>
+                </ion-card>
+            </ion-item>
+
+            <ion-item-options side="end">
+              <ion-item-option class="bg-light" style="max-width: 70px">
+                <div class="d-flex flex-column w-100">
+                  <ion-button color="light" mode="ios">
+                    <ion-icon :icon="removeOutline" color="dark"></ion-icon>
+                  </ion-button>
+                  <input type="number" class="form-control text-center mt-1 mb-1" style="border-radius: 100px !important" value="1">
+                  <ion-button color="light" mode="ios">
+                    <ion-icon :icon="addOutline" color="dark"></ion-icon>
+                  </ion-button>
+                </div>
+              </ion-item-option>
+              <ion-item-option class="bg-danger" style="min-width: 60px">
+                <ion-icon :icon="trashOutline"></ion-icon>
+              </ion-item-option>
+            </ion-item-options>
+        </ion-item-sliding>
+
+        <ion-item-sliding style="border-bottom: 1px solid #eee">
+            <ion-item class="ion-no-padding" style="--inner-padding-end:0">
+                <ion-card class="bg-white m-0 p-0" style="border-radius:0px">
+                    <div class="row m-0">
+                        <div class="col-4 d-flex align-items-center">
+                          <img src="../../resources/tipm.png" class="w-100"/>
+                        </div>
+                        <div class="col-8 p-3">
+                          <ion-card-content class="ion-no-padding">
+                            <span :class="'text-white tipm-badge badge mb-1 rounded-pill'">REBUILT</span><br/>
+                            OEM TIPM for 2010 Dodge RAM 1500 / 2500 / 3500 Part # 04692194
+                          </ion-card-content>
+                          <hr class="mt-1 mb-1" style="background-color: #eee"/>
+                          <ion-card-header class="ion-no-padding mt-2">
+                              <ion-card-title style="font-size: 15px" class="fw-bold">
+                                $ 123.00
+                                <span class="fw-normal text-decoration-line-through text-danger" style="font-size: 1.3vh">$ 100.00</span>
+                              </ion-card-title>
+                          </ion-card-header>
+                        </div>
+                    </div>
+                </ion-card>
+            </ion-item>
+
+            <ion-item-options side="end">
+              <ion-item-option class="bg-light" style="max-width: 70px">
+                <div class="d-flex flex-column w-100">
+                  <ion-button color="light" mode="ios">
+                    <ion-icon :icon="removeOutline" color="dark"></ion-icon>
+                  </ion-button>
+                  <input type="number" class="form-control text-center mt-1 mb-1" style="border-radius: 100px !important" value="1">
+                  <ion-button color="light" mode="ios">
+                    <ion-icon :icon="addOutline" color="dark"></ion-icon>
+                  </ion-button>
+                </div>
+              </ion-item-option>
+              <ion-item-option class="bg-danger" style="min-width: 60px">
+                <ion-icon :icon="trashOutline"></ion-icon>
+              </ion-item-option>
+            </ion-item-options>
+        </ion-item-sliding>
+
+        <ion-item-sliding style="border-bottom: 1px solid #eee">
+            <ion-item class="ion-no-padding" style="--inner-padding-end:0">
+                <ion-card class="bg-white m-0 p-0" style="border-radius:0px">
+                    <div class="row m-0">
+                        <div class="col-4 d-flex align-items-center">
+                          <img src="https://ecmrebuilders.com/wp-content/uploads/2019/05/4-back-angle.png" class="w-100"/>
+                        </div>
+                        <div class="col-8 p-3">
+                          <ion-card-content class="ion-no-padding">
+                            <span :class="'text-white ecm-badge badge mb-1 rounded-pill me-2'">REBUILT</span>
+                            <br/>
+                            OEM ECM PCM ECU for 2011 Chrysler Town & Country with 3.6L Engine - 05150562
+                          </ion-card-content>
+                          <hr class="mt-1 mb-1" style="background-color: #eee"/>
+                          <ion-card-header class="ion-no-padding mt-2">
+                              <ion-card-title style="font-size: 15px" class="fw-bold">
+                                $ 375.00
+                                <span class="fw-normal text-decoration-line-through text-danger" style="font-size: 1.3vh"></span>
+                              </ion-card-title>
+                          </ion-card-header>
+                        </div>
+                    </div>
+                </ion-card>
+            </ion-item>
+
+            <ion-item-options side="end">
+              <ion-item-option class="bg-light" style="max-width: 70px">
+                <div class="d-flex flex-column w-100">
+                  <ion-button color="light" mode="ios">
+                    <ion-icon :icon="removeOutline" color="dark"></ion-icon>
+                  </ion-button>
+                  <input type="number" class="form-control text-center mt-1 mb-1" style="border-radius: 100px !important" value="1">
+                  <ion-button color="light" mode="ios">
+                    <ion-icon :icon="addOutline" color="dark"></ion-icon>
+                  </ion-button>
+                </div>
+              </ion-item-option>
+              <ion-item-option class="bg-danger" style="min-width: 60px">
+                <ion-icon :icon="trashOutline"></ion-icon>
+              </ion-item-option>
+            </ion-item-options>
+        </ion-item-sliding>
       </ion-list>
       
       <div class="d-flex justify-content-center">
@@ -67,8 +211,8 @@
       </ion-list> -->
 
 
-        <br/><br/><br/><br/><br/><br/>
-      
+      <br/><br/><br/><br/><br/><br/>
+
       <div class="position-fixed bottom-0 w-100 p-3 bg-white" style="border-radius:30px 30px 0 0 ">
         <section class="row w-100">
           <div class="col-6 d-flex align-items-center">
@@ -98,12 +242,12 @@ import {
     IonTitle, IonContent, IonButton,
     IonIcon, IonButtons, IonList,
     IonItem, IonItemSliding, IonItemOptions,
-    IonItemOption, IonRefresher, IonRefresherContent,
+    IonItemOption, IonRefresher, IonRefresherContent
     //IonLabel
 } from '@ionic/vue';
 import { 
   arrowBackOutline, cartOutline, bagCheckOutline,
-  trashOutline
+  trashOutline, addOutline, removeOutline, 
 } from 'ionicons/icons'
 import Mixin from '../mixins/global.mixin'
 //import axios from 'axios'
@@ -120,7 +264,7 @@ export default defineComponent({
     IonContent, IonPage, IonButton,
     IonIcon, IonButtons, IonList,
     IonItem, IonItemSliding, IonItemOptions,
-    IonItemOption, IonRefresher, IonRefresherContent,
+    IonItemOption, IonRefresher, IonRefresherContent
     //IonLabel, 
  },
   setup() {
@@ -133,7 +277,7 @@ export default defineComponent({
     return {
       doRefresh,
       arrowBackOutline, cartOutline, bagCheckOutline,
-      trashOutline
+      trashOutline, addOutline, removeOutline
     }
   },
   data() {
@@ -204,5 +348,9 @@ export default defineComponent({
 .item-inner {
     padding-inline-end: 0 !important;
     padding-inline-start: 0 !important;
+}
+
+#cart ion-input input {
+  height: 40px !important;
 }
 </style>
