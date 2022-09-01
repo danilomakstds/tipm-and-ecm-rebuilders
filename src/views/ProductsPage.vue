@@ -55,7 +55,7 @@
       <div class="d-flex justify-content-center mt-2"><dot-loader :loading="isLoading" :color="color" :size="size" class="mt-5"></dot-loader></div>
       <div class="row p-3 pt-0" v-if="!isLoading">
           <div class="col-6 p-0" v-for="product in productList" :key="product.tags[0].name+product.id">
-            <ion-card class="position-relative m-2">
+            <ion-card class="position-relative m-2 ion-activatable ripple-parent">
                 <img :src="product.images[0].src" :class="product.imgclass" @click="setSelectedProduct(product)"/>
                 <span class="text-center position-absolute out-of-stock-banner" v-if="product.stock_status == 'outofstock'">
                   <img src="../../resources/OutOfStock.png" />
@@ -80,11 +80,13 @@
                     :color="(product.badge == 'ecm-badge') ? 'tertiary': ''"
                     class="float-end add-dimentions"
                     :disabled="product.stock_status == 'outofstock'"
+                    @click="addToCart(product.id, product.source)"
                     >
                         <ion-icon :icon="add"></ion-icon>
                     </ion-button>
                   </div>
                 </ion-card-header>
+                <ion-ripple-effect></ion-ripple-effect>
             </ion-card>
           </div>
 
@@ -132,7 +134,7 @@ IonTitle, IonContent, IonChip, IonIcon,
 IonLabel, IonButtons, IonButton,
 IonBreadcrumbs, IonBreadcrumb,
 IonRefresher, IonRefresherContent,
-actionSheetController
+actionSheetController, IonRippleEffect
 } from '@ionic/vue';
 
 import { 
@@ -157,7 +159,8 @@ export default defineComponent({
     IonTitle, IonContent, IonPage, IonChip,
     IonIcon, IonLabel, IonButtons, IonButton,
     IonBreadcrumbs, IonBreadcrumb,
-    IonRefresher, IonRefresherContent
+    IonRefresher, IonRefresherContent,
+    IonRippleEffect
   },
   computed: mapState([
     'selectedYear',
@@ -281,12 +284,14 @@ export default defineComponent({
                   var name = null;
                   if (prod.tags.find(tag => tag.name == 'TIPM')) {
                     prod.badge = 'tipm-badge';
+                    prod.source = 'TIPM';
                     name = prod.name.substr(prod.name.indexOf(' ')+1).replace(/–/g,'-');
                     prod.name_title = name.split('- Part')[0];
                     prod.name_subtitle = '- Part' + name.split('- Part')[1];
                   }
                   if (prod.tags.find(tag => tag.name == 'ECM')) {
                     prod.badge = 'ecm-badge';
+                    prod.source = 'ECM';
                     name = prod.name.substr(prod.name.indexOf(' ')+1).replace(/–/g,'-');
                     prod.name_title = name.split('with')[0];
                     prod.name_subtitle = 'with' + name.split('with')[1];
@@ -296,8 +301,10 @@ export default defineComponent({
                     prod.isNonECMTIPM = true;
                     if (prod.name_title.toLowerCase().includes('ecm')) {
                       prod.badge = 'ecm-badge';
+                      prod.source = 'ECM';
                     } else {
                       prod.badge = 'tipm-badge';
+                      prod.source = 'TIPM';
                     }
                   }
                   this.productList.push(prod);
@@ -337,8 +344,10 @@ export default defineComponent({
         if (this.vinEngine) {
           if (!site.includes('ecm')) {
             ifStatement = (prod.status == 'publish');
+            prod.source = 'TIPM';
           } else {
             ifStatement = ((prod.status == 'publish' && prod.name.includes(this.vinEngine)) || prod.name.includes('REPAIR SERVICE'));
+            prod.source = 'ECM';
           }
         }
 
@@ -469,6 +478,9 @@ export default defineComponent({
                   } else {
                     this.vinEngine = res.Value+'L';
                   }
+                }
+                if (res.Value == '5.9' && this.vinMake.toLowerCase() == 'dodge') {
+                  this.vinTrim = '2500';
                 }
                 break;
 						}

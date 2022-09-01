@@ -1,6 +1,6 @@
 <template>
   <ion-page>
-    <ion-header>
+    <ion-header mode="md">
       <ion-toolbar color="white">
         <ion-buttons slot="start">
           <router-link to="/">
@@ -496,14 +496,6 @@ export default defineComponent({
 </script>
 
 <style scoped>
-.order-page {
-  text-align: center;
-  position: absolute;
-  left: 0;
-  right: 0;
-  top: 50%;
-  transform: translateY(-50%);
-}
 
 .text-overflow {
   white-space: nowrap;

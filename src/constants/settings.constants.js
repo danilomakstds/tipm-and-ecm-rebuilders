@@ -33,6 +33,7 @@ const APP_DESCRIPTION = `<img src="https://tipmrebuilders.com/wp-content/uploads
 
 const VIN_DECODE_URL = 'https://vpic.nhtsa.dot.gov/api/vehicles/decodevin/';
 const VALID_MAKE = ['chrysler','dodge', 'ram', 'jeep', 'volkswagen', 'fiat', 'plymouth'];
+const BASIC_AUTH = 'Basic ZGFuaWxvQG1ha3NkdHMuY29tOmNob2NvUm9hc3QyMw==';
 
 export default {
     BASE_URL: BASE_URL_API,
@@ -57,5 +58,6 @@ export default {
     GOOGLE_BASE_URL: GOOGLE_BASE_URL,
     APP_DESCRIPTION: APP_DESCRIPTION,
     VIN_DECODE_URL: VIN_DECODE_URL,
-    VALID_MAKE: VALID_MAKE
+    VALID_MAKE: VALID_MAKE,
+    BASIC_AUTH: BASIC_AUTH
 }

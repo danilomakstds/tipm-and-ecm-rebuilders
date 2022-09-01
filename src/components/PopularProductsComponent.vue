@@ -9,7 +9,7 @@
     <div class="row p-0" v-if="!isLoading">
         <div class="col-6 p-0">
             <div v-for="(product, index) in productList" :key="product.tags[0].name+product.id">
-                <ion-card class="position-relative" v-if="!(index%2)">
+                <ion-card class="position-relative ion-activatable ripple-parent" v-if="!(index%2)">
                     <img :src="product.images[0].src" :class="product.stock_status == 'outofstock'?'opacity bg-white':'bg-white'" @click="setSelectedProduct(product)"/>
                     <span class="text-center position-absolute out-of-stock-banner" v-if="product.stock_status == 'outofstock'">
                       <img src="../../resources/OutOfStock.png" />
@@ -34,17 +34,19 @@
                         :color="(product.badge == 'ecm-badge') ? 'tertiary': ''"
                         class="float-end add-dimentions"
                         :disabled="product.stock_status == 'outofstock'"
+                        @click="addToCart(product.id, product.source)"
                         >
                             <ion-icon :icon="add"></ion-icon>
                         </ion-button>
                       </div>
                     </ion-card-header>
+                    <ion-ripple-effect></ion-ripple-effect>
                 </ion-card>
             </div>
         </div>
         <div class="col-6 p-0">
             <div v-for="(product, index) in productList" :key="product.tags[0].name+product.id">
-                <ion-card class="position-relative" v-if="(index%2)">
+                <ion-card class="position-relative ion-activatable ripple-parent" v-if="(index%2)">
                     <img :src="product.images[0].src" :class="product.stock_status == 'outofstock'?'opacity bg-white':'bg-white'" @click="setSelectedProduct(product)"/>
                     <span class="text-center position-absolute out-of-stock-banner" v-if="product.stock_status == 'outofstock'">
                       <img src="../../resources/OutOfStock.png" />
@@ -68,11 +70,13 @@
                         <ion-button
                         :color="(product.badge == 'ecm-badge') ? 'tertiary': ''"
                         class="float-end add-dimentions"
-                        :disabled="product.stock_status == 'outofstock'">
+                        :disabled="product.stock_status == 'outofstock'"
+                        @click="addToCart(product.id, product.source)">
                             <ion-icon :icon="add"></ion-icon>
                         </ion-button>
                       </div>
                     </ion-card-header>
+                    <ion-ripple-effect></ion-ripple-effect>
                 </ion-card>
             </div>
         </div>
@@ -83,8 +87,9 @@
 <script lang="js">
 import { defineComponent } from 'vue';
 import {
+  alertController,
   IonCard, IonButton, IonCardHeader,
-  IonCardTitle, IonCardSubtitle 
+  IonCardTitle, IonCardSubtitle, IonRippleEffect
 } from '@ionic/vue';
 import { 
   add
@@ -101,18 +106,25 @@ export default defineComponent({
   mixins: [Mixin],
   computed: mapState([
       'selectedProduct',
-      'popularProducList'
+      'popularProducList',
+      'cartKeyECM',
+      'cartKeyTIPM',
+      'cartItemCount',
+      'cartTIPMCount',
+      'cartECMCount',
+      'cartItemList'
   ]),
   components: {
     IonCard, IonButton, IonCardHeader,
     IonCardTitle, IonCardSubtitle,
-    DotLoader,
+    DotLoader, IonRippleEffect
   },
   data () {
     return {
         productList: [],
         maxItems: 8,
-        isLoading: false
+        isLoading: false,
+        cartDetails: null
     }
   },
   setup() {
@@ -121,6 +133,33 @@ export default defineComponent({
     }
   },
   methods: {
+    async showConfirmDeleteCartSessionModal(cartSource, newSource, base, cartKey, id) {
+      const alert = await alertController
+          .create({
+              cssClass: 'my-custom-class',
+              header: 'Confirm!',
+              message: 'You have <b>'+cartSource+'</b> items currently in your cart, Adding <b>'+newSource+'</b> products will replace those item(s). You are only allowed to checkout from 1 source at a time.!',
+              buttons: [{
+                      text: 'Cancel',
+                      role: 'cancel',
+                      cssClass: 'secondary',
+                      id: 'cancel-button',
+                      handler: blah => {
+                          console.log('Confirm Cancel:', blah)
+                      },
+                  },
+                  {
+                      text: 'Confirm',
+                      id: 'confirm-button',
+                      handler: () => {
+                          this.deleteCartSession(cartSource);
+                          this.continueCartProcessing(newSource, base, cartKey, id);
+                      },
+                  },
+              ],
+          });
+      return alert.present();
+    },
     getPopularProducts: function (site) {
         axios.get(SettingsConstants.BASE_URL +
         'productREST.php?op=popular&site='+site+'&page=1&products_perpage='+(this.maxItems/2) , { crossdomain: true })
@@ -135,11 +174,13 @@ export default defineComponent({
                         prod.name_subtitle = '';
                         var name = null;
                         if (prod.tags.find(tag => tag.name == 'TIPM')) {
+                            prod.source = 'TIPM';
                             prod.badge = 'tipm-badge';
                             name = prod.name.substr(prod.name.indexOf(' ')+1).replace(/–/g,'-');
                             prod.name_title = name.split('- Part')[0];
                             prod.name_subtitle = '- Part' + name.split('- Part')[1];
                         } else {
+                            prod.source = 'ECM';
                             prod.badge = 'ecm-badge';
                             name = prod.name.substr(prod.name.indexOf(' ')+1).replace(/–/g,'-');
                             prod.name_title = name.split('with')[0];
@@ -161,9 +202,16 @@ export default defineComponent({
         //window.location.href = '/product-details';
         this.$router.push('/product-details');
       }
-    },
+    }
+    // getCartId: function () {
+    //   axios.get( 'https://dev.ecmrebuilders.com/wp-json/cocart/v2/cart', { crossdomain: true })
+    //       .then(function (response) {
+    //         this.cartDetails = response.data.cart_key;
+    //       }.bind(this));
+    // }
   },
   mounted () {
+    //this.getCartId();
     if (!this.popularProducList.length) {
       this.isLoading = true;
       this.getPopularProducts(SettingsConstants.TIPMSITE);

@@ -20,6 +20,13 @@ export default createStore({
     customerOrderList: [],
     shopperApprovedData: null,
     productBackRoute: null,
+    cartKeyECM: null,
+    cartKeyTIPM: null,
+    cartItemCount: 0,
+    cartTIPMCount: 0,
+    cartECMCount: 0,
+    cartItemList: [],
+    isInstallationSlideOpen: true
   },
   mutations: {
     SET_SESSION_DATA: function (state, sessionData) {
@@ -94,6 +101,37 @@ export default createStore({
     RESET_PRODUCT_BACK_ROUTE: function (state) {
       state.productBackRoute = null;
     },
+    SET_CART_KEY_ECM: function (state, cartKeyECM) {
+      state.cartKeyECM = cartKeyECM;
+    },
+    SET_CART_KEY_TIPM: function (state, cartKeyTIPM) {
+      state.cartKeyTIPM = cartKeyTIPM;
+    },
+    RESET_CART_KEY: function (state) {
+      state.cartKeyECM = null;
+      state.cartKeyTIPM = null;
+    },
+    SET_CART_ITEM_COUNTER: function (state, cartItemCount) {
+      state.cartItemCount = cartItemCount;
+    },
+    RESET_CART_ITEM_COUNTER: function (state) {
+      state.cartItemCount = 0;
+    },
+    SET_CART_TIPM_COUNTER: function (state, cartTIPMCount) {
+      state.cartTIPMCount = cartTIPMCount;
+    },
+    SET_CART_ECM_COUNTER: function (state, cartECMCount) {
+      state.cartECMCount = cartECMCount;
+    },
+    SET_CART_ITEM_LIST: function (state, cartItemList) {
+      state.cartItemList = cartItemList;
+    },
+    REST_CART_ITEM_LIST: function (state) {
+      state.cartItemList = [];
+    },
+    SET_INSTALLATION_SLIDE_STATUS: function (state, isInstallationSlideOpen) {
+      state.isInstallationSlideOpen = isInstallationSlideOpen;
+    }
   },
   getters: {
 

@@ -24,20 +24,8 @@
 
 
       <div class="d-flex flex-column bd-highlight mb-5">
-        <div class="order-1 bd-highlight">
-          <div class="mapouter overflow-hidden" style="">
-            <div class="gmap_canvas h-100">
-              <iframe height="500" id="gmap_canvas"
-              src="https://maps.google.com/maps?q=9531%20Cozycroft%20Ave,%20Chatsworth,%20CA%2091311,%20United%20States&t=&z=16&ie=UTF8&iwloc=&output=embed"
-              frameborder="0" scrolling="no" marginheight="0" marginwidth="0" ></iframe>
-            </div>
-          </div>
-        </div>
         <div class="order-2 bd-highlight">
-
           <div class="bg-white p-3 order-details">
-
-            
             <div class="d-flex justify-content-center">
               <dot-loader :loading="isLoadingProduct" :color="color" :size="size" class="mt-5"></dot-loader>
             </div>
@@ -116,6 +104,16 @@
             </div>
           </div>
         </div>
+        <div class="order-1 bd-highlight">
+          <div class="mapouter overflow-hidden" style="">
+            <div class="gmap_canvas h-100">
+              <iframe height="500" id="gmap_canvas"
+              src="https://maps.google.com/maps?q=9531%20Cozycroft%20Ave,%20Chatsworth,%20CA%2091311,%20United%20States&t=&z=16&ie=UTF8&iwloc=&output=embed"
+              frameborder="0" scrolling="no" marginheight="0" marginwidth="0" ></iframe>
+            </div>
+          </div>
+        </div>
+
       </div>
       <br/>
 
@@ -496,7 +494,7 @@ export default defineComponent({
 }
 
 .order-details {
-  margin-top: -50px; min-height: 100px; border-radius: 30px 30px 0 0;
+  margin-top: -50px; min-height: 100px; border-radius: 30px 30px 0 0; overflow: auto;
 }
 
 ul.timeline {

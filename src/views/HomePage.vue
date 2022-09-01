@@ -7,9 +7,16 @@
             <ion-icon slot="icon-only" :ios="ellipsisVertical" :md="ellipsisVertical"></ion-icon>
           </ion-button>
         </ion-buttons>
+        
         <ion-buttons slot="primary">
-          <ion-button href="/cart">
+          <ion-button href="/cart" class="position-relative" style="--overflow: visible">
+            <a href="/cart" v-if="cartItemCount">
+              <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger" style="z-index: 1">
+              {{cartItemCount}}
+              </span>
+            </a>
             <ion-icon slot="icon-only" :icon="cartOutline" color="dark"></ion-icon>
+            <ion-ripple-effect></ion-ripple-effect>
           </ion-button>
         </ion-buttons>
         <ion-buttons slot="primary" @click="toggleScannerModal()">
@@ -128,7 +135,7 @@ import { IonPage, IonHeader, IonToolbar,
 IonTitle, IonContent, IonIcon,
 IonButtons, IonChip, IonLabel,
 IonRefresher, IonRefresherContent,
-modalController,
+modalController, IonRippleEffect ,
 IonModal
 } from '@ionic/vue';
 import { 
@@ -150,13 +157,17 @@ import store from '../store';
 import $ from 'jquery'
 import Quagga from 'quagga';
 import DotLoader from 'vue-spinner/src/DotLoader.vue'
+import { mapState } from 'vuex';
 
 export default  defineComponent({
   name: 'HomePage',
   mixins: [Mixin],
+  computed: mapState([
+      'cartItemCount',
+  ]),
   components: {
     SliderComponent, PopularProductsComponent, SlidingChips,
-    DotLoader,
+    DotLoader, IonRippleEffect,
 
     IonChip, IonLabel,
     IonHeader, IonToolbar, IonTitle,

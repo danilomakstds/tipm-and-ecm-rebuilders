@@ -1,6 +1,6 @@
 <template>
   <ion-page id="youtube">
-    <ion-header>
+    <ion-header mode="md">
       <ion-toolbar color="white">
         <ion-buttons slot="start">
           <router-link to="/">
@@ -219,7 +219,7 @@ export default defineComponent({
 .yt-banner {
     background-repeat: no-repeat;
     background-attachment: fixed;
-    background-position: center;
+    background-position: top;
     background-size: cover;
     background-image: url('https://tipmrebuilders.com/wp-content/uploads/2021/03/Shop-Tipms.jpg');
 }

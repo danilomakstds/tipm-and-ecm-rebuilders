@@ -1,6 +1,19 @@
 import moment from 'moment'
+import store from '../store';
+import axios from 'axios'
+import SettingsConstants from '../constants/settings.constants'
+import Swal from 'sweetalert2'
+import { mapState } from 'vuex';
 
 export default {
+    computed: mapState([
+        'cartKeyECM',
+        'cartKeyTIPM',
+        'cartItemCount',
+        'cartTIPMCount',
+        'cartECMCount',
+        'cartItemList'
+    ]),
     methods: {
         cleanString: function (string) {
             if (string) {
@@ -73,6 +86,62 @@ export default {
         },
         formatDate: function (date) {
            return moment(date).fromNow();
-        }   
+        },
+        addToCart: function (id, source) {
+            var base = null;
+            var cartKey = null;
+            if ('ECM' == source) {
+              base = SettingsConstants.ECMURL;
+              cartKey = this.cartKeyECM;
+            } else {
+              base = SettingsConstants.TIPMURL;
+              cartKey = this.cartKeyTIPM;
+            }
+      
+            this.emitter.emit('showFullScreenLoader', true);
+            var url = base + 'wp-json/cocart/v2/cart/add-item?id='+id+'&quantity=1';
+            if (cartKey) {
+              url = url + '&cart_key=' + cartKey;
+            }
+            axios.post(url)
+              .then(function (response) {
+                if (response.data.cart_key) {
+                  this.emitter.emit('showFullScreenLoader', false);
+                  Swal.fire({
+                    title: 'Great!',
+                    text: 'Item was added to '+source+' cart!',
+                    icon: 'success',
+                    confirmButtonText: 'View Cart'
+                  }).then((result) => {
+                    if (result.isConfirmed) {
+                        location.pathname = '/cart';
+                    } else if (result.isDenied) {
+                        console.log('go to cart cancelled');
+                    }
+                  })
+      
+                  if ('ECM' == source) {
+                    store.commit('SET_CART_ECM_COUNTER', response.data.items.length);
+                  } else {
+                    store.commit('SET_CART_TIPM_COUNTER', response.data.items.length);
+                  }
+                  store.commit('SET_CART_ITEM_COUNTER', this.cartTIPMCount + this.cartECMCount);
+      
+                  var list = [];
+                  list = this.cartItemList.concat(response.data.items.filter(
+                  function (item) {
+                    return this.cartItemList.indexOf(item) < 0;
+                  }.bind(this)));
+                  store.commit('SET_CART_ITEM_LIST', list);
+      
+                  if (!cartKey) {
+                    store.commit('SET_CART_KEY_'+source, response.data.cart_key);
+                  }
+                }
+              }.bind(this))
+              .catch(function (error) {
+                console.log(error);
+            });
+        }, 
     }
   };

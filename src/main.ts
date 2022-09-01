@@ -28,7 +28,7 @@ import './theme/variables.css';
 
 import 'viewerjs/dist/viewer.css'
 import VueViewer from 'v-viewer'
-import LoadScript from "vue-plugin-load-script";
+import LoadScript from "vue-plugin-load-script"
 
 // Above the createApp() line
 import { defineCustomElements } from '@ionic/pwa-elements/loader';

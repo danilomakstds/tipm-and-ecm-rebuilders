@@ -20,6 +20,10 @@ const routes: Array<RouteRecordRaw> = [
     component: () => import('@/views/CartPage.vue')
   },
   {
+    path: '/checkout',
+    component: () => import('@/views/CheckoutPage.vue')
+  },
+  {
     path: '/profile',
     component: () => import('@/views/ProfilePage.vue')
   },
@@ -46,6 +50,10 @@ const routes: Array<RouteRecordRaw> = [
       {
         path: 'orders',
         component: () => import('@/views/OrdersPage.vue')
+      },
+      {
+        path: 'installation',
+        component: () => import('@/views/InstallationPage.vue')
       },
       {
         path: 'youtube',

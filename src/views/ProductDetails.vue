@@ -121,36 +121,6 @@
 
         <div class="bg-default" style="height:130px"></div>
 
-        <div class="position-fixed bottom-0 w-100 p-3 bg-white" style="border-radius:30px 30px 0 0 ">
-          <section class="row w-100">
-            <div class="col-6 d-flex align-items-center">
-              <h1 :class="isOnSale ? 'fw-bold w-100 m-0': 'fw-bold w-100 m-0 text-center'" style="line-height: 1">
-                <span class="original-price text-danger w-100 text-start" v-if="isOnSale">
-                $ {{selectedProduct.regular_price}}<br/></span>
-                $ {{productPrice}}
-              </h1>
-            </div>
-            <div class="col-6 p-0">
-
-              <ion-button class="w-100"
-              style="height: 6vh"
-              :color="selectedProduct.badge.includes('ecm') ? 'tertiary' : ''"
-              :disabled="isOutofStock" v-if="!isOutofStock">
-                <ion-icon :icon="cartOutline" class="me-2"></ion-icon>
-                Add to cart
-              </ion-button>
-
-              <ion-button class="w-100"
-              style="height: 6vh"
-              color="danger"
-              v-if="isOutofStock">
-                <ion-icon :icon="enterOutline" class="me-2"></ion-icon>
-                Join Waitlist
-              </ion-button>
-            </div>
-          </section>
-        </div>
-
         <ion-fab horizontal="start" vertical="top" slot="fixed" mode="ios">
           <ion-fab-button color="light" :href="productBackRoute">
             <ion-icon :icon="chevronBackOutline"></ion-icon>
@@ -163,6 +133,35 @@
       </div>
 
     </ion-content>
+    <div slot="bottom" class="position-fixed bottom-0 w-100 p-3 bg-white" style="border-radius:30px 30px 0 0;">
+      <section class="row w-100">
+        <div class="col-6 d-flex align-items-center">
+          <h1 :class="isOnSale ? 'fw-bold w-100 m-0': 'fw-bold w-100 m-0 text-center'" style="line-height: 1">
+            <span class="original-price text-danger w-100 text-start" v-if="isOnSale">
+            $ {{selectedProduct.regular_price}}<br/></span>
+            $ {{productPrice}}
+          </h1>
+        </div>
+        <div class="col-6 p-0">
+
+          <ion-button class="w-100"
+          style="height: 6vh"
+          :color="selectedProduct.badge.includes('ecm') ? 'tertiary' : ''"
+          :disabled="isOutofStock" v-if="!isOutofStock">
+            <ion-icon :icon="cartOutline" class="me-2"></ion-icon>
+            Add to cart
+          </ion-button>
+
+          <ion-button class="w-100"
+          style="height: 6vh"
+          color="danger"
+          v-if="isOutofStock">
+            <ion-icon :icon="enterOutline" class="me-2"></ion-icon>
+            Join Waitlist
+          </ion-button>
+        </div>
+      </section>
+    </div>
   </ion-page>
 </template>
 

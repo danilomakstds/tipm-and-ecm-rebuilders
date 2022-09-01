@@ -32,6 +32,7 @@
     "sweetalert2": "^11.4.8",
     "v-viewer": "^3.0.10",
     "vue": "^3.2.21",
+    "vue-iframes": "^0.0.20",
     "vue-plugin-load-script": "^2.1.1",
     "vue-router": "^4.0.12",
     "vue-spinner": "^1.0.4",

@@ -168,7 +168,7 @@ export default defineComponent({
               text: 'Missing email or password!',
               icon:'error',
               confirmButtonColor: '#4b7838',
-            })
+            });
           }
         }
       }.bind(this))
@@ -201,6 +201,7 @@ export default defineComponent({
         .then(function (response) {
           this.isLoading = false;
           if (response.data) {
+            console.log(response.data);
             Swal.fire({
               title: 'Great!',
               text: 'you are now logged in!',

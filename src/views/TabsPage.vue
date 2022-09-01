@@ -63,6 +63,8 @@
         </ion-content>
     </ion-modal>
 
+    <full-screen-loader v-if="showFullScreenLoader"></full-screen-loader>
+
     <ion-tabs mode="md">
       <ion-router-outlet id="main"></ion-router-outlet>
       <ion-tab-bar slot="bottom" style="--border:#fff">
@@ -81,8 +83,8 @@
           <!-- <ion-label>Tab 3</ion-label> -->
         </ion-tab-button>
 
-        <ion-tab-button tab="youtube" href="/tabs/youtube">
-          <ion-icon :icon="logoYoutube" />
+        <ion-tab-button tab="installation" href="/tabs/installation">
+          <ion-icon :icon="buildOutline" />
           <!-- <ion-label>Tab 3</ion-label> -->
         </ion-tab-button>
 
@@ -103,10 +105,19 @@
             <ion-item href="/cart">
                 <ion-icon :icon="cartOutline" slot="start" />
                 <ion-label>Cart</ion-label>
+                <ion-badge slot="end" color="danger" mode="ios" v-if="cartItemCount">{{cartItemCount}}</ion-badge>
             </ion-item>
             <ion-item href="tabs/orders">
                 <ion-icon :icon="cubeOutline" slot="start" />
                 <ion-label>Orders</ion-label>
+            </ion-item>
+            <ion-item href="tabs/installation">
+                <ion-icon :icon="buildOutline" slot="start" />
+                <ion-label>Installation</ion-label>
+            </ion-item>
+            <ion-item href="https://www.youtube.com/c/TIPMRebuilders">
+                <ion-icon :icon="logoYoutube" slot="start" />
+                <ion-label>TIPM Rebuilders on YT</ion-label>
             </ion-item>
             <ion-item>
                 <ion-icon :icon="informationCircleOutline" slot="start" />
@@ -121,7 +132,7 @@
                 <ion-label>Resellers</ion-label>
             </ion-item>
             <ion-item>
-                <ion-icon :icon="buildOutline" slot="start" />
+                <ion-icon :icon="hammerOutline" slot="start" />
                 <ion-label>Repair</ion-label>
             </ion-item>
             <ion-item @click="logOutUserModal()">
@@ -142,13 +153,15 @@ import { IonTabBar, IonTabButton, IonTabs,
 IonIcon, IonPage, IonRouterOutlet,
 IonModal, modalController, IonSelect, IonSelectOption,
 IonInput, alertController, menuController,
-IonMenu, IonHeader, IonToolbar, IonTitle, IonContent, IonList, IonItem, IonLabel
+IonMenu, IonHeader, IonToolbar, IonTitle, IonContent, IonList, IonItem, IonLabel,
+IonBadge
 } from '@ionic/vue';
 import { ellipse, square, triangle, searchOutline,
 heartOutline, homeOutline, scanOutline,
 cubeOutline, logOutOutline, cartOutline,
 openOutline, informationCircleOutline, returnDownBackOutline,
-buildOutline, briefcaseOutline, logoYoutube
+buildOutline, briefcaseOutline, logoYoutube, constructOutline,
+hammerOutline
 } from 'ionicons/icons';
 import axios from 'axios'
 import DotLoader from 'vue-spinner/src/DotLoader.vue'
@@ -156,7 +169,8 @@ import SettingsConstants from '../constants/settings.constants'
 import store from '../store'
 import $ from 'jquery'
 import Swal from 'sweetalert2'
-
+import FullScreenLoader from '../components/FullScreenLoader'
+import { mapState } from 'vuex'
 
 
 export default defineComponent({
@@ -168,8 +182,15 @@ export default defineComponent({
     IonModal, IonSelect, IonSelectOption,
     IonInput, IonMenu, IonHeader, IonToolbar,
     IonTitle, IonContent, IonList, IonItem,
-    IonLabel
+    IonLabel, IonBadge,
+
+    FullScreenLoader
   },
+  computed: mapState([
+    'cartKeyECM',
+    'cartKeyTIPM',
+    'cartItemCount'
+  ]),
   setup() {
     return {
       ellipse, 
@@ -186,7 +207,9 @@ export default defineComponent({
       informationCircleOutline,
       returnDownBackOutline, buildOutline,
       briefcaseOutline,
-      logoYoutube
+      logoYoutube,
+      constructOutline,
+      hammerOutline
     }
   },
   watch: {
@@ -293,7 +316,8 @@ export default defineComponent({
       model_tip: [],
       model: [],
 
-      isSearchDisabled: true
+      isSearchDisabled: true,
+      showFullScreenLoader: false
     }
   },
   methods: {
@@ -483,15 +507,34 @@ export default defineComponent({
         }.bind(this));
       }
     },
+    // getCartCount: function () {
+    //   //wp-json/cocart/v2/cart/items/count
+    //   axios.get(SettingsConstants.ECMURL+'wp-json/cocart/v2/cart/items/count?cart_key='+this.cartKeyECM , { crossdomain: true })
+    //     .then(function (response) {
+    //       if (response.data) {
+    //         store.commit('SET_CART_ITEM_COUNTER', response.data);
+    //       }
+    //     }.bind(this));
+    //   axios.get(SettingsConstants.TIPMURL+'wp-json/cocart/v2/cart/items/count?cart_key='+this.cartKeyTIPM , { crossdomain: true })
+    //     .then(function (response) {
+    //       if (response.data) {
+    //         store.commit('SET_CART_ITEM_COUNTER', response.data);
+    //       }
+    //     }.bind(this));
+    // },
     openScannerModal: function () {
       this.emitter.emit('isShowScannerModal');
-    }
+    },
   },
   mounted() {
+    //this.getCartCount();
     this.getYear(SettingsConstants.TIPMSITE);
     this.getYear(SettingsConstants.ECMSITE);
     this.emitter.on('isShowSearchModal', function () {
       this.toggleSearchModal();
+    }.bind(this));
+    this.emitter.on('showFullScreenLoader', function (show) {
+      this.showFullScreenLoader = show;
     }.bind(this));
     this.emitter.on('openMenu', function () {
       this.openMenu();
@@ -503,7 +546,6 @@ export default defineComponent({
         this.triggerSearch();
       }.bind(this), 100);
     }.bind(this));
-    //
   }
 });
 </script>
