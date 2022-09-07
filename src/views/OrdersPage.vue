@@ -303,7 +303,7 @@ export default defineComponent({
   },
   
   methods: {
-      async presentActionSheet() {
+    async presentActionSheet() {
         const actionSheet = await actionSheetController
         .create({
           header: 'Options',

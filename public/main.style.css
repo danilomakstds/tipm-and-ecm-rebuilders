@@ -159,7 +159,8 @@ ion-button {
     border-radius: 20px;
 }
 
-.input-modif input {
+.input-modif input, 
+.native-input {
     height: 50px !important;
     padding-left: 15px !important;
 }
@@ -248,4 +249,12 @@ div.ytp-gradient-bottom, div.ytp-gradient-top {
 
 .center-absolute {
     margin-left: auto; margin-right: auto; left: 0; right: 0;
+}
+
+.top--5 {
+   top: -5px
+}
+
+.end--5 {
+   right: -5px
 }

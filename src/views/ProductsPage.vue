@@ -44,11 +44,11 @@
 
       <ion-breadcrumbs class="p-3 pb-0" style="font-size: 1.5vh" v-if="searchVinNumber">
         <ion-breadcrumb>Searching VIN </ion-breadcrumb>
-        <ion-breadcrumb>{{searchVinNumber}}</ion-breadcrumb>
+        <ion-breadcrumb>{{searchVinNumber.toUpperCase()}}</ion-breadcrumb>
       </ion-breadcrumbs>
 
       <div class="alert alert-info me-3 ms-3 mt-2 mb-0 text-start" role="alert" v-if="searchVinNumber && vinYear" style="font-size: 1.6vh">
-        Your vehicle : <b class="text-uppercase">{{vinYear}} {{vinMake}} {{vinModel}} {{vinModel == 'caravan'? '/ GRAND CARAVAN' : '' }} {{this.vinEngine}}</b>
+        Your vehicle : <b class="text-uppercase">{{searchedVehicleFullname}}</b>
       </div>
 
 
@@ -57,10 +57,10 @@
           <div class="col-6 p-0" v-for="product in productList" :key="product.tags[0].name+product.id">
             <ion-card class="position-relative m-2 ion-activatable ripple-parent">
                 <img :src="product.images[0].src" :class="product.imgclass" @click="setSelectedProduct(product)"/>
-                <span class="text-center position-absolute out-of-stock-banner" v-if="product.stock_status == 'outofstock'">
+                <span class="text-center position-absolute out-of-stock-banner" v-if="product.stock_status == 'outofstock'" @click="setSelectedProduct(product)">
                   <img src="../../resources/OutOfStock.png" />
                 </span>
-                <span v-if="product.on_sale">
+                <span v-if="product.on_sale" @click="setSelectedProduct(product)">
                   <img src="../../resources/sale.png" class="position-absolute sale-banner"/>
                 </span>
                 <ion-card-header class="overflow-hidden">
@@ -92,33 +92,83 @@
 
 
           <!-- for could not find ecm thumbnail-->
-          
           <div class="col-6 p-0" v-if="!isVinInvalid">
-            <!-- <a href="tel://+1-818-798-5558" class="text-decoration-none"> -->
-            <ion-card class="position-relative m-2" @click="presentActionSheet">
+            <ion-card class="position-relative m-2" @click="toggleHubspotFormContactUs()">
                 <img src="https://ecmrebuilders.com/wp-content/uploads/2022/07/no_ecm.png" class="bg-white"/>
                 <ion-card-header class="overflow-hidden">
                   <span>
                       <ion-card-title class="prod-title fw-bold" style="font-size:2vh">
-                      CANT FIND YOUR <span style="color: #3A7CA5">ECM</span> / <span style="color: #3A7CA5">PCM</span>?</ion-card-title>
+                      CAN'T FIND YOUR <span style="color: #3A7CA5">ECM?</span></ion-card-title>
                   </span>
                   <div class="overflow-hidden">
-                    <!-- <p>We're here to help! We will contact you regarding the availability of your part #</p> -->
-                    <p class="mt-3 text-dark" style="font-size:1.8vh">Call us or Send us a message and we'll find it for you!</p>
+                    <p class="mt-3 text-dark" style="font-size:1.8vh">Click here!, We'll find it for you!</p>
                   </div>
                 </ion-card-header>
             </ion-card>
-            <!-- </a> -->
           </div>
 
-
+          <div class="col-6 p-0" v-if="showRepairHubspotThumbnail">
+            <ion-card class="position-relative m-2" @click="toggleHubspotRepairForm()">
+                <img src="http://ecmrebuilders.com/wp-content/uploads/2022/01/ECM-REPAIR-2-e1641540545289.png"
+                class="bg-white" style="filter: grayscale(100%);"/>
+                <ion-card-header class="overflow-hidden">
+                  <span>
+                      <ion-card-title class="prod-title fw-bold" style="font-size:2vh">
+                      REPAIR MAY BECOME AVAILABLE</ion-card-title>
+                  </span>
+                  <div class="overflow-hidden">
+                    <p class="mt-3 text-dark" style="font-size:1.8vh">
+                      It looks like there is no available repair services for your
+                      <span class="text-uppercase fw-bold">{{searchedVehicleFullname}}</span> 
+                      at this time. <span style="color: #3A7CA5">Click here for more details!</span>
+                    </p>
+                  </div>
+                </ion-card-header>
+            </ion-card>
+          </div>
       </div>
 
-      <div v-if="!productList.length && !isLoading && isVinInvalid" class="text-center order-page">
+      <div v-if="!productList.length && !isLoading && isVinInvalid && !showRepairHubspotThumbnail" class="text-center order-page">
         <ion-icon :icon="listOutline" style="font-size: 200px;  opacity: .1"></ion-icon>
         <p class="text-muted fst-italic mt-0" style="font-size: 2vh">No results found</p>
       </div>
 
+      <ion-modal ref="modal-hubspot-contact-form"
+      :is-open="isHubspotContactUsFormOpen"
+      :breakpoints="[0.0, 0.7, 0.95]"
+      :initialBreakpoint="0.7"
+      @didDismiss="toggleHubspotFormContactUs()">
+        <ion-content class="p-4">
+          <div class="p-3">
+            <br/>
+            <p style="font-size:20px" class="fw-bold text-center">CAN'T FIND YOUR <span style="color: #3A7CA5">ECM?</span></p>
+            <p style="font-size: 14px">We're here to help! We will contact you regarding the availability of your part #.</p>
+            <div class="d-flex justify-content-center mt-2">
+              <dot-loader :loading="isLoadingHubspotForm" color="#3A7CA5" :size="size" class="mt-5"></dot-loader>
+            </div>
+            <div id="contact-us-hsf"></div>
+          </div>
+        </ion-content>
+      </ion-modal>
+
+      <ion-modal ref="modal-hubspot-repair-form"
+      :is-open="isHubspotRepairFormOpen"
+      :breakpoints="[0.0, 0.7, 0.95]"
+      :initialBreakpoint="0.7"
+      @didDismiss="toggleHubspotRepairForm()">
+        <ion-content class="p-4">
+          <div class="p-3">
+            <br/>
+            <p style="font-size:20px" class="fw-bold text-center">REPAIR MAY BECOME <span style="color: #3A7CA5">AVAILABLE!</span></p>
+            <p style="font-size: 14px">It looks like there is no available repair services for your <b class="text-uppercase fw-bold">{{searchedVehicleFullname}}</b> at this time.
+              However it may become available in the near future. We will contact you once this service becomes available for your part#.</p>
+            <div class="d-flex justify-content-center mt-2">
+              <dot-loader :loading="isLoadingHubspotForm" color="#3A7CA5" :size="size" class="mt-5"></dot-loader>
+            </div>
+            <div id="repair-hsf"></div>
+          </div>
+        </ion-content>
+      </ion-modal>
       
 
 
@@ -134,7 +184,8 @@ IonTitle, IonContent, IonChip, IonIcon,
 IonLabel, IonButtons, IonButton,
 IonBreadcrumbs, IonBreadcrumb,
 IonRefresher, IonRefresherContent,
-actionSheetController, IonRippleEffect
+actionSheetController, IonRippleEffect,
+modalController, IonModal
 } from '@ionic/vue';
 
 import { 
@@ -160,9 +211,10 @@ export default defineComponent({
     IonIcon, IonLabel, IonButtons, IonButton,
     IonBreadcrumbs, IonBreadcrumb,
     IonRefresher, IonRefresherContent,
-    IonRippleEffect
+    IonRippleEffect, IonModal
   },
   computed: mapState([
+    'sessionData',
     'selectedYear',
     'selectedMake',
     'selectedModel',
@@ -185,6 +237,47 @@ export default defineComponent({
       mailOutline, paperPlaneOutline, logoFacebook
     }
   },
+  watch: {
+    isHubspotRepairFormOpen: function (newVal) {
+      if (newVal) {
+        this.isLoadingHubspotForm = true;
+        if (window.hbspt) {
+          var existCondition = setInterval(function() {
+            if ($('#repair-hsf').length) {
+              window.hbspt.forms.create({
+                region: "na1",
+                portalId: "21300550",
+                formId: "de4404b5-39b5-49d1-b108-6150f9fd7baf",
+                target: "#repair-hsf"
+              });
+              this.addIframeJquery();
+              clearInterval(existCondition);
+            }
+          }.bind(this), 100);
+        }
+      }
+    },
+    isHubspotContactUsFormOpen: function (newVal) {
+      if (newVal) {
+        this.isLoadingHubspotForm = true;
+        if (window.hbspt) {
+          var existCondition = setInterval(function() {
+            if ($('#contact-us-hsf').length) {
+              window.hbspt.forms.create({
+                region: "na1",
+                portalId: "21300550",
+                formId: "a3e1aa90-cb87-4b14-b0ce-09397efe9495",
+                target: "#contact-us-hsf"
+              });
+              this.addIframeJquery();
+              clearInterval(existCondition);
+            }
+          }.bind(this), 100);
+          
+        }
+      }
+    }
+  },
   data() {
     return {
       productList: [],
@@ -198,10 +291,20 @@ export default defineComponent({
       vinTrim: null,
       vinEngine: null,
       productSlug: null,
-      isVinInvalid: false
+      isVinInvalid: false,
+      searchedVehicleFullname: null,
+      isHubspotContactUsFormOpen: false,
+      isHubspotRepairFormOpen: false,
+      isLoadingHubspotForm: false,
+      showRepairHubspotThumbnail: false,
     }
   },
   methods: {
+    async dismiss() {
+      modalController.dismiss({
+        'dismissed': true
+      });
+    },
     async presentActionSheet() {
       const actionSheet = await actionSheetController
         .create({
@@ -257,6 +360,38 @@ export default defineComponent({
       const { role, data } = await actionSheet.onDidDismiss();
       console.log('onDidDismiss resolved with role and data', role, data);
     },
+    showSearchResultWarning: function () {
+      Swal.fire({
+        title: 'Keyword search warning!',
+        text: "Search returned more than 50 results, would you like to narrow down your search",
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#4b7838',
+        cancelButtonColor: '#92949C',
+        cancelButtonText: 'Continue',
+        confirmButtonText: 'New Search',
+      }).then((result) => {
+        if (result.isConfirmed) {
+          this.openSearchModal();
+        }
+      });
+    },
+    toggleHubspotFormContactUs() {
+      this.isHubspotContactUsFormOpen = !this.isHubspotContactUsFormOpen;
+    },
+    toggleHubspotRepairForm: function () {
+      this.isHubspotRepairFormOpen = !this.isHubspotRepairFormOpen;
+    },
+    addIframeJquery: function () {
+      setInterval(() => {
+        this.isLoadingHubspotForm = false;
+        $("iframe").contents().find('.hs_submit input.hs-button').css('width','100%');
+        $("iframe").contents().find('input').css('min-height','45px');
+        $("iframe").contents().find('input').css('border-radius','10px');
+        $("iframe").contents().find('.hs_submit .actions').css('padding','0px 0px 17px 0px');
+        $("iframe").contents().find('html').css('background-color','#F6F6F6');
+      }, 500);
+    },
     openSearchModal: function () {
       this.emitter.emit('isShowSearchModal');
     },
@@ -270,54 +405,19 @@ export default defineComponent({
         axios.get(SettingsConstants.BASE_URL +
         'productREST.php?op=get_product_under_category&site='+cat.site+'&page=1&categoryId='+cat.categories.id+'&products_perpage='+50 , { crossdomain: true })
           .then(function (response) {
+            counter = counter + 1;
             if (response.data.length) {
-                counter = counter + 1;
-                response.data.forEach(function (prod, idx, array) {
-                  prod.name = prod.name.replace('LIKE NEW', 'LIKE_NEW');
-                  prod.imgclass = (prod.stock_status == 'outofstock'?'opacity ':'') + (prod.name.toLowerCase().includes('repair service')? 'bg-dark': 'bg-white');
-                  if (prod.name.toLowerCase().includes('repair service')) {
-                    console.log(prod.name);
-                  }
-                  prod.name_title = '';
-                  prod.name_subtitle = '';
-                  name = null;
-                  var name = null;
-                  if (prod.tags.find(tag => tag.name == 'TIPM')) {
-                    prod.badge = 'tipm-badge';
-                    prod.source = 'TIPM';
-                    name = prod.name.substr(prod.name.indexOf(' ')+1).replace(/–/g,'-');
-                    prod.name_title = name.split('- Part')[0];
-                    prod.name_subtitle = '- Part' + name.split('- Part')[1];
-                  }
-                  if (prod.tags.find(tag => tag.name == 'ECM')) {
-                    prod.badge = 'ecm-badge';
-                    prod.source = 'ECM';
-                    name = prod.name.substr(prod.name.indexOf(' ')+1).replace(/–/g,'-');
-                    prod.name_title = name.split('with')[0];
-                    prod.name_subtitle = 'with' + name.split('with')[1];
-                  }
-                  if (!prod.tags.find(tag => tag.name == 'TIPM') && !prod.tags.find(tag => tag.name == 'ECM')){
-                    prod.name_title = prod.name;
-                    prod.isNonECMTIPM = true;
-                    if (prod.name_title.toLowerCase().includes('ecm')) {
-                      prod.badge = 'ecm-badge';
-                      prod.source = 'ECM';
-                    } else {
-                      prod.badge = 'tipm-badge';
-                      prod.source = 'TIPM';
-                    }
-                  }
-                  this.productList.push(prod);
-                  this.isLoading = false;
-                  if (idx == array.length-1 && counter == this.queryCount) {
-                    this.sortProducts();
-                  }
-                }.bind(this));
+                this.formatProductData(response.data, counter, cat.site);
+            } else {
+              if (counter == this.queryCount) {
+                this.isLoading = false;
+              }
             }
           }.bind(this));
       }.bind(this));
     },
     getProductsSearchKeyword: function () {
+      this.showRepairHubspotThumbnail = false;
       this.searchVinNumber = null;
       this.isVinInvalid = false;
       this.isLoading = true;
@@ -328,11 +428,13 @@ export default defineComponent({
         axios.get(SettingsConstants.BASE_URL +
         'productREST.php?op=search_keyword&site='+site+'&page=1&search_keyword='+this.searchKeyword+'&products_perpage='+100 , { crossdomain: true })
           .then(function (response) {
+            counter = counter + 1;
             if (response.data.length) {
-                counter = counter + 1;
                 this.formatProductData(response.data, counter, site);
             } else {
-              this.isLoading = false;
+              if (counter == this.queryCount) {
+                this.isLoading = false;
+              }
             }
           }.bind(this));
       }.bind(this));
@@ -340,14 +442,17 @@ export default defineComponent({
     formatProductData: function (data, counter, site) {
       data.forEach(function (prod, idx, array) {
         var ifStatement;
+        if (site.includes('ecm')) {
+          prod.source = 'ECM';
+        } else {
+          prod.source = 'TIPM';
+        }
         ifStatement = (prod.status == 'publish');
         if (this.vinEngine) {
           if (!site.includes('ecm')) {
             ifStatement = (prod.status == 'publish');
-            prod.source = 'TIPM';
           } else {
             ifStatement = ((prod.status == 'publish' && prod.name.includes(this.vinEngine)) || prod.name.includes('REPAIR SERVICE'));
-            prod.source = 'ECM';
           }
         }
 
@@ -380,10 +485,13 @@ export default defineComponent({
             }
           }
           this.productList.push(prod);
-          this.isLoading = false;
         }
         if (idx == array.length-1 && counter == this.queryCount) {
+          this.isLoading = false;
           this.sortProducts();
+          if (this.productList.length > 50) {
+            this.showSearchResultWarning();
+          }
         }
       }.bind(this));
     },
@@ -397,15 +505,16 @@ export default defineComponent({
         }
         axios.get(geturl, { crossdomain: true })
         .then(function (response) {
-          //console.log(response.data);
           if (response.data) {
             this.formatProductData(response.data, counter, site);
           }
         }.bind(this));
+        this.showRepairHubspotThumbnail = false;
       } else {
         this.isVinInvalid = true;
         this.isLoading = false;
         this.productList = [];
+        this.showRepairHubspotThumbnail = true;
       }
     },
     decodeVin: function () {
@@ -494,6 +603,7 @@ export default defineComponent({
                 if (this.productSlug) {
                   this.getCategoryIDBySlug();
                 }
+                this.searchedVehicleFullname = this.vinYear+' '+this.vinMake+' '+this.vinModel+' '+(this.vinModel == 'caravan'? '/ GRAND CARAVAN' : '')+' '+this.vinEngine;
               } else {
                 this.productList = [];
                 this.isVinInvalid = true;

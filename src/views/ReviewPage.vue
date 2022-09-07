@@ -22,14 +22,14 @@
       </ion-refresher>
       <div v-if="shopperApprovedData">
         <section class="text-center p-3">
-          <h1 style="font-size: 5vh" class="fw-bold"> {{averageRating}}</h1>
+          <h1 style="font-size: 35px" class="fw-bold"> {{averageRating}}</h1>
           <div class="d-flex justify-content-center" v-html="getStars(averageRating, 13)">
           </div>
-          <p class="text-muted" style="font-size: 1.5vh">
+          <p class="text-muted" style="font-size: 13px">
             based on {{totalReviews}} Review<span v-if="totalReviews > 1">s</span>
           </p>
           <div class="d-flex text-start">
-            <div style="width: 37%; font-size: 1.5vh;">Excellent</div>
+            <div style="width: 37%; font-size: 13px;">Excellent</div>
             <div class="w-100">
               <div class="progress mb-2">
                 <div class="progress-bar progress-excellent" role="progressbar" :style="'width: '+(productReviewsRated5.length/totalReviews)*100+'%'"  aria-valuemax="100"></div>
@@ -37,7 +37,7 @@
             </div>
           </div>
           <div class="d-flex text-start">
-            <div style="width: 37%; font-size: 1.5vh;">Good</div>
+            <div style="width: 37%; font-size: 13px;">Good</div>
             <div class="w-100">
               <div class="progress mb-2">
                 <div class="progress-bar progress-good" role="progressbar" :style="'width: '+(productReviewsRated4.length/totalReviews)*100+'%'" aria-valuemax="100"></div>
@@ -45,7 +45,7 @@
             </div>
           </div>
           <div class="d-flex text-start">
-            <div style="width: 37%; font-size: 1.5vh;">Average</div>
+            <div style="width: 37%; font-size: 13px;">Average</div>
             <div class="w-100">
               <div class="progress mb-2">
                 <div class="progress-bar progress-average" role="progressbar" :style="'width: '+(productReviewsRated3.length/totalReviews)*100+'%'" aria-valuemax="100"></div>
@@ -53,7 +53,7 @@
             </div>
           </div>
           <div class="d-flex text-start">
-            <div style="width: 37%; font-size: 1.5vh;">Below Average</div>
+            <div style="width: 37%; font-size: 13px;">Below Average</div>
             <div class="w-100">
               <div class="progress mb-2">
                 <div class="progress-bar progress-belowaverage" role="progressbar" :style="'width: '+(productReviewsRated2.length/totalReviews)*100+'%'" aria-valuemax="100"></div>
@@ -61,7 +61,7 @@
             </div>
           </div>
           <div class="d-flex text-start">
-            <div style="width: 37%; font-size: 1.5vh;">Poor</div>
+            <div style="width: 37%; font-size: 13px;">Poor</div>
             <div class="w-100">
               <div class="progress mb-2">
                 <div class="progress-bar progress-poor" role="progressbar" :style="'width: '+(productReviewsRated1.length/totalReviews)*100+'%'" aria-valuemax="100"></div>
@@ -74,7 +74,7 @@
             <dot-loader :loading="isLoading" :color="color" :size="size" class="mt-5"></dot-loader>
           </div>
           <div class="ion-padding" slot="content" v-if="items.length">
-            <p class="fst-italic" v-if="showMessage" style="font-size: 1.5vh; line-height: 1.6">
+            <p class="fst-italic" v-if="showMessage" style="font-size: 13px; line-height: 1.6">
                 We're currently collecting product reviews for this item.
                 In the meantime, here are some reviews from our past customers sharing their overall shopping experience.
             </p>
@@ -86,16 +86,16 @@
                     <img src="../../resources/user.png" />
                   </ion-avatar>
                   <ion-label class="ion-text-wrap">
-                    <span class="float-end mt-4 text-muted" style="font-size: 1.4vh"> {{formatDate(item.date ? item.date : item.review_date)}}</span>
-                    <h2>{{item.display_name}}</h2>
+                    <span class="float-end mt-4 text-muted" style="font-size: 12px"> {{formatDate(item.date ? item.date : item.review_date)}}</span>
+                    <h2 style="font-size: 15px">{{item.display_name}}</h2>
                     <span>
                       <h3 v-html="getStars(item.rating ? item.rating : item.overall)" class="float-start me-2"></h3>
-                      <b style="font-size: 1.7vh">{{item.rating ? item.rating : item.overall}}.0</b>
+                      <b style="font-size: 14px">{{item.rating ? item.rating : item.overall}}.0</b>
                     </span>
                   </ion-label>
                 </ion-item>
                 <div>
-                  <p style="font-size: 1.7vh">{{item.comments}}</p>
+                  <p style="font-size: 14px">{{item.comments}}</p>
                 </div>
                 <section class="row" v-viewer="options">
                   <div class="col-4 mb-2 p-1" v-for="img in item.images" :key="img.mediaURL+img.mime">

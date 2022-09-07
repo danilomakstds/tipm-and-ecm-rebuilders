@@ -38,7 +38,7 @@
       </ion-segment>
 
 
-      <div class="d-flex justify-content-center align-items-center mb-2 mt-2" v-if="isLoading">
+      <div class="d-flex justify-content-center align-items-center mb-4 mt-4" v-if="isLoading">
           <dot-loader :loading="isLoading" :color="color" :size="size"></dot-loader>
       </div>
 
@@ -71,16 +71,16 @@
             <ion-item-options side="end">
               <ion-item-option class="bg-light" style="max-width: 70px">
                 <div class="d-flex flex-column w-100">
-                  <ion-button color="light" mode="ios">
+                  <ion-button color="light" mode="ios" @click="addsubtractItemQuantity(cart, '-')" :disabled="disableCheckout">
                     <ion-icon :icon="removeOutline" color="dark"></ion-icon>
                   </ion-button>
-                  <input type="number" class="form-control text-center mt-1 mb-1" disabled style="border-radius: 100px !important" value="1">
-                  <ion-button color="light" mode="ios">
+                  <input type="number" class="form-control text-center mt-1 mb-1" disabled style="border-radius: 100px !important" :value="cart.quantity.value">
+                  <ion-button color="light" mode="ios" @click="addsubtractItemQuantity(cart, '+')" :disabled="disableCheckout">
                     <ion-icon :icon="addOutline" color="dark"></ion-icon>
                   </ion-button>
                 </div>
               </ion-item-option>
-              <ion-item-option class="bg-danger" style="min-width: 60px" @click="showDeleteItemInCartModal(cart.item_key, cart.source)">
+              <ion-item-option class="bg-danger" style="min-width: 60px" @click="showDeleteItemInCartModal(cart.item_key, cart.source)" :disabled="disableCheckout">
                 <ion-icon :icon="trashOutline"></ion-icon>
               </ion-item-option>
             </ion-item-options>
@@ -201,6 +201,13 @@ export default defineComponent({
   watch: {
     selectedSegment: function (newVal) {
       this.processSegment(newVal);
+      if (newVal.toLowerCase() == 'ecm') {
+        this.cartBaseURL = SettingsConstants.ECMURL;
+        this.color = '#348CA6';
+      } else {
+        this.cartBaseURL = SettingsConstants.TIPMURL;
+        this.color = '#568E3E';
+      }
     }
   },
   methods: {
@@ -230,6 +237,35 @@ export default defineComponent({
           });
       return alert.present();
     },
+    addsubtractItemQuantity: function (cartdata, type) {
+      this.disableCheckout = true;
+      this.isLoading = true;
+      if (this.cartBaseURL == SettingsConstants.ECMURL) {
+        this.cartItemsECM = [];
+      } else {
+        this.cartItemsTIPM = [];
+      }
+      var curQuantity = cartdata.quantity.value;
+      var newQuantity = 0;
+      if (type == '-') {
+        if (curQuantity == 1) {
+          this.deleteCartItems(cartdata.item_key, this.selectedSegment.toUpperCase());
+        } else {
+          newQuantity = parseInt(curQuantity)-1;
+        }
+      } else {
+        newQuantity = parseInt(curQuantity)+1;
+      }
+      
+      if (newQuantity != 0) {
+        axios.post( this.cartBaseURL+'wp-json/cocart/v2/cart/item/'+cartdata.item_key+'/?cart_key='+this.cartKey+'&quantity='+newQuantity, { crossdomain: true })
+        .then(function (response) {
+          this.processCartData(response, this.selectedSegment.toUpperCase());
+          this.processSegment(this.selectedSegment);
+          this.isLoading = false;
+        }.bind(this));
+      }
+    },
     processSegment: function (segment) {
       var listLength = 0;
       segment == 'tipm' ? listLength = this.cartItemsTIPM.length : listLength = this.cartItemsECM.length;
@@ -243,11 +279,13 @@ export default defineComponent({
       switch (segment) {
         case 'tipm': 
           this.cartItems = this.cartItemsTIPM;
+          this.cartKey = this.cartKeyTIPM;
           this.cartTotal = this.cartTotalTIPM;
           this.checkoutBtnColor = 'primary';
           break;
         case 'ecm': 
           this.cartItems = this.cartItemsECM;
+          this.cartKey = this.cartKeyECM;
           this.cartTotal = this.cartTotalECM;
           this.checkoutBtnColor = 'tertiary';
           break;

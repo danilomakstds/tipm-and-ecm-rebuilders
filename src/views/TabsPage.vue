@@ -40,7 +40,7 @@
                 Search by VIN
               </div>
               <div class="col-10 p-1">
-                <ion-input placeholder="VIN" maxlength="17" v-model="searchVinNumber" class="input-modif"></ion-input>
+                <ion-input placeholder="VIN" maxlength="17" v-model="searchVinNumber" class="input-modif text-uppercase"></ion-input>
               </div>
               <div class="col-2 p-1">
                 <ion-button color="medium" class="w-100" @click="openScannerModal()">
@@ -90,6 +90,7 @@
 
       </ion-tab-bar>
     </ion-tabs>
+
   </ion-page>
 
 
@@ -189,7 +190,8 @@ export default defineComponent({
   computed: mapState([
     'cartKeyECM',
     'cartKeyTIPM',
-    'cartItemCount'
+    'cartItemCount',
+    'sessionData'
   ]),
   setup() {
     return {
@@ -317,7 +319,7 @@ export default defineComponent({
       model: [],
 
       isSearchDisabled: true,
-      showFullScreenLoader: false
+      showFullScreenLoader: false,
     }
   },
   methods: {
@@ -373,14 +375,31 @@ export default defineComponent({
     toggleSearchModal: function () {
       this.isSearchModalOpen = !this.isSearchModalOpen;
     },
+    
     triggerSearch: function () {
       this.dismiss();
-      if (this.$route.fullPath == '/tabs/products') {
-        this.emitter.emit('triggerSearch');
+      this.emitter.emit('triggerSearch');
+      if (this.searchVinNumber) {
+        if (this.sessionData) {
+          this.$router.push({path: '/tabs/products', query: {part___or_vin: this.searchVinNumber, email: this.sessionData.email} });
+        } else {
+          this.$router.push({path: '/tabs/products', query: {part___or_vin: this.searchVinNumber} });
+        }
       } else {
-        this.emitter.emit('triggerSearch');
-        this.$router.push('/tabs/products');
+        if (this.sessionData) {
+          this.$router.push({path: '/tabs/products', query: {email: this.sessionData.email} });
+        } else {
+          this.$router.push('/tabs/products');
+        }
+        //this.$router.push('/tabs/products');
       }
+      
+      // if (this.$route.fullPath == '/tabs/products') {
+      //   this.emitter.emit('triggerSearch');
+      // } else {
+      //   this.emitter.emit('triggerSearch');
+      //   this.$router.push('/tabs/products');
+      // }
     },
     getYear: function (site) {
       this.isVehicleSearchLoading = true;
@@ -507,6 +526,7 @@ export default defineComponent({
         }.bind(this));
       }
     },
+    
     // getCartCount: function () {
     //   //wp-json/cocart/v2/cart/items/count
     //   axios.get(SettingsConstants.ECMURL+'wp-json/cocart/v2/cart/items/count?cart_key='+this.cartKeyECM , { crossdomain: true })

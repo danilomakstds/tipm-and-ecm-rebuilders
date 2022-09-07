@@ -11,11 +11,11 @@
             <img src="../../resources/OutOfStock.png" />
           </span>
           <span v-if="isOnSale">
-            <img src="../../resources/sale.png" class="position-absolute top-0 end-0" style="z-index: 1000; height: 100px;"/>
+            <img src="../../resources/sale.png" class="position-absolute top--5 end--5" style="z-index: 1000; height: 100px;"/>
           </span>
           <ion-slides pager="true" class="bg-white position-relative">
               <ion-slide v-for="img in selectedProduct.images" :key="img.id">
-                <img :src="img.src" style="height: 30vh;" :class="isOutofStock?'opacity mb-5':'mb-5'"/>
+                <img :src="img.src" style="height: 230px;" :class="isOutofStock?'opacity mb-5':'mb-5'"/>
               </ion-slide>
           </ion-slides>
         </div>
@@ -31,24 +31,165 @@
             </ion-chip>
           </div>
           <h5 class="mb-0">{{cleanString(selectedProduct.name_title)}}</h5>
-          <p class="text-muted" style="font-size: 1.8vh">
+          <p class="text-muted" style="font-size: 15px">
             {{cleanPartNumber(selectedProduct.name_subtitle)}}
           </p>
 
-          <p class="affirm-as-low-as" data-page-type="product"
-          :data-amount="selectedProduct.regular_price.replace('.','')"
-          style="font-size:11px" v-if="!isOutofStock"></p>
+          <div class="alert alert-warning" role="alert" v-if="selectedProduct.stock_quantity && selectedProduct.stock_quantity < 5">
+            Availability: <span>Only {{selectedProduct.stock_quantity}} left in stock</span>
+          </div>
 
-          <p v-html="selectedProduct.short_description" style="font-size: 1.8vh" class="text-muted fst-italic">
+          <p class="affirm-as-low-as" data-page-type="product"
+          :data-amount="productPrice.replace('.','')"
+          style="font-size:11px" v-if="!isOutofStock && productPrice"></p>
+
+          <p v-html="selectedProduct.short_description" style="font-size: 15px" class="text-muted fst-italic">
           </p>
         </div>
 
-        <ion-accordion-group :multiple="true" :value="['information', 'reviews']">
+
+
+        <ion-accordion-group :multiple="true" :value="['fields', 'reviews']">
+            <ion-accordion value="fields" class="bg-default">
+              <ion-item slot="header" color="light">
+                <ion-label>Required Fields / Options</ion-label>
+              </ion-item>
+              <div class="ion-padding bg-white" slot="content">
+                <ion-list lines="full" class="ion-no-margin" mode="ios" v-if="selectedProduct.source == 'ECM'">
+                  <ion-item lines="none" class="ion-no-padding mb-2" style="--inner-padding-end:0">
+                    <ion-label position="stacked" color="text-dark">
+                      <h4 class="fw-bold mb-2 header-class">17-Digit VIN <span class="text-danger">*</span></h4>
+                      Your VIN# is needed for us to program the unit.
+                    </ion-label>
+                    <ion-input class="mt-2 text-uppercase bg-light" v-model="vinInput" maxlength="17" placeholder="VIN Nunber"></ion-input>
+                  </ion-item>
+                  <div>
+                    <div v-if="isVinMatchingLoading" class="d-flex justify-content-center align-items-center h-100">
+                      <dot-loader :loading="isVinMatchingLoading" :color="color" :size="size" class="mt-5"></dot-loader>
+                    </div>
+                    <div :class="'alert alert-'+(vinMatchingResult ? 'success' : 'danger')+' mt-2'" role="alert" v-if="showVinMatchingResult">
+                      Your Vehicle: <br/>{{vehicleNameVinResult}}<br/>
+                      <b>Your vehicle <span v-if="!vinMatchingResult">might not</span> matched this {{this.selectedProduct.source}}!</b>
+                    </div>
+                  </div>
+                  <ion-item lines="none" class="ion-no-padding mb-2" style="--inner-padding-end:0">
+                    <ion-label position="stacked" color="text-dark" class="ion-text-wrap">
+                      <h4 class="fw-bold mb-2 header-class">Current Mileage</h4>
+                      Enter mileage and transmission type here or leave blank, and our Customer Service  team will reach out to you if needed for your ECM /PCM.
+                      Mileage entered should be accurate to +/- 10 miles of actual when the ECM is installed.
+                      If you plan to be driving this vehicle, leave blank and we will contact you before shipment or Call Us with Questions.
+                    </ion-label>
+                    <ion-input class="mt-2 bg-light" type="number" placeholder="Current Mileage"></ion-input>
+                  </ion-item>
+                  <ion-item lines="none" class="ion-no-padding mb-2" style="--inner-padding-end:0">
+                    <ion-label position="stacked" color="text-dark" class="ion-text-wrap">
+                      <h4 class="fw-bold mb-2 header-class">Transmission Type</h4>
+                      Please confirm your Transmission Type:
+                    </ion-label>
+                    <ion-radio-group class="w-100">
+                      <ion-item>
+                        <ion-label>Automatic</ion-label>
+                        <ion-radio slot="start" color="tertiary" value="apple"></ion-radio>
+                      </ion-item>
+
+                      <ion-item>
+                        <ion-label>Manual</ion-label>
+                        <ion-radio slot="start" color="tertiary" value="grape"></ion-radio>
+                      </ion-item>
+                    </ion-radio-group>
+                  </ion-item>
+                  <ion-item lines="none" class="ion-no-padding mb-2" style="--inner-padding-end:0">
+                    <ion-label position="stacked" color="text-dark"  class="ion-text-wrap">
+                      <h4 class="fw-bold mb-2 header-class">Rental Program Option</h4>
+                      Sometimes after you purchase an ECM, you discover the real problem was not in the ECM and you just needed it for troubleshooting.
+                      With MAK'S, you may convert your purchase to a rental at any time during the first 30 days.
+                      See our <b>Warranty Information & Returns Policy</b> for more information.
+                    </ion-label>
+                  </ion-item>
+                </ion-list>
+                
+                
+                
+                <ion-list lines="full" class="ion-no-margin" mode="ios" v-if="selectedProduct.source == 'TIPM'">
+                  <ion-item lines="none" class="ion-no-padding mb-2" style="--inner-padding-end:0">
+                    <ion-label position="stacked" color="text-dark">
+                      <h4 class="fw-bold mb-2 header-class-tipm">Verify VIN (Optional)</h4>
+                    </ion-label>
+                    <ion-input class="mt-2 text-uppercase bg-light" v-model="vinInput" maxlength="17" placeholder="VIN Nunber"></ion-input>
+                  </ion-item>
+                  <div>
+                    <div v-if="isVinMatchingLoading" class="d-flex justify-content-center align-items-center h-100">
+                      <dot-loader :loading="isVinMatchingLoading" :color="color" :size="size" class="mt-5"></dot-loader>
+                    </div>
+                    <div :class="'alert alert-'+(vinMatchingResult ? 'success' : 'danger')+' mt-2'" role="alert" v-if="showVinMatchingResult">
+                      Your Vehicle: <br/>{{vehicleNameVinResult}}<br/>
+                      <b>Your vehicle <span v-if="!vinMatchingResult">might not</span> matched this {{this.selectedProduct.source}}!</b>
+                    </div>
+                  </div>
+                  <ion-item lines="none" class="ion-no-padding mb-2" style="--inner-padding-end:0">
+                    <ion-label position="stacked" color="text-dark" class="ion-text-wrap">
+                      <h4 class="fw-bold mb-2 header-class-tipm">4x4 Check <span class="text-danger">*</span></h4>
+                      Please confirm if your vehicle has 4x4 or not:
+                    </ion-label>
+                    <ion-radio-group class="w-100">
+                      <ion-item>
+                        <ion-label>With 4x4</ion-label>
+                        <ion-radio slot="start" color="primary" value="with4x4"></ion-radio>
+                      </ion-item>
+
+                      <ion-item>
+                        <ion-label>Without 4x4</ion-label>
+                        <ion-radio slot="start" color="primary" value="without4x4"></ion-radio>
+                      </ion-item>
+                    </ion-radio-group>
+                  </ion-item>
+                  <ion-item lines="none" class="ion-no-padding mb-2" style="--inner-padding-end:0">
+                    <ion-label position="stacked" color="text-dark" class="ion-text-wrap">
+                      <h4 class="fw-bold mb-2 header-class-tipm">Lid Options <span class="text-danger">*</span></h4>
+                      TIPM lids are not included in the price. The majority of TIPMs we rebuild come to us with missing or broken lids.
+                      Re-using your old lid will help us and the environment. You may request a lid for a $15.00 surcharge.<br/><br/>
+                      Re-using your old lid will not lower the value of your old TIPM under our Core Buyback Program.
+                    </ion-label>
+                    <ion-radio-group class="w-100">
+                      <ion-item>
+                        <ion-label>Include a Lid <b class="ms-2">$15.00</b></ion-label>
+                        <ion-radio slot="start" color="primary" value="include-a-lid"></ion-radio>
+                      </ion-item>
+
+                      <ion-item>
+                        <ion-label>No Lid Needed <b class="ms-2">$0.00</b></ion-label>
+                        <ion-radio slot="start" color="primary" value="no-lid-needed"></ion-radio>
+                      </ion-item>
+                    </ion-radio-group>
+                  </ion-item>
+                  <ion-item lines="none" class="ion-no-padding mb-2" style="--inner-padding-end:0">
+                    <ion-label position="stacked" color="text-dark"  class="ion-text-wrap">
+                      <h4 class="fw-bold mb-2 header-class-tipm">Rental Program Option</h4>
+                      Sometimes after you purchase a TIPM, you discover the real problem was not in the TIPM and you just needed it for troubleshooting.
+                      With MAK'S, you may convert your purchase to a rental at any time during the first 30 days.
+                      See our <b>Warranty Information & Returns Policy</b> for more information.
+                    </ion-label>
+                  </ion-item>
+                  <ion-item lines="none" class="ion-no-padding mb-2" style="--inner-padding-end:0" v-if="productsWithCoreRefund.includes(productID)">
+                    <ion-label position="stacked" color="text-dark"  class="ion-text-wrap">
+                      <h4 class="fw-bold mb-2 header-class-tipm">Core Refund Program</h4>
+                      Use slider to set your own core fee and get double your money back!
+                    </ion-label>
+                  </ion-item>
+                  <span v-if="productsWithCoreRefund.includes(productID)">
+                    <ion-range>
+                        <ion-label slot="end">Core Fee: $ 75.00</ion-label>
+                    </ion-range>
+                    <span>You get back <b>$80.00</b> when you send in your old core under our <b class="color-primary">Core Buyback Program</b>.</span>
+                  </span>
+                </ion-list>
+              </div>
+            </ion-accordion>
             <ion-accordion value="description" class="bg-default">
               <ion-item slot="header" color="light">
                 <ion-label>Description</ion-label>
               </ion-item>
-              <div class="ion-padding" slot="content" v-html="productDescription">
+              <div class="ion-padding bg-white" slot="content" v-html="productDescription">
               </div>
             </ion-accordion>
             <ion-accordion value="information">
@@ -66,13 +207,16 @@
                   <ion-item>
                     <ion-label><b>Dimentions</b>: {{selectedProduct.dimensions.length}} x {{selectedProduct.dimensions.width}} x {{selectedProduct.dimensions.height}} in </ion-label>
                   </ion-item>
+                  <ion-item v-if="selectedProduct.source == 'ECM'">
+                    <ion-label class="ion-text-wrap"><b>Hardware Code</b>: {{hardwareCodes}} </ion-label>
+                  </ion-item>
                   <ion-item>
                     <ion-label><b>Total Sales</b>: {{selectedProduct.total_sales}}</ion-label>
                   </ion-item>
                 </ion-list>
               </div>
             </ion-accordion>
-            <ion-accordion value="reviews" style="font-size: 1.8vh;">
+            <ion-accordion value="reviews" style="font-size: 15px;">
               <ion-item slot="header" color="light">
                 <ion-label class="position-relative">Reviews</ion-label>
                 <ion-badge slot="start" :color="defaultColor" class="me-2" v-if="shopperapprovedDetails.total_reviews">{{shopperapprovedDetails.total_reviews}}</ion-badge>
@@ -90,16 +234,16 @@
                           <img src="../../resources/user.png" />
                         </ion-avatar>
                         <ion-label class="ion-text-wrap">
-                          <span class="float-end mt-4 text-muted2" style="font-size: 1.4vh"> {{formatDate(review.date ? review.date : review.review_date)}}</span>
+                          <span class="float-end mt-4 text-muted2" style="font-size: 12px"> {{formatDate(review.date ? review.date : review.review_date)}}</span>
                           <h2>{{review.display_name}}</h2>
                           <span>
                             <h3 v-html="getStars(review.rating ? review.rating : review.overall)" class="float-start me-2"></h3>
-                            <b style="font-size: 1.7vh">{{review.rating ? review.rating : review.overall}}.0</b>
+                            <b style="font-size: 14px">{{review.rating ? review.rating : review.overall}}.0</b>
                           </span>
                         </ion-label>
                       </ion-item>
                       <div>
-                        <p style="font-size: 1.7vh">{{review.comments}}</p>
+                        <p style="font-size: 14px">{{review.comments}}</p>
                       </div>
                       <section class="row" v-viewer="options">
                         <div class="col-4 mb-2 p-1" v-for="img in review.images" :key="img.mediaURL+img.mime">
@@ -123,7 +267,7 @@
 
         <ion-fab horizontal="start" vertical="top" slot="fixed" mode="ios">
           <ion-fab-button color="light" :href="productBackRoute">
-            <ion-icon :icon="chevronBackOutline"></ion-icon>
+            <ion-icon :icon="chevronBackOutline" :style="'color:'+this.color" ></ion-icon>
           </ion-fab-button>
         </ion-fab>
       </section>
@@ -171,7 +315,9 @@ import { IonSlide, IonSlides, IonButton, IonAccordion,
     IonAccordionGroup,
     IonItem, IonRefresher, IonRefresherContent,
     IonLabel, IonList, IonBadge,
-    IonFab, IonFabButton, 
+    IonFab, IonFabButton,
+    IonInput, IonRadio, IonRadioGroup,
+    IonRange
 } from '@ionic/vue'
 import { 
   starOutline, star, chevronBackOutline,
@@ -197,6 +343,8 @@ export default defineComponent({
     IonItem, IonFab, IonFabButton, 
     IonLabel, IonList, IonBadge,
     IonRefresher, IonRefresherContent,
+    IonInput, IonRadio, IonRadioGroup,
+    IonRange,
     DotLoader
   },
   computed: mapState([
@@ -233,7 +381,16 @@ export default defineComponent({
         transition: true,
         fullscreen: false,
         keyboard: false,
-      }
+      },
+      ninthDigitVinError: false,
+      color: null,
+      vinInput: null,
+      showVinMatchingResult: false,
+      vehicleNameVinResult: null,
+      vinMatchingResult: false,
+      isVinMatchingLoading: false,
+      productsWithCoreRefund: [],
+      hardwareCodes: null
     }
   },
   setup() {
@@ -250,12 +407,110 @@ export default defineComponent({
       openOutline
     }
   },
+  watch: {
+    vinInput: function (newVal) {
+      if (newVal.length == 17) {
+        this.getVinDetails(newVal);
+      } else {
+        this.showVinMatchingResult = false,
+        this.vehicleNameVinResult = null,
+        this.vinMatchingResult = false,
+        this.isVinMatchingLoading = false
+      }
+    },
+    productOrigin: function (newVal) {
+      if (newVal.toLowerCase() == 'ecm') {
+        this.color = '#348CA6';
+      } else {
+        this.color = '#568E3E';
+      }
+    }
+  },
   methods: {
     changePaginationBulletColors: function () {
       if (this.selectedProduct.badge.includes('ecm')) {
         $('.swiper-pagination .swiper-pagination-bullet').css('background', '#3A7CA5');
       }
     },
+    getVinDetails: function (vin) {
+      this.isVinMatchingLoading = true;
+      this.showVinMatchingResult = false;
+      axios.get('https://vpic.nhtsa.dot.gov/api/vehicles/decodevin/'+vin+'?format=json', { crossdomain: true })
+      .then(function (response) {
+        if (response.data) {
+          var trim = ``;
+          var possibleSlugvalues = [];
+          var year = response.data.Results.filter(function (vin) { return vin.Variable == 'Model Year'})[0].Value;
+          var make = response.data.Results.filter(function (vin) { return vin.Variable == 'Make'})[0].Value.toLowerCase();
+          var model = response.data.Results.filter(function (vin) { return vin.Variable == 'Model'})[0].Value.replace(' and ',' ').toLowerCase();
+          var engine = response.data.Results.filter(function (vin) { return vin.Variable == 'Displacement (L)'})[0].Value;
+          if (engine == '5.9' && make.toLowerCase() == 'dodge') {
+            model = model + ' 2500';
+          }
+          if (!engine.includes('.')) {
+            engine = engine+'.0L';
+          } else {
+            engine = engine+'L';
+          }
+          if (response.data.Results.filter(function (vin) { return vin.Variable == 'Trim'})[0].Value) {
+            trim = response.data.Results.filter(function (vin) { return vin.Variable == 'Trim'})[0].Value.toLowerCase();
+            if (model.toLowerCase() == 'ram') {
+                switch (trim.toLowerCase()) {
+                    case 'cargo van':
+                        trim = 'c-v';
+                        break;
+                    case 'dt':
+                        trim = '';
+                        break;
+                    default:
+                        trim = trim.replace(/\D/g, '');
+                        break;
+                }
+            }
+            possibleSlugvalues.push(model+'-'+trim+'-'+make+'-'+year);
+          }
+          possibleSlugvalues.push(model+'-'+make+'-'+year);
+          if (model.split(' ').length > 1) {
+            model.split(' ').forEach( function (m){
+                possibleSlugvalues.push(m+'-'+make+'-'+year);
+                if (trim) {
+                    possibleSlugvalues.push(m+'-'+trim+'-'+make+'-'+year);
+                }
+            })
+          }
+          if (model.split('/').length > 1) {
+              possibleSlugvalues.push(model.split('/')[0].replace(/\s/g,'-')+'-'+make+'-'+year);
+              possibleSlugvalues.push(model.split('/')[1].replace(/\s/g,'-')+'-'+make+'-'+year);
+          }
+          var matchCount = 0;
+          possibleSlugvalues.forEach( function (slug, idx, array){
+            slug = slug.replace(/\s/g,'-');
+            this.vehicleNameVinResult = (year+` `+response.data.Results.filter(function (vin) { return vin.Variable == 'Make'})[0].Value+` `+response.data.Results.filter(function (vin) { return vin.Variable == 'Model'})[0].Value+` `+trim+` `+engine).toUpperCase();
+            if (this.selectedProduct.source == 'ECM') {
+              if (this.selectedProduct.categories.filter((cat) => cat.slug == slug).length && this.selectedProduct.name.includes(engine)) {
+                matchCount++;
+                this.vinMatchingResult = true;
+              } 
+            } else {
+              if (this.selectedProduct.categories.filter((cat) => cat.slug == slug).length) {
+                matchCount++;
+                this.vinMatchingResult = true;
+              }
+            }
+            if (idx === array.length - 1 && matchCount == 0) { 
+              this.vinMatchingResult = false;
+            }
+            if (idx === array.length - 1) {
+              this.showVinMatchingResult = true;
+            }
+            this.isVinMatchingLoading = false;
+          }.bind(this));
+        }
+      }.bind(this));
+    },
+    // showRequiredFieldsModal: function (product) {
+    //   this.emitter.emit('isShowRequiredFieldsModal', product);
+    // },
     getProductRatings: function () {
       axios.get(SettingsConstants.SA_PRODUCT_RATINGS +'/'+this.shopperapprovedStoreID +'/'+this.productID+this.shopperapprovedToken, { crossdomain: true })
           .then(function (response) {
@@ -367,6 +622,17 @@ export default defineComponent({
       if (this.shopperApprovedData) {
         this.$router.push('/reviews');
       }
+    },
+    getAllProductsWithCoreRefundProgram: function () {
+      axios.get(SettingsConstants.BASE_URL_API_MOBILE+'settings.rest.php?type=get_products_with_core_refund_option', { crossdomain: true })
+      .then(function (response) {
+        this.productsWithCoreRefund = response.data[0].products_with_core_refund.split(',');
+      }.bind(this));
+    },
+    getHardwareCodes: function () {
+      var hardwareCode = this.selectedProduct.attributes.filter((hc) => hc.name == 'Hardware Code');
+      this.hardwareCodes = hardwareCode[0].options.join();
+      //console.log(hardwareCode);
     }
   },
   mounted () {
@@ -377,6 +643,14 @@ export default defineComponent({
         this.getProductDetails(this.selectedProduct.productId, this.selectedProduct.site);
       }
     }
+    if (this.selectedProduct && this.selectedProduct.source == 'ECM') {
+      this.getHardwareCodes();
+      this.color = '#3A7CA5';
+    } else {
+      this.getAllProductsWithCoreRefundProgram();
+      this.color = '#487436';
+    }
+       
   },
   created () {
     this.lastPath = this.$router.options.history.state.back;
@@ -397,7 +671,7 @@ export default defineComponent({
 
 ion-accordion.bg-default, .bg-default, ion-item {
   background-color: #f6f6f6;
-  font-size: 1.8vh;
+  font-size: 15px;
 }
 
 #product-details ion-chip.tipm-badge, #product-details ion-chip.ecm-badge {
@@ -415,6 +689,7 @@ ion-accordion.bg-default, .bg-default, ion-item {
 ion-content {
   --ion-background-color:#fff;
 }
+
 .star-icon {
   height: 20px;
 }
@@ -431,5 +706,21 @@ ion-content {
 .original-price {
   font-size: 12px;
   text-decoration: line-through;
+}
+
+.header-class {
+  font-size: 18px; color: #3A7CA5;
+}
+
+.header-class-tipm {
+  font-size: 18px; color: #487436
+}
+
+.color-primary {
+  color: #487436;
+}
+
+.color-tertiary {
+  color: #3A7CA5;
 }
 </style>

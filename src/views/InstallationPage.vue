@@ -49,8 +49,8 @@
                 <span :class="'pe-2 ps-2 pt-1 pb-1 text-white rounded-pill text-uppercase ' + inst.badgecolor" style="font-size: smaller">{{inst.badgetType}}</span> 
               </ion-card-subtitle>
               <span>
-                <ion-card-title class="prod-title fw-normal mt-2 " style="font-size:2vh">{{inst.title}}</ion-card-title>
-                <ion-card-subtitle class="prod-sub-title mt-2" style="font-size: 1.5vh" v-if="inst.description">{{inst.description}}</ion-card-subtitle>
+                <ion-card-title class="prod-title fw-normal mt-2 " style="font-size:15px">{{inst.title}}</ion-card-title>
+                <ion-card-subtitle class="prod-sub-title mt-2" style="font-size: 13px" v-if="inst.description">{{inst.description}}</ion-card-subtitle>
               </span>
             </ion-card-header>
             <ion-ripple-effect></ion-ripple-effect>

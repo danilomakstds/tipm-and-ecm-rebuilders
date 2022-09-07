@@ -11,10 +11,10 @@
             <div v-for="(product, index) in productList" :key="product.tags[0].name+product.id">
                 <ion-card class="position-relative ion-activatable ripple-parent" v-if="!(index%2)">
                     <img :src="product.images[0].src" :class="product.stock_status == 'outofstock'?'opacity bg-white':'bg-white'" @click="setSelectedProduct(product)"/>
-                    <span class="text-center position-absolute out-of-stock-banner" v-if="product.stock_status == 'outofstock'">
+                    <span class="text-center position-absolute out-of-stock-banner" v-if="product.stock_status == 'outofstock'" @click="setSelectedProduct(product)">
                       <img src="../../resources/OutOfStock.png" />
                     </span>
-                    <span v-if="product.on_sale">
+                    <span v-if="product.on_sale" @click="setSelectedProduct(product)">
                       <img src="../../resources/sale.png" class="position-absolute sale-banner"/>
                     </span>
                     <ion-card-header class="overflow-hidden">
@@ -48,10 +48,10 @@
             <div v-for="(product, index) in productList" :key="product.tags[0].name+product.id">
                 <ion-card class="position-relative ion-activatable ripple-parent" v-if="(index%2)">
                     <img :src="product.images[0].src" :class="product.stock_status == 'outofstock'?'opacity bg-white':'bg-white'" @click="setSelectedProduct(product)"/>
-                    <span class="text-center position-absolute out-of-stock-banner" v-if="product.stock_status == 'outofstock'">
+                    <span class="text-center position-absolute out-of-stock-banner" v-if="product.stock_status == 'outofstock'" @click="setSelectedProduct(product)">
                       <img src="../../resources/OutOfStock.png" />
                     </span>
-                    <span v-if="product.on_sale">
+                    <span v-if="product.on_sale" @click="setSelectedProduct(product)">
                       <img src="../../resources/sale.png" class="position-absolute sale-banner"/>
                     </span>
                     <ion-card-header class="overflow-hidden">

@@ -1,6 +1,7 @@
 
 
 const BASE_URL_API = 'https://database.tipmrebuilders.com/tipmecm-rest/';
+const BASE_URL_API_MOBILE = 'https://tipmecmmobileapp.kinsta.cloud/rest/';
 const SOFTWARE_NAME = 'TIPM and ECM Rebuilders';
 const ECMSITE = 'liveecm';
 const TIPMSITE = 'livetipm';
@@ -37,6 +38,7 @@ const BASIC_AUTH = 'Basic ZGFuaWxvQG1ha3NkdHMuY29tOmNob2NvUm9hc3QyMw==';
 
 export default {
     BASE_URL: BASE_URL_API,
+    BASE_URL_API_MOBILE: BASE_URL_API_MOBILE,
     SOFTWARE_NAME: SOFTWARE_NAME,
     ECMSITE: ECMSITE,
     TIPMSITE: TIPMSITE,
