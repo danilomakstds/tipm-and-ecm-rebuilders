@@ -26,7 +26,10 @@ export default createStore({
     cartTIPMCount: 0,
     cartECMCount: 0,
     cartItemList: [],
-    isInstallationSlideOpen: true
+    isInstallationSlideOpen: true,
+    productsWithCoreRefund: [],
+    productsWith4x4: [],
+    productsWithOutLidOptions: [],
   },
   mutations: {
     SET_SESSION_DATA: function (state, sessionData) {
@@ -131,7 +134,25 @@ export default createStore({
     },
     SET_INSTALLATION_SLIDE_STATUS: function (state, isInstallationSlideOpen) {
       state.isInstallationSlideOpen = isInstallationSlideOpen;
-    }
+    },
+    SET_PRODUCTS_W_CORE_REFUND: function (state, productsWithCoreRefund) {
+      state.productsWithCoreRefund = productsWithCoreRefund;
+    },
+    RESET_PRODUCTS_W_CORE_REFUND: function (state) {
+      state.productsWithCoreRefund = [];
+    },
+    SET_PRODUCTS_W_4x4: function (state, productsWith4x4) {
+      state.productsWith4x4 = productsWith4x4;
+    },
+    RESET_PRODUCTS_W_4x4: function (state) {
+      state.productsWith4x4 = [];
+    },
+    SET_PRODUCTS_WOUT_LID_OPTIONS: function (state, productsWithOutLidOptions) {
+      state.productsWithOutLidOptions = productsWithOutLidOptions;
+    },
+    RESET_PRODUCTS_WOUT_LID_OPTIONS: function (state) {
+      state.productsWithOutLidOptions = [];
+    },
   },
   getters: {
 

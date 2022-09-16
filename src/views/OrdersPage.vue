@@ -3,11 +3,7 @@
     <ion-header mode="md">
       <ion-toolbar color="white">
         <ion-buttons slot="start">
-          <router-link to="/">
-            <ion-button color="primary">
-                <ion-icon slot="icon-only" :ios="arrowBackOutline" :md="arrowBackOutline" color="dark"></ion-icon>
-            </ion-button>
-          </router-link>
+          <ion-back-button :icon="arrowBackOutline" color="primary" :default-href="lastPath" text=""></ion-back-button>
         </ion-buttons>
         <ion-title>Track Orders</ion-title>
       </ion-toolbar>
@@ -218,7 +214,7 @@ import { IonPage, IonHeader, IonToolbar, actionSheetController,
   IonIcon, IonModal, IonInput, IonFab, IonFabButton,
   IonItem, IonCardContent, IonLabel, IonChip,
   IonRefresher, IonRefresherContent,
-  IonSegment, IonSegmentButton,
+  IonSegment, IonSegmentButton, IonBackButton,
   //IonItemDivider,
   IonItemGroup
 } from '@ionic/vue';
@@ -248,7 +244,7 @@ export default defineComponent({
     IonIcon, IonModal, IonInput, IonFab, IonFabButton,
     IonItem, IonCardContent, IonLabel, IonChip,
     IonRefresher, IonRefresherContent,
-    IonSegment, IonSegmentButton, 
+    IonSegment, IonSegmentButton, IonBackButton,
     //IonItemDivider,
     IonItemGroup
   },

@@ -28,7 +28,6 @@ import './theme/variables.css';
 
 import 'viewerjs/dist/viewer.css'
 import VueViewer from 'v-viewer'
-import LoadScript from "vue-plugin-load-script"
 
 // Above the createApp() line
 import { defineCustomElements } from '@ionic/pwa-elements/loader';
@@ -41,8 +40,7 @@ const app = createApp(App)
   .use(IonicVue)
   .use(router)
   .use(store)
-  .use(VueViewer)
-  .use(LoadScript);
+  .use(VueViewer);
   // .use(VueGoogleMaps, {
   //   load: {
   //         key: 'AIzaSyDX_bIjjI3y6-CzvDu-p1XAJMeuXyXLxfY',

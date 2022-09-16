@@ -34,7 +34,9 @@ const APP_DESCRIPTION = `<img src="https://tipmrebuilders.com/wp-content/uploads
 
 const VIN_DECODE_URL = 'https://vpic.nhtsa.dot.gov/api/vehicles/decodevin/';
 const VALID_MAKE = ['chrysler','dodge', 'ram', 'jeep', 'volkswagen', 'fiat', 'plymouth'];
-const BASIC_AUTH = 'Basic ZGFuaWxvQG1ha3NkdHMuY29tOmNob2NvUm9hc3QyMw==';
+//const BASIC_AUTH = 'Basic ZGFuaWxvQG1ha3NkdHMuY29tOmNob2NvUm9hc3QyMw==';
+const ADDED_PRICE_OF_LID = 15;
+const ADDED_PRICE_OF_DEFAULT_COREFEE = 40;
 
 export default {
     BASE_URL: BASE_URL_API,
@@ -61,5 +63,7 @@ export default {
     APP_DESCRIPTION: APP_DESCRIPTION,
     VIN_DECODE_URL: VIN_DECODE_URL,
     VALID_MAKE: VALID_MAKE,
-    BASIC_AUTH: BASIC_AUTH
+    //BASIC_AUTH: BASIC_AUTH,
+    ADDED_PRICE_OF_LID: ADDED_PRICE_OF_LID,
+    ADDED_PRICE_OF_DEFAULT_COREFEE: ADDED_PRICE_OF_DEFAULT_COREFEE
 }

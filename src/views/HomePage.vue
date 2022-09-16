@@ -9,15 +9,17 @@
         </ion-buttons>
         
         <ion-buttons slot="primary">
-          <ion-button href="/cart" class="position-relative" style="--overflow: visible">
-            <a href="/cart" v-if="cartItemCount">
-              <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger" style="z-index: 1">
-              {{cartItemCount}}
-              </span>
-            </a>
-            <ion-icon slot="icon-only" :icon="cartOutline" color="dark"></ion-icon>
-            <ion-ripple-effect></ion-ripple-effect>
-          </ion-button>
+          <router-link to="/cart">
+            <ion-button class="position-relative" style="--overflow: visible">
+              <router-link to="/cart" v-if="cartItemCount">
+                <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger" style="z-index: 1">
+                {{cartItemCount}}
+                </span>
+              </router-link>
+              <ion-icon slot="icon-only" :icon="cartOutline" color="dark"></ion-icon>
+              <ion-ripple-effect></ion-ripple-effect>
+            </ion-button>
+          </router-link>
         </ion-buttons>
         <ion-buttons slot="primary" @click="toggleScannerModal()">
           <ion-button>
@@ -277,7 +279,7 @@ export default  defineComponent({
             }.bind(this));
         }.bind(this));
       }.bind(this), 500);
-    }
+    },
   },
   mounted() {
     this.emitter.on('isShowScannerModal', function () {

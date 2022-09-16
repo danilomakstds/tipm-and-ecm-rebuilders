@@ -1,6 +1,6 @@
 <template>
   <div id="slider">
-    <ion-slides pager="true" >
+    <ion-slides pager="true" :options="slideOpts" >
         <!-- <ion-slide>
           <ion-card class="w-100 bg-dark" style="height:255px">
             <youtube-vue3 width="100%" height="100%" videoid="YPU4yfTp3nI?theme=light" style="background:none"  autoplay="1" loop="0" listType="search" theme="dark" 
@@ -93,8 +93,15 @@ export default defineComponent({
     //YoutubeVue3
   },
   setup() {
+    const slideOpts = {
+      initialSlide: 0,
+      speed: 500,
+      autoplay: {
+        delay: 5000
+      },
+    };
     return {
-      starOutline
+      starOutline, slideOpts
     }
   },
   //mounted() {

@@ -3,11 +3,10 @@
     <ion-header>
       <ion-toolbar color="white">
         <ion-buttons slot="start">
-          <router-link to="/">
-            <ion-button color="primary">
-                <ion-icon slot="icon-only" :ios="arrowBackOutline" :md="arrowBackOutline" color="dark"></ion-icon>
-            </ion-button>
-          </router-link>
+          <!-- <ion-button color="primary">
+              <ion-icon slot="icon-only" :ios="arrowBackOutline" :md="arrowBackOutline" color="dark"></ion-icon>
+          </ion-button> -->
+          <ion-back-button :icon="arrowBackOutline" color="primary" :default-href="lastPath" text=""></ion-back-button>
         </ion-buttons>
         <ion-title>Search Results</ion-title>
       </ion-toolbar>
@@ -80,7 +79,7 @@
                     :color="(product.badge == 'ecm-badge') ? 'tertiary': ''"
                     class="float-end add-dimentions"
                     :disabled="product.stock_status == 'outofstock'"
-                    @click="addToCart(product.id, product.source)"
+                    @click="showRequiredFieldsModal(product)"
                     >
                         <ion-icon :icon="add"></ion-icon>
                     </ion-button>
@@ -185,7 +184,7 @@ IonLabel, IonButtons, IonButton,
 IonBreadcrumbs, IonBreadcrumb,
 IonRefresher, IonRefresherContent,
 actionSheetController, IonRippleEffect,
-modalController, IonModal
+modalController, IonModal, IonBackButton
 } from '@ionic/vue';
 
 import { 
@@ -211,7 +210,7 @@ export default defineComponent({
     IonIcon, IonLabel, IonButtons, IonButton,
     IonBreadcrumbs, IonBreadcrumb,
     IonRefresher, IonRefresherContent,
-    IonRippleEffect, IonModal
+    IonRippleEffect, IonModal, IonBackButton
   },
   computed: mapState([
     'sessionData',
@@ -468,6 +467,11 @@ export default defineComponent({
             name = prod.name.substr(prod.name.indexOf(' ')+1).replace(/–/g,'-');
             prod.name_title = name.split('- Part')[0];
             prod.name_subtitle = '- Part' + name.split('- Part')[1];
+            if (prod.name.includes('NEW') || prod.name.includes('LIKE_NEW')) {
+              prod.isNew = true;
+            } else {
+              prod.isNew = false;
+            }
           }
           if (prod.tags.find(tag => tag.name == 'ECM')) {
             prod.badge = 'ecm-badge';
@@ -687,7 +691,10 @@ export default defineComponent({
       if (this.searchVinNumber) {
         this.decodeVin();
       }
-    }
+    },
+    showRequiredFieldsModal: function (product) {
+      this.emitter.emit('isShowRequiredFieldsModal', product);
+    },
   },
   mounted() {
     this.initLogic();

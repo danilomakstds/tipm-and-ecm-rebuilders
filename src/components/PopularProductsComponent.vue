@@ -34,7 +34,7 @@
                         :color="(product.badge == 'ecm-badge') ? 'tertiary': ''"
                         class="float-end add-dimentions"
                         :disabled="product.stock_status == 'outofstock'"
-                        @click="addToCart(product.id, product.source)"
+                        @click="showRequiredFieldsModal(product)"
                         >
                             <ion-icon :icon="add"></ion-icon>
                         </ion-button>
@@ -56,7 +56,7 @@
                     </span>
                     <ion-card-header class="overflow-hidden">
                       <ion-card-subtitle @click="setSelectedProduct(product)">
-                          <span :class="'badge rounded-pill mb-2 text-white '+ product.badge">{{product.name.split(' ')[0]}}</span>
+                          <span :class="'badge rounded-pill mb-2 text-white '+ product.badge">{{product.name.split(' ')[0].replace('_',' ')}}</span>
                       </ion-card-subtitle>
                       <span @click="setSelectedProduct(product)">
                           <ion-card-title class="prod-title fw-normal">{{cleanString(product.name_title)}}</ion-card-title>
@@ -71,7 +71,7 @@
                         :color="(product.badge == 'ecm-badge') ? 'tertiary': ''"
                         class="float-end add-dimentions"
                         :disabled="product.stock_status == 'outofstock'"
-                        @click="addToCart(product.id, product.source)">
+                        @click="showRequiredFieldsModal(product)">
                             <ion-icon :icon="add"></ion-icon>
                         </ion-button>
                       </div>
@@ -91,7 +91,7 @@ import {
   IonCard, IonButton, IonCardHeader,
   IonCardTitle, IonCardSubtitle, IonRippleEffect
 } from '@ionic/vue';
-import { 
+import {
   add
 } from 'ionicons/icons';
 import axios from 'axios'
@@ -169,6 +169,7 @@ export default defineComponent({
                 if (this.productList.length == this.maxItems) {
                     this.isLoading = false;
                     this.sortProducts(this.productList).forEach(function (prod) {
+                        prod.name = prod.name.replace('LIKE NEW', 'LIKE_NEW');
                         prod.badge = prod.name.split(' ')[0];
                         prod.name_title = '';
                         prod.name_subtitle = '';
@@ -179,6 +180,11 @@ export default defineComponent({
                             name = prod.name.substr(prod.name.indexOf(' ')+1).replace(/–/g,'-');
                             prod.name_title = name.split('- Part')[0];
                             prod.name_subtitle = '- Part' + name.split('- Part')[1];
+                            if (prod.name.includes('NEW') || prod.name.includes('LIKE NEW')) {
+                              prod.isNew = true;
+                            } else {
+                              prod.isNew = false;
+                            }
                         } else {
                             prod.source = 'ECM';
                             prod.badge = 'ecm-badge';
@@ -202,7 +208,11 @@ export default defineComponent({
         //window.location.href = '/product-details';
         this.$router.push('/product-details');
       }
-    }
+    },
+    showRequiredFieldsModal: function (product) {
+      this.emitter.emit('isShowRequiredFieldsModal', product);
+    },
+
     // getCartId: function () {
     //   axios.get( 'https://dev.ecmrebuilders.com/wp-json/cocart/v2/cart', { crossdomain: true })
     //       .then(function (response) {

@@ -3,11 +3,7 @@
     <ion-header mode="md">
       <ion-toolbar color="white">
         <ion-buttons slot="start">
-          <router-link to="/">
-            <ion-button color="primary">
-                <ion-icon slot="icon-only" :ios="arrowBackOutline" :md="arrowBackOutline" color="dark"></ion-icon>
-            </ion-button>
-          </router-link>
+          <ion-back-button :icon="arrowBackOutline" color="primary" default-href="/" text=""></ion-back-button>
         </ion-buttons>
         <ion-title>My Cart</ion-title>
       </ion-toolbar>
@@ -52,8 +48,8 @@
                         </div>
                         <div class="col-8 p-3">
                           <ion-card-content class="ion-no-padding">
-                            <span :class="'text-white '+cart.source.toLowerCase()+'-badge badge mb-1 rounded-pill'">{{cart.name.split(' ')[0]}}</span><br/>
-                            {{cleanString(cart.name_title)}} {{cart.name_subtitle}}
+                            <span :class="'text-white '+cart.source.toLowerCase()+'-badge badge mb-1 rounded-pill'">{{cart.name.split(' ')[0].replace('_',' ')}}</span><br/>
+                            {{cleanString(cart.name_title.replace('_',' '))}} {{cart.name_subtitle}}
                           </ion-card-content>
                           <hr class="mt-1 mb-1 bg-light"/>
                           <ion-card-header class="ion-no-padding mt-2">
@@ -130,7 +126,8 @@ import {
     IonIcon, IonButtons, IonList,
     IonItem, IonItemSliding, IonItemOptions,
     IonItemOption, IonRefresher, IonRefresherContent,
-    alertController, IonSegment, IonSegmentButton, IonLabel
+    alertController, IonSegment, IonSegmentButton, IonLabel,
+    IonBackButton
 } from '@ionic/vue';
 import { 
   arrowBackOutline, cartOutline, bagCheckOutline,
@@ -159,7 +156,8 @@ export default defineComponent({
     IonIcon, IonButtons, IonList,
     IonItem, IonItemSliding, IonItemOptions,
     IonItemOption, IonRefresher, IonRefresherContent,
-    IonSegment, IonSegmentButton, IonLabel
+    IonSegment, IonSegmentButton, IonLabel,
+    IonBackButton
  },
   setup() {
     const doRefresh = function (event) {
@@ -353,6 +351,7 @@ export default defineComponent({
       var list = [];
       list = this.cartItemList.filter(item => item.item_key != item_key);
       store.commit('SET_CART_ITEM_LIST', list);
+
       //store.commit('SET_CART_ITEM_COUNTER', list.length);
     },
     processCartData: function (response, source) {
@@ -370,20 +369,21 @@ export default defineComponent({
 
       response.data.items.forEach( function (prod) {
         prod.name = prod.name.replace('LIKE NEW', 'LIKE_NEW');
+        prod.name = prod.name.replace('TIPM Repair', 'TIPM_Repair');
         prod.name_title = '';
         prod.name_subtitle = '';
         name = null;
         var name = null;
+        prod.source = source;
+
 
         if (prod.name.includes('OEM TIPM')) {
-          prod.source = 'TIPM';
           prod.badge = 'tipm-badge';
           name = prod.name.substr(prod.name.indexOf(' ')+1).replace(/–/g,'-');
           prod.name_title = name.split('- Part')[0];
           prod.name_subtitle = '- Part' + name.split('- Part')[1];
         }
         else if (prod.name.includes('OEM ECM PCM ECU')) {
-          prod.source = 'ECM';
           prod.badge = 'ecm-badge';
           name = prod.name.substr(prod.name.indexOf(' ')+1).replace(/–/g,'-');
           prod.name_title = name.split('with')[0];

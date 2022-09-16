@@ -127,9 +127,10 @@
           </ion-button>
       </div>
 
-      <ion-fab horizontal="start" vertical="top" slot="fixed" mode="ios">
-        <ion-fab-button color="light" href="/tabs/orders">
-          <ion-icon :icon="chevronBackOutline"></ion-icon>
+      <ion-fab horizontal="start" vertical="top" slot="fixed" mode="ios" >
+        <ion-fab-button color="light" :href="lastPath">
+          <ion-icon :icon="arrowBackOutline" :color="productType == 'tipm' ? 'primary':'tertiary'" ></ion-icon>
+          <!-- <ion-back-button :icon="arrowBackOutline" color="primary" text="" :default-href="lastPath"></ion-back-button> -->
         </ion-fab-button>
       </ion-fab>
 
@@ -165,7 +166,8 @@ import { IonPage,
 IonButton, IonChip, IonLabel,
 IonIcon, IonItem,
 IonContent, IonRefresher, IonRefresherContent,
-IonFab, IonFabButton
+IonFab, IonFabButton,
+//IonBackButton
 } from '@ionic/vue';
 import { 
   arrowBackOutline, locateOutline,
@@ -193,7 +195,8 @@ export default defineComponent({
     IonIcon, IonItem,
     IonPage, IonContent, DotLoader,
     IonRefresher, IonRefresherContent,
-    IonFab, IonFabButton
+    IonFab, IonFabButton,
+    //IonBackButton
   },
   computed: mapState([
       'trackedOrderNumber',

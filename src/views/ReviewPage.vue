@@ -3,9 +3,7 @@
     <ion-header>
       <ion-toolbar color="white">
         <ion-buttons slot="start">
-          <ion-button color="primary" href="/product-details">
-              <ion-icon slot="icon-only" :ios="arrowBackOutline" :md="arrowBackOutline" color="dark"></ion-icon>
-          </ion-button>
+          <ion-back-button :icon="arrowBackOutline" color="primary" :default-href="lastPath" text=""></ion-back-button>
         </ion-buttons>
         <ion-title>Reviews</ion-title>
       </ion-toolbar>
@@ -130,11 +128,14 @@
 import { defineComponent, ref } from 'vue';
 import {
     IonPage, IonHeader, IonToolbar,
-    IonTitle, IonContent, IonButton,
-    IonIcon, IonButtons, IonRefresher,
+    IonTitle, IonContent,
+    // IonButton,
+    //IonIcon,
+    IonButtons, IonRefresher,
     IonRefresherContent,
     IonInfiniteScroll, 
-    IonInfiniteScrollContent
+    IonInfiniteScrollContent,
+    IonBackButton
     //IonLabel
 } from '@ionic/vue';
 import { 
@@ -155,11 +156,14 @@ export default defineComponent({
   components: {
     DotLoader,
     IonPage, IonHeader, IonToolbar,
-    IonTitle, IonContent, IonButton,
-    IonIcon, IonButtons, IonRefresher,
+    IonTitle, IonContent,
+    // IonButton,
+    //IonIcon,
+    IonButtons, IonRefresher,
     IonRefresherContent,
     IonInfiniteScroll, 
-    IonInfiniteScrollContent
+    IonInfiniteScrollContent,
+    IonBackButton
     //IonLabel, 
   },
   computed: mapState([
@@ -182,7 +186,8 @@ export default defineComponent({
     return {
       isDisabled, toggleInfiniteScroll,
       doRefresh,
-      arrowBackOutline, cartOutline, bagCheckOutline,
+      arrowBackOutline,
+      cartOutline, bagCheckOutline,
       trashOutline, star,
     }
   },
@@ -300,7 +305,9 @@ export default defineComponent({
       this.averageRating = parseFloat(this.shopperApprovedData.details.average_rating).toFixed(1);
     }
     store.commit('SET_SA_DATA', this.shopperApprovedData);
-    
+  },
+  created () {
+    this.lastPath = this.$router.options.history.state.back
   },
 });
 </script>

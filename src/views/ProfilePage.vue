@@ -66,9 +66,10 @@
         </ion-list>
       </div>
 
-      <ion-fab horizontal="start" vertical="top" slot="fixed" mode="ios">
-        <ion-fab-button color="light" href="/">
-          <ion-icon :icon="chevronBackOutline"></ion-icon>
+      <ion-fab horizontal="start" vertical="top" slot="fixed" mode="ios" >
+        <ion-fab-button color="light" :href="lastPath">
+          <ion-icon :icon="arrowBackOutline"></ion-icon>
+          <!-- <ion-back-button :icon="arrowBackOutline" color="primary" text="" :default-href="lastPath"></ion-back-button> -->
         </ion-fab-button>
       </ion-fab>
 
@@ -82,7 +83,8 @@ import {
     IonPage, IonContent,
     IonIcon, IonFab, IonFabButton,
     IonRefresher, IonRefresherContent,
-    IonList, IonItem, IonLabel
+    IonList, IonItem, IonLabel,
+    //IonBackButton
 } from '@ionic/vue';
 import { 
   arrowBackOutline, cartOutline, bagCheckOutline,
@@ -105,7 +107,8 @@ export default defineComponent({
     IonPage, IonContent,
     IonIcon, IonFab, IonFabButton,
     IonRefresher, IonRefresherContent,
-    IonList, IonItem, IonLabel
+    IonList, IonItem, IonLabel,
+    //IonBackButton
   },
   computed: mapState([
       'sessionData',

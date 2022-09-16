@@ -63,8 +63,6 @@
         </ion-content>
     </ion-modal>
 
-    <full-screen-loader v-if="showFullScreenLoader"></full-screen-loader>
-
     <ion-tabs mode="md">
       <ion-router-outlet id="main"></ion-router-outlet>
       <ion-tab-bar slot="bottom" style="--border:#fff">
@@ -116,7 +114,7 @@
                 <ion-icon :icon="buildOutline" slot="start" />
                 <ion-label>Installation</ion-label>
             </ion-item>
-            <ion-item href="https://www.youtube.com/c/TIPMRebuilders">
+            <ion-item href="https://www.youtube.com/c/TIPMRebuilders" target="_blank">
                 <ion-icon :icon="logoYoutube" slot="start" />
                 <ion-label>TIPM Rebuilders on YT</ion-label>
             </ion-item>
@@ -170,7 +168,6 @@ import SettingsConstants from '../constants/settings.constants'
 import store from '../store'
 import $ from 'jquery'
 import Swal from 'sweetalert2'
-import FullScreenLoader from '../components/FullScreenLoader'
 import { mapState } from 'vuex'
 
 
@@ -183,9 +180,7 @@ export default defineComponent({
     IonModal, IonSelect, IonSelectOption,
     IonInput, IonMenu, IonHeader, IonToolbar,
     IonTitle, IonContent, IonList, IonItem,
-    IonLabel, IonBadge,
-
-    FullScreenLoader
+    IonLabel, IonBadge
   },
   computed: mapState([
     'cartKeyECM',
@@ -318,8 +313,7 @@ export default defineComponent({
       model_tip: [],
       model: [],
 
-      isSearchDisabled: true,
-      showFullScreenLoader: false,
+      isSearchDisabled: true
     }
   },
   methods: {
@@ -552,9 +546,6 @@ export default defineComponent({
     this.getYear(SettingsConstants.ECMSITE);
     this.emitter.on('isShowSearchModal', function () {
       this.toggleSearchModal();
-    }.bind(this));
-    this.emitter.on('showFullScreenLoader', function (show) {
-      this.showFullScreenLoader = show;
     }.bind(this));
     this.emitter.on('openMenu', function () {
       this.openMenu();
