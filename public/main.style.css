@@ -144,6 +144,10 @@ ion-toolbar, ion-tabs, ion-tab-bar, ion-tab-button, .toolbar-background {
     background-color: #fff
 }
 
+.warning-message {
+    background-color: #eb445a; font-size: 13px;
+}
+
 .text-muted2 {
     color: #bbb !important;
 }

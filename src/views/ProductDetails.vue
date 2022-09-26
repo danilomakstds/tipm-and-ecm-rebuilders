@@ -1,5 +1,13 @@
 <template>
   <ion-page>
+    <ion-header v-if="!onlineStatus">
+      <ion-toolbar>
+        <div class="p-3 text-white warning-message">
+          <img src="../../resources/wifi-no-signal.png" style="height: 30px" class="float-start me-3"/>
+          <span>You are currently offline. Please check your internet connection!</span>
+        </div>
+      </ion-toolbar>
+    </ion-header>
     <ion-content :fullscreen="true" :scroll-events="true" :scroll-y="true">
       
       <ion-refresher slot="fixed" @ionRefresh="doRefresh($event)">
@@ -289,27 +297,61 @@
               </div>
 
             </ion-accordion>
-            <p class="ion-text-wrap text-center mb-3" @click="seeAllReviews()" style="color: #487436">
+            <p class="ion-text-wrap text-center mb-3" @click="seeAllReviews()" :style="'color: '+this.color">
               All <span v-if="shopperapprovedDetails.total_reviews == 0 || productRatings == '0 reviews'">Site </span>Reviews
-              <ion-icon :icon="openOutline" class="ms-1" color="primary"></ion-icon>
+              <ion-icon :icon="openOutline" class="ms-1" :color="defaultColor"></ion-icon>
             </p>
         </ion-accordion-group>
 
         <div class="bg-default" style="height:130px"></div>
-
-        <ion-fab horizontal="start" vertical="top" slot="fixed" mode="ios">
-          <ion-fab-button color="light" :href="productBackRoute">
-            <ion-icon :icon="arrowBackOutline" :style="'color:'+this.color" ></ion-icon>
-            <!-- <ion-back-button :icon="arrowBackOutline" :color="defaultColor" :default-href="productBackRoute" text=""></ion-back-button> -->
-          </ion-fab-button>
-        </ion-fab>
       </section>
 
       <div v-if="isLoading" class="d-flex justify-content-center align-items-center h-100">
         <dot-loader :loading="isLoading" :color="color" :size="size" class="mt-5"></dot-loader>
       </div>
 
+      <ion-fab horizontal="start" vertical="top" slot="fixed" mode="ios" >
+        <ion-fab-button color="light" :href="productBackRoute">
+          <ion-icon :icon="arrowBackOutline" :style="'color:'+this.color" ></ion-icon>
+        </ion-fab-button>
+      </ion-fab>
+
+
+      <ion-modal
+        ref="waitlistModal"
+        :is-open="isWaitlistModalOpen"
+        :breakpoints="[0.0, 0.7, 0.95]"
+        :initialBreakpoint="0.7"
+        @didDismiss="toggleWaitlistModal()"
+      >
+        <ion-header>
+          <ion-toolbar>
+            <ion-buttons slot="start">
+              <ion-button @click="cancel()" :color="defaultColor">Cancel</ion-button>
+            </ion-buttons>
+            <ion-buttons slot="end">
+              <ion-button :strong="true" @click="confirm()" :disabled="!waitListEmail || !validateEmail(waitListEmail)" :color="defaultColor">Confirm</ion-button>
+            </ion-buttons>
+          </ion-toolbar>
+        </ion-header>
+        <ion-content>
+          <img :src="waitListBanner" style="height: 80px"/>
+          <div class="pt-3">
+            <p class="ms-3 me-3">Join the waitlist to be emailed when this product becomes available</p>
+            <ion-item lines="none">
+              <ion-label position="stacked">Email Address <span class="text-danger">*</span>
+                </ion-label>
+              <ion-input ref="input" type="email" placeholder="Email Address" v-model="waitListEmail" class="mt-3 input-modif bg-light"></ion-input>
+            </ion-item>
+            <div class="alert alert-danger m-3" role="alert" v-if="!validateEmail(waitListEmail) && waitListEmail">
+              Invalid Email Address!
+            </div>
+          </div>
+        </ion-content>
+      </ion-modal>
+
     </ion-content>
+
     <div slot="bottom" class="position-fixed bottom-0 w-100 p-3 bg-white" style="border-radius:30px 30px 0 0;">
       <section class="row w-100">
         <div class="col-6 d-flex align-items-center">
@@ -333,9 +375,10 @@
           <ion-button class="w-100"
           style="height: 6vh"
           color="danger"
-          v-if="isOutofStock">
+          v-if="isOutofStock" @click="waitListButtonClicked()">
             <ion-icon :icon="enterOutline" class="me-2"></ion-icon>
             Join Waitlist
+            <dot-loader :loading="isAddingToWaitlistLoading" :color="color" :size="30" class="ms-4"></dot-loader>
           </ion-button>
         </div>
       </section>
@@ -351,6 +394,8 @@ import { IonSlide, IonSlides, IonButton, IonAccordion,
     IonItem, IonRefresher, IonRefresherContent,
     IonLabel, IonList, IonBadge,
     IonFab, IonFabButton,
+    IonModal, IonHeader, IonToolbar, IonButtons, 
+    IonInput, modalController,
     //alertController
 } from '@ionic/vue'
 import {
@@ -366,6 +411,7 @@ import { loadScript, unloadScript } from "vue-plugin-load-script"
 import Mixin from '../mixins/global.mixin'
 import store from '../store'
 import DotLoader from 'vue-spinner/src/DotLoader.vue'
+import Swal from 'sweetalert2'
 
 export default defineComponent({
   name: 'ProductDetails',
@@ -377,19 +423,25 @@ export default defineComponent({
     IonItem, IonFab, IonFabButton,
     IonLabel, IonList, IonBadge,
     IonRefresher, IonRefresherContent,
+    IonModal, IonHeader, IonToolbar, IonButtons, 
+    IonInput,
     //IonBackButton,
     DotLoader
   },
   computed: mapState([
-      'selectedProduct',
-      'shopperApprovedData',
-      'productBackRoute',
-      'productsWithCoreRefund'
+    'sessionDataTIPM',
+    'sessionDataECM',
+    'selectedProduct',
+    'shopperApprovedData',
+    'productBackRoute',
+    'productsWithCoreRefund',
+    'onlineStatus'
   ]),
   data() {
     return {
       productID: null,
       site: null,
+      sessionData: null,
       productOrigin: null,
       shopperapprovedStoreID: null,
       shopperapprovedToken: null,
@@ -403,6 +455,10 @@ export default defineComponent({
       isOnSale: false,
       lastPath: null,
       isLoading: false,
+      isWaitlistModalOpen: false,
+      waitListEmail: null,
+      waitListBanner: null,
+      isAddingToWaitlistLoading: false,
       options: {
         button: false,
         navbar: true,
@@ -418,7 +474,6 @@ export default defineComponent({
         keyboard: false,
       },
       color: null,
-
       // ninthDigitVinError: false,
       // vinInput: null,
       // showVinMatchingResult: false,
@@ -522,6 +577,11 @@ export default defineComponent({
     // }
   },
   methods: {
+    async dismiss() {
+      modalController.dismiss({
+        'dismissed': true
+      });
+    },
     changePaginationBulletColors: function () {
       if (this.selectedProduct.badge.includes('ecm')) {
         $('.swiper-pagination .swiper-pagination-bullet').css('background', '#3A7CA5');
@@ -660,6 +720,151 @@ export default defineComponent({
     },
     showRequiredFieldsModal: function (product) {
       this.emitter.emit('isShowRequiredFieldsModal', product);
+    },
+    waitListButtonClicked: function () {
+      if (this.sessionData) {
+        this.checkIfUserIsAlreadyInWaitlist(this.sessionData);
+      } else {
+        this.toggleWaitlistModal();
+      }
+    },
+    cancel() {
+      this.$refs.waitlistModal.$el.dismiss(null, 'cancel');
+    },
+    confirm() {
+      const email = this.$refs.input.$el.value;
+      if (email) {
+        this.$refs.waitlistModal.$el.dismiss(email, 'confirm');
+        this.checkifEmailExist(email);
+        //console.log(email);
+      }
+    },
+    checkifEmailExist: function (email) {
+      this.isAddingToWaitlistLoading = true;
+      axios.get(SettingsConstants.BASE_URL + 'customerREST.php?site='+this.site+'&op=get_customer_by_email&email='+email, { crossdomain: true })
+        .then(function (response) {
+          if (response.data.length) {
+            response.data.forEach(function (cust){
+              cust._yoast_wpseo_profile_updated = cust.meta_data.filter((met) => met.key == '_yoast_wpseo_profile_updated')[0].value;
+            });
+            this.checkIfUserIsAlreadyInWaitlist(response.data[0]);
+            // store.commit('SET_SESSION_DATA', response.data[0]);
+            if (this.selectedProduct.source == 'ECM') {
+              store.commit('SET_SESSION_DATA_ECM', response.data[0]);
+            } else {
+              store.commit('SET_SESSION_DATA_TIPM', response.data[0]);
+            }
+            this.sessionData = response.data[0];
+          } else {
+            this.checkIfUserIsAdmin(email);
+          }
+        }.bind(this));
+    },
+    checkIfUserIsAdmin: function (email) {
+      var url = null;
+      var request_url = 'rest/users.php?type=get_user_by_email&email=';
+      if (this.selectedProduct.source == 'ECM') {
+        url = SettingsConstants.ECMURL + request_url + email;
+      } else {
+        url = SettingsConstants.TIPMURL + request_url + email;
+      }
+      axios.get(url, { crossdomain: true })
+        .then(function (response) {
+          if (!response.data) {
+            this.createCustomerAccount(email, null, this.color, false);
+          }
+        }.bind(this));
+    },
+    createCustomerAccount: function (email, password, color, showAlert) {
+        var bodyFormData = new FormData();
+        bodyFormData.append('email', email);
+        if (password) {
+            bodyFormData.append('password', password);
+        } else {
+            bodyFormData.append('password', '');
+        }
+        axios({
+            method: "post",
+            url: SettingsConstants.BASE_URL + "customerREST.php?op=create_customer&site="+SettingsConstants.TIPMSITE,
+            data: bodyFormData,
+            headers: { "Content-Type": "multipart/form-data" },
+        })
+        .then(function (response) {
+        if (response.data) {
+            if (showAlert) {
+                Swal.fire({
+                    title: 'Great!',
+                    text: 'Account created!',
+                    icon:'success',
+                    confirmButtonColor: color,
+                });
+            }
+            response.data._yoast_wpseo_profile_updated = response.data.meta_data.filter((met) => met.key == '_yoast_wpseo_profile_updated')[0].value;
+            // store.commit('SET_SESSION_DATA', response.data);
+            if (this.selectedProduct.source == 'ECM') {
+              store.commit('SET_SESSION_DATA_ECM', response.data);
+            } else {
+              store.commit('SET_SESSION_DATA_TIPM', response.data);
+            }
+            this.sessionData = response.data[0];
+            this.addUserToWaitlistTEST();
+        }
+        }.bind(this));
+    },
+    checkIfUserIsAlreadyInWaitlist: function (user) {
+      this.isAddingToWaitlistLoading = true;
+      var exist = false;
+      this.selectedProduct.meta_data.forEach(function (key){
+        if (key.key == "woocommerce_waitlist"){
+          //exist = key.value.filter((waitlist) => (waitlist[user.id]) == user._yoast_wpseo_profile_updated);
+          exist = key.value[user.id]; 
+        }
+      }.bind(this));
+
+      if (exist) {
+        Swal.fire({
+          title: 'Already on waitlist!',
+          text: 'Your email is already on the waitlist for this product.',
+          icon:'success',
+          confirmButtonColor: this.color,
+        });
+        this.isAddingToWaitlistLoading = false;
+      } else {
+        this.addUserToWaitlistTEST();
+      }
+    },
+    addUserToWaitlistTEST: function () {
+      this.selectedProduct.meta_data.forEach(function (key){
+        if (key.key == "woocommerce_waitlist"){
+            key.value[this.sessionData.id] = parseInt(this.sessionData._yoast_wpseo_profile_updated);
+        }
+      }.bind(this));
+      var bodyFormData = new FormData();
+      bodyFormData.append('new_meta_data', JSON.stringify(this.selectedProduct.meta_data));
+      axios({
+          method: "post",
+          url: SettingsConstants.BASE_URL + 'productREST.php?op=update_product_waitlist&site='+this.site+'&id='+this.productID,
+          data: bodyFormData,
+          headers: { "Content-Type": "multipart/form-data" },
+      })
+          .then(function (response) {
+            if (response.data) {
+              //console.log('Success!');
+              //console.log(JSON.stringify(response.data));
+              Swal.fire({
+                title: 'Great!',
+                text: 'Email has been added to waitlist',
+                icon:'success',
+                confirmButtonColor: this.color,
+              });
+              this.isAddingToWaitlistLoading = false;
+            } else {
+              console.log('FAILED');
+            }
+          }.bind(this));
+    },
+    toggleWaitlistModal: function () {
+      this.isWaitlistModalOpen = !this.isWaitlistModalOpen;
     },
     // getAllProductsWithCoreRefundProgram: function () {
     //   if (this.productsWithCoreRefund.includes(this.productID)) {
@@ -851,10 +1056,12 @@ export default defineComponent({
       this.getHardwareCodes();
       this.color = '#3A7CA5';
       this.site = SettingsConstants.ECMSITE;
+      this.sessionData = this.sessionDataECM;
     } else {
       //this.getAllProductsWithCoreRefundProgram();
       this.color = '#487436';
       this.site = SettingsConstants.TIPMSITE;
+      this.sessionData = this.sessionDataTIPM;
     }
     if (this.selectedProduct.id) {
       this.initProduct();
@@ -866,9 +1073,12 @@ export default defineComponent({
 
     if (this.selectedProduct.source == 'ECM') {
       loadScript("/js/affirm.ecm.js");
+      this.waitListBanner = 'http://ecmrebuilders.com/wp-content/uploads/2022/01/ecm_email_banner.png';
     } else {
       loadScript("/js/affirm.tipm.js");
+      this.waitListBanner = 'https://tipmrebuilders.com/wp-content/uploads/2022/01/email_banner.png';
     }
+
     
     //this.defaultOpen = ;
     // if (!this.isOutofStock && this.isVariationRequired) {

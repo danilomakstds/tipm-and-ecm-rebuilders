@@ -35,11 +35,18 @@
         </ion-buttons>
         <ion-title><img src="../../resources/icon.png" style="height:35px"></ion-title>
       </ion-toolbar>
+      <ion-toolbar v-if="!onlineStatus">
+        <div class="p-3 text-white warning-message">
+          <img src="../../resources/wifi-no-signal.png" style="height: 30px" class="float-start me-3"/>
+          <span>You are currently offline. Please check your internet connection!</span>
+        </div>
+      </ion-toolbar>
     </ion-header>
     <ion-content :fullscreen="true" :scroll-events="true" :scroll-y="true">
       <ion-refresher slot="fixed" @ionRefresh="doRefresh($event)">
         <ion-refresher-content></ion-refresher-content>
       </ion-refresher>
+      
       <!-- <div class="p-4">
         <div class="row">
           <div class="col-4 p-1">
@@ -165,7 +172,8 @@ export default  defineComponent({
   name: 'HomePage',
   mixins: [Mixin],
   computed: mapState([
-      'cartItemCount',
+    'cartItemCount',
+    'onlineStatus'
   ]),
   components: {
     SliderComponent, PopularProductsComponent, SlidingChips,

@@ -25,7 +25,6 @@ import '@ionic/vue/css/display.css';
 /* Theme variables */
 import './theme/variables.css';
 
-
 import 'viewerjs/dist/viewer.css'
 import VueViewer from 'v-viewer'
 

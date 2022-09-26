@@ -16,7 +16,12 @@
         </ion-buttons>
         <ion-title>Installation</ion-title>
       </ion-toolbar>
-      
+      <ion-toolbar v-if="!onlineStatus">
+        <div class="p-3 text-white warning-message">
+          <img src="../../resources/wifi-no-signal.png" style="height: 30px" class="float-start me-3"/>
+          <span>You are currently offline. Please check your internet connection!</span>
+        </div>
+      </ion-toolbar>
     </ion-header>
     <ion-content :fullscreen="true" class="d-flex align-items-center">
 
@@ -155,7 +160,8 @@ export default defineComponent({
     IonFab, IonFabButton
   },
   computed: mapState([
-      'isInstallationSlideOpen'
+    'isInstallationSlideOpen',
+    'onlineStatus'
   ]),
   setup() {
     const doRefresh = function (event) {

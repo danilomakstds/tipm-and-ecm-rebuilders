@@ -7,14 +7,19 @@
         </ion-buttons>
         <ion-title>Track Orders</ion-title>
       </ion-toolbar>
+      <ion-toolbar v-if="!onlineStatus">
+        <div class="p-3 text-white warning-message">
+          <img src="../../resources/wifi-no-signal.png" style="height: 30px" class="float-start me-3"/>
+          <span>You are currently offline. Please check your internet connection!</span>
+        </div>
+      </ion-toolbar>
     </ion-header>
     <ion-content :fullscreen="true" >
 
-      
       <ion-refresher slot="fixed" @ionRefresh="doRefresh($event)">
         <ion-refresher-content></ion-refresher-content>
       </ion-refresher>
-      
+
       <!-- <ion-header collapse="condense">
         <ion-toolbar>
           <ion-title size="large">Tab 3</ion-title>
@@ -233,6 +238,7 @@ import DotLoader from 'vue-spinner/src/DotLoader.vue'
 import moment from 'moment'
 import Mixin from '../mixins/global.mixin'
 
+
 export default defineComponent({
   name: 'OrdersPage',
   mixins: [Mixin],
@@ -277,12 +283,13 @@ export default defineComponent({
     }
   },
   computed: mapState([
-      'trackedOrderNumber',
-      'sessionData',
-      'customerOrderNumberList',
-      'customerOrderList',
-      'customerOrderWatchList',
-      'selectedProduct'
+    'trackedOrderNumber',
+    'sessionData',
+    'customerOrderNumberList',
+    'customerOrderList',
+    'customerOrderWatchList',
+    'selectedProduct',
+    'onlineStatus'
   ]),
   watch: {
     orderNumber: function (newVal) {

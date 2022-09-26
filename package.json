@@ -17,6 +17,7 @@
     "@capacitor/haptics": "^4.0.0",
     "@capacitor/ios": "4.0.1",
     "@capacitor/keyboard": "^4.0.0",
+    "@capacitor/network": "^4.0.1",
     "@capacitor/status-bar": "^4.0.0",
     "@fawmi/vue-google-maps": "^0.9.72",
     "@ionic/pwa-elements": "^3.1.1",

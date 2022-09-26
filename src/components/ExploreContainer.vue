@@ -20,9 +20,9 @@
       </ion-header>
       <ion-content>
         <img src="https://tipmrebuilders.com/wp-content/uploads/2022/01/email_banner.png" style="height: 80px" class="w-100"/>
-        <div class="alert alert-danger mt-3 mb-0" role="alert" v-if="(!validateEmail(userEmail) && userEmail) || (userPassword !== confirmPassword) || (userPassword && userPassword == confirmPassword && !userEmail)">
-            <span v-if="userPassword !== confirmPassword && userPassword">
-              Passwords don't match!
+        <div class="alert alert-danger mb-0" role="alert" v-if="(!validateEmail(userEmail) && userEmail) || (userPassword !== confirmPassword && userPassword && confirmPassword) || (confirmPassword && userPassword && userPassword == confirmPassword && !userEmail)">
+            <span v-if="userPassword !== confirmPassword && userPassword && confirmPassword">
+              Those passwords didn't match.
             </span>
             <span v-if="userPassword && userPassword == confirmPassword && !userEmail">
               Email address is required
@@ -184,7 +184,7 @@ export default defineComponent({
       //const name = this.$refs.input.$el.value;
       if (this.userEmail && this.userPassword == this.confirmPassword) {
         //this.$refs.modal.$el.dismiss(name, 'confirm');
-        this.createAccount(this.userEmail ,this.userPassword);
+        this.createAccount(this.userEmail ,this.userPassword, null, true);
       }
     },
     onWillDismiss(ev) {
@@ -242,32 +242,6 @@ export default defineComponent({
       this.isLoading = true;
       this.getUserDetails(email);
       this.isLoading = false;
-    },
-    createAccount: function (email, password) {
-      var bodyFormData = new FormData();
-      bodyFormData.append('email', email);
-      bodyFormData.append('password', password);
-      axios({
-          method: "post",
-          url: SettingsConstants.BASE_URL + "customerREST.php?op=create_customer&site="+SettingsConstants.TIPMSITE,
-          data: bodyFormData,
-          headers: { "Content-Type": "multipart/form-data" },
-      })
-        .then(function (response) {
-          if (response.data) {
-            Swal.fire({
-              title: 'Great!',
-              text: 'Account created!',
-              icon:'success',
-              confirmButtonColor: '#4b7838',
-            });
-            store.commit('SET_SESSION_DATA', response.data[0]);
-            // if (this.sessionData) {
-
-            // }
-            console.log(response.data)
-          }
-        }.bind(this));
     },
     getUserDetails: function (username) {
       var url = null;

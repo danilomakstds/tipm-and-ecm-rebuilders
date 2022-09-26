@@ -1,8 +1,12 @@
 <template>
   <ion-app>
-
     <ion-router-outlet :key="$route.fullPath" />
+
     <ion-progress-bar type="indeterminate" v-if="showProgressBar"></ion-progress-bar>
+    <!-- <vueInternetChecker
+      @status="status"
+      @event="event"
+    /> -->
 
     <full-screen-loader v-if="showFullScreenLoader"></full-screen-loader>
 
@@ -197,24 +201,28 @@
         </ion-content>
     </ion-modal>
   </ion-app>
+
 </template>
 
 <script lang="js">
 import { IonApp, IonRouterOutlet, IonModal,
 IonInput, IonLabel, IonItem, IonList, IonHeader, IonToolbar, IonButton, IonButtons,
-IonRange, IonRadio, IonRadioGroup, alertController, IonProgressBar } from '@ionic/vue';
+IonRange, IonRadio, IonRadioGroup, alertController, IonProgressBar, toastController } from '@ionic/vue';
 import axios from 'axios'
 import SettingsConstants from './constants/settings.constants'
 import $ from 'jquery'
 import store from './store';
 import { 
-  cartOutline
+  cartOutline, alertCircleOutline
 } from 'ionicons/icons'
 import FullScreenLoader from './components/FullScreenLoader'
 import { defineComponent } from 'vue';
 import { mapState } from 'vuex'
 import Mixin from './mixins/global.mixin'
 import DotLoader from 'vue-spinner/src/DotLoader.vue'
+import { Network } from '@capacitor/network';
+// import vueInternetChecker from 'vue-internet-checker';
+
 export default defineComponent({
   name: 'App',
   mixins: [Mixin],
@@ -256,9 +264,9 @@ export default defineComponent({
     vehicleFCMPartNumber: function () {
       this.isVariationRequired = false;
     },
-    // $route: function (to, from){
-    //   this.showProgressBar = true;
-    // }
+    onLine: function (newVal) {
+      store.commit('SET_ONLINE_STATUS', newVal);
+    }
   },
   data () {
     return {
@@ -296,29 +304,46 @@ export default defineComponent({
       showCoreRefund: false,
       color: null,
       is4x4Visible: true,
-      isLidOptionsVisible: true
+      isLidOptionsVisible: true,
+
+      onLine: null,
     }
   },
   computed: mapState([
     'productsWithCoreRefund',
     'productsWithOutLidOptions',
-    'productsWith4x4'
+    'productsWith4x4',
+    'onlineStatus'
   ]),
   setup() {
     return {
-      cartOutline
+      cartOutline, alertCircleOutline
     }
   },
   components: {
+    //vueInternetChecker,
+    DotLoader,
+
     IonApp, FullScreenLoader,
     IonRouterOutlet,
     IonModal, IonProgressBar,
     IonInput, IonLabel, IonItem, IonList,
     IonHeader, IonToolbar, IonButton, IonButtons,
     IonRange, IonRadio, IonRadioGroup,
-    DotLoader
+    
   },
   methods: {
+    async presentToast() {
+      const toast = await toastController.create({
+        message: 'You are currently offline, Please check your internet connection!',
+        duration: 1500,
+        position: 'top',
+        color: 'danger',
+        icon: alertCircleOutline
+      });
+
+      await toast.present();
+    },
     async presentAlert() {
       var message = null;
       if (this.selectedProduct.source == 'TIPM') {
@@ -357,6 +382,9 @@ export default defineComponent({
       });
 
       await alert.present();
+    },
+    updateOnlineStatus: function (status) {
+      store.commit("SET_ONLINE_STATUS", status);
     },
     toggleRequiredFieldsModal: function (product) {
       if (product) {
@@ -581,10 +609,30 @@ export default defineComponent({
       this.showFullScreenLoader = show;
     }.bind(this));
     this.getAllProductsWithCoreRefundProgram();
-    // if (!this.productsWithCoreRefund.length || !this.productsWith4x4 || !this.productsWithOutLidOptions) {
-    //   this.getAllProductsWithCoreRefundProgram();
-    // }
+    //check if online or offline
+    
   },
+  created () {
+    // window.addEventListener('online', function (event) {
+    //   this.onLine = true;
+    //   console.log(event);
+    // }.bind(this));
+    // window.addEventListener('offline', function (event) {
+    //   this.onLine = false;
+    //   console.log(event);
+    // }.bind(this));
+
+    Network.addListener('networkStatusChange', status => {
+      console.log('Network status changed', status);
+      this.onLine = status.connected;
+    });
+
+    // const logCurrentNetworkStatus = async () => {
+    //   const status = await Network.getStatus();
+
+    //   console.log('Network status:', status);
+    // };
+  }
 });
 </script>
 

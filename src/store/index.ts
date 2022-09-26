@@ -4,6 +4,8 @@ import createPersistedState from 'vuex-persistedstate'
 export default createStore({
   state: {
     sessionData: null,
+    sessionDataTIPM: null,
+    sessionDataECM: null,
     popularProducList: [],
     selectedProduct: null,
     selectedYear: null,
@@ -30,6 +32,7 @@ export default createStore({
     productsWithCoreRefund: [],
     productsWith4x4: [],
     productsWithOutLidOptions: [],
+    onlineStatus: false,
   },
   mutations: {
     SET_SESSION_DATA: function (state, sessionData) {
@@ -37,6 +40,18 @@ export default createStore({
     },
     RESET_SESSION_DATA: function (state) {
       state.sessionData = null;
+    },
+    SET_SESSION_DATA_TIPM: function (state, sessionDataTIPM) {
+      state.sessionDataTIPM = sessionDataTIPM;
+    },
+    RESET_SESSION_DATA_TIPM: function (state) {
+      state.sessionDataTIPM = null;
+    },
+    SET_SESSION_DATA_ECM: function (state, sessionDataECM) {
+      state.sessionDataECM = sessionDataECM;
+    },
+    RESET_SESSION_DATA_ECM: function (state) {
+      state.sessionDataECM = null;
     },
     SET_POPULAR_PRODUCT_LIST: function (state, popularProducList) {
       state.popularProducList = popularProducList;
@@ -153,6 +168,9 @@ export default createStore({
     RESET_PRODUCTS_WOUT_LID_OPTIONS: function (state) {
       state.productsWithOutLidOptions = [];
     },
+    SET_ONLINE_STATUS: function (state, onlineStatus) {
+      state.onlineStatus = onlineStatus;
+    }
   },
   getters: {
 

@@ -548,6 +548,38 @@ export default {
             var productPrice = parseFloat(price) + parseFloat(addedPrice);
             productPrice = this.formatRegularPrice(productPrice.toString());
             return productPrice;
-        }
+        },
+        createAccount: function (email, password, color, showAlert) {
+            if (!color) {
+                color = '#4b7838';
+            }
+            var bodyFormData = new FormData();
+            bodyFormData.append('email', email);
+            if (password) {
+                bodyFormData.append('password', password);
+            } else {
+                bodyFormData.append('password', '');
+            }
+            axios({
+                method: "post",
+                url: SettingsConstants.BASE_URL + "customerREST.php?op=create_customer&site="+SettingsConstants.TIPMSITE,
+                data: bodyFormData,
+                headers: { "Content-Type": "multipart/form-data" },
+            })
+            .then(function (response) {
+            if (response.data) {
+                if (showAlert) {
+                    Swal.fire({
+                        title: 'Great!',
+                        text: 'Account created!',
+                        icon:'success',
+                        confirmButtonColor: color,
+                    });
+                }
+                store.commit('SET_SESSION_DATA', response.data);
+                console.log(response.data)
+            }
+            }.bind(this));
+        },
     }
   };

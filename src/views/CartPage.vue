@@ -7,6 +7,12 @@
         </ion-buttons>
         <ion-title>My Cart</ion-title>
       </ion-toolbar>
+      <ion-toolbar v-if="!onlineStatus">
+        <div class="p-3 text-white warning-message">
+          <img src="../../resources/wifi-no-signal.png" style="height: 30px" class="float-start me-3"/>
+          <span>You are currently offline. Please check your internet connection!</span>
+        </div>
+      </ion-toolbar>
     </ion-header>
     <ion-content :fullscreen="true">
       <!-- <ion-header collapse="condense">
@@ -127,11 +133,12 @@ import {
     IonItem, IonItemSliding, IonItemOptions,
     IonItemOption, IonRefresher, IonRefresherContent,
     alertController, IonSegment, IonSegmentButton, IonLabel,
-    IonBackButton
+    IonBackButton 
 } from '@ionic/vue';
 import { 
   arrowBackOutline, cartOutline, bagCheckOutline,
-  trashOutline, addOutline, removeOutline, listOutline
+  trashOutline, addOutline, removeOutline, listOutline,
+  alertCircleOutline, wifiOutline
 } from 'ionicons/icons'
 import Mixin from '../mixins/global.mixin'
 import axios from 'axios'
@@ -147,7 +154,8 @@ export default defineComponent({
     'cartKeyECM',
     'cartKeyTIPM',
     'cartItemCount',
-    'cartItemList'
+    'cartItemList',
+    'onlineStatus'
   ]),
   components: {
     DotLoader,
@@ -169,6 +177,7 @@ export default defineComponent({
     return {
       doRefresh,
       arrowBackOutline, cartOutline, bagCheckOutline,
+      alertCircleOutline, wifiOutline,
       trashOutline, addOutline, removeOutline, listOutline
     }
   },

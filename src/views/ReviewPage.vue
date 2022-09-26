@@ -7,6 +7,12 @@
         </ion-buttons>
         <ion-title>Reviews</ion-title>
       </ion-toolbar>
+      <ion-toolbar v-if="!onlineStatus">
+        <div class="p-3 text-white warning-message">
+          <img src="../../resources/wifi-no-signal.png" style="height: 30px" class="float-start me-3"/>
+          <span>You are currently offline. Please check your internet connection!</span>
+        </div>
+      </ion-toolbar>
     </ion-header>
     <ion-content :fullscreen="true">
       <!-- <ion-header collapse="condense">
@@ -18,6 +24,7 @@
       <ion-refresher slot="fixed" @ionRefresh="doRefresh($event)">
         <ion-refresher-content></ion-refresher-content>
       </ion-refresher>
+
       <div v-if="shopperApprovedData">
         <section class="text-center p-3">
           <h1 style="font-size: 35px" class="fw-bold"> {{averageRating}}</h1>
@@ -168,7 +175,8 @@ export default defineComponent({
   },
   computed: mapState([
       'shopperApprovedData',
-      'selectedProduct'
+      'selectedProduct',
+      'onlineStatus'
   ]),
   setup() {
     const doRefresh = function (event) {

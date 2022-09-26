@@ -10,6 +10,14 @@
         <ion-title>Order #: {{trackedOrderNumber.toUpperCase()}}</ion-title>
       </ion-toolbar>
     </ion-header> -->
+    <ion-header v-if="!onlineStatus">
+      <ion-toolbar>
+        <div class="p-3 text-white warning-message">
+          <img src="../../resources/wifi-no-signal.png" style="height: 30px" class="float-start me-3"/>
+          <span>You are currently offline. Please check your internet connection!</span>
+        </div>
+      </ion-toolbar>
+    </ion-header>
     <ion-content :fullscreen="true" id="order-details">
       <!-- <ion-header collapse="condense">
         <ion-toolbar>
@@ -20,8 +28,6 @@
       <ion-refresher slot="fixed" @ionRefresh="doRefresh($event)">
         <ion-refresher-content></ion-refresher-content>
       </ion-refresher>
-
-
 
       <div class="d-flex flex-column bd-highlight mb-5">
         <div class="order-2 bd-highlight">
@@ -161,7 +167,7 @@
 <script lang="js">
 import { defineComponent } from 'vue';
 import { IonPage,
-// IonHeader, IonToolbar,
+IonHeader, IonToolbar,
 // IonTitle, IonButtons,
 IonButton, IonChip, IonLabel,
 IonIcon, IonItem,
@@ -189,8 +195,8 @@ export default defineComponent({
   name: 'OrderDetails',
   mixins: [Mixin],
   components: {
-    // IonHeader, IonToolbar, IonTitle,
-    // IonButtons,
+    IonHeader, IonToolbar,
+    // IonTitle, IonButtons,
     IonButton, IonChip, IonLabel,
     IonIcon, IonItem,
     IonPage, IonContent, DotLoader,
@@ -199,9 +205,10 @@ export default defineComponent({
     //IonBackButton
   },
   computed: mapState([
-      'trackedOrderNumber',
-      'customerOrderNumberList',
-      'customerOrderWatchList'
+    'trackedOrderNumber',
+    'customerOrderNumberList',
+    'customerOrderWatchList',
+    'onlineStatus'
   ]),
   setup() {
     const doRefresh = function (event) {

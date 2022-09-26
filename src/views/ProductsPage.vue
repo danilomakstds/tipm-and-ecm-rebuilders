@@ -1,6 +1,6 @@
 <template>
   <ion-page id="product-page">
-    <ion-header>
+    <ion-header mode="md">
       <ion-toolbar color="white">
         <ion-buttons slot="start">
           <!-- <ion-button color="primary">
@@ -9,6 +9,12 @@
           <ion-back-button :icon="arrowBackOutline" color="primary" :default-href="lastPath" text=""></ion-back-button>
         </ion-buttons>
         <ion-title>Search Results</ion-title>
+      </ion-toolbar>
+      <ion-toolbar v-if="!onlineStatus">
+        <div class="p-3 text-white warning-message">
+          <img src="../../resources/wifi-no-signal.png" style="height: 30px" class="float-start me-3"/>
+          <span>You are currently offline. Please check your internet connection!</span>
+        </div>
       </ion-toolbar>
     </ion-header>
     <ion-content :fullscreen="true">
@@ -219,7 +225,8 @@ export default defineComponent({
     'selectedModel',
     'selectedProduct',
     'searchKeyword',
-    'searchVinNumber'
+    'searchVinNumber',
+    'onlineStatus'
   ]),
   setup() {
     const doRefresh = function (event) {
@@ -706,7 +713,10 @@ export default defineComponent({
     }
   },
   created () {
-    this.lastPath = this.$router.options.history.state.back
+    this.lastPath = this.$router.options.history.state.back;
+    if (!this.lastPath) {
+      this.lastPath = '/';
+    }
   },
 });
 </script>

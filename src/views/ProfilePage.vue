@@ -1,5 +1,13 @@
 <template>
   <ion-page id="profile">
+    <ion-header v-if="!onlineStatus">
+      <ion-toolbar>
+        <div class="p-3 text-white warning-message">
+          <img src="../../resources/wifi-no-signal.png" style="height: 30px" class="float-start me-3"/>
+          <span>You are currently offline. Please check your internet connection!</span>
+        </div>
+      </ion-toolbar>
+    </ion-header>
     <ion-content :fullscreen="true">
 
       <ion-refresher slot="fixed" @ionRefresh="doRefresh($event)">
@@ -84,6 +92,7 @@ import {
     IonIcon, IonFab, IonFabButton,
     IonRefresher, IonRefresherContent,
     IonList, IonItem, IonLabel,
+    IonHeader, IonToolbar
     //IonBackButton
 } from '@ionic/vue';
 import { 
@@ -108,10 +117,12 @@ export default defineComponent({
     IonIcon, IonFab, IonFabButton,
     IonRefresher, IonRefresherContent,
     IonList, IonItem, IonLabel,
+    IonHeader, IonToolbar
     //IonBackButton
   },
   computed: mapState([
       'sessionData',
+      'onlineStatus'
   ]),
   setup() {
     const doRefresh = function (event) {

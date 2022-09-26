@@ -351,6 +351,8 @@ export default defineComponent({
     },
     logOutUser: function () {
         store.commit('RESET_SESSION_DATA');
+        store.commit('RESET_SESSION_DATA_ECM');
+        store.commit('RESET_SESSION_DATA_TIPM');
         store.commit('RESET_CUSTOMER_ORDER_LIST');
         store.commit('RESET_CUSTOMER_ORDER_WATCHLIST');
         store.commit('RESET_CUSTOMER_ORDERNUMBER_LIST');
