@@ -31,10 +31,7 @@
 
       <div class="d-flex flex-column bd-highlight mb-5">
         <div class="order-2 bd-highlight">
-          <div class="bg-white p-3 order-details">
-            <div class="d-flex justify-content-center">
-              <dot-loader :loading="isLoadingProduct" :color="color" :size="size" class="mt-5"></dot-loader>
-            </div>
+          <div class="bg-white p-3 order-details" v-if="!orderDoesnotExist">
             <div v-if="wooOrderDetails" class="mt-3">
               <h2 class="fw-bold" style="font-size: 3vh">
                 <ion-icon :icon="cubeOutline" :color="productType == 'tipm' ? 'primary':'tertiary'" class=" me-2"></ion-icon>
@@ -74,6 +71,7 @@
             <div class="overflow-hidden mt-2" v-if="trackingCourier != 'none'">
               <img src="../../resources/FedEx_logo_orange-purple-700x196.png" style="height:20px" v-if="trackingCourier == 'fedex'" class="float-start"/>
               <img src="../../resources/DHL-Emblem.png" style="height:20px" v-if="trackingCourier == 'dhl'" class="float-start"/>
+              <img src="../../resources/usps-logo.png" style="height:35px" v-if="trackingCourier == 'stamps_com'" class="float-start"/>
             </div>
             <h5 class="overflow-hidden">
                 <span v-if="trackingNumber">
@@ -109,6 +107,12 @@
               </div>
             </div>
           </div>
+          <div class="bg-white p-3 order-details" v-if="orderDoesnotExist">
+            <div class="alert alert-warning mt-3" role="alert">
+              Order # <b>{{trackedOrderNumber}}'s</b> tracking information is unavailable.
+            </div>
+          </div>
+          
         </div>
         <div class="order-1 bd-highlight">
           <div class="mapouter overflow-hidden" style="">
@@ -119,7 +123,6 @@
             </div>
           </div>
         </div>
-
       </div>
       <br/>
 
@@ -241,7 +244,6 @@ export default defineComponent({
       trackingResults: null,
       trackingTimeLine: [],
       isLoading: false,
-      isLoadingProduct: false,
       isLoadingButton: false,
       disableWatchlistButton: false,
       trackingNumber: null,
@@ -251,6 +253,7 @@ export default defineComponent({
       wooOrderDetails: null,
       productBadge: null,
       productType: null,
+      orderDoesnotExist: false,
     }
   },
   methods: {
@@ -274,17 +277,27 @@ export default defineComponent({
       axios.get(SettingsConstants.SHIPSTATION_BASE_URL +'?op=shipment_details&order_number='+this.trackedOrderNumber+'&store_id='+shipstation_storeid , { crossdomain: true })
         .then(function (response) {
           if (response.data.shipments.length) {
-            var fedex = null;
-            var dhl = null;
-            fedex = response.data.shipments.filter(shipment => shipment.carrierCode.includes('fedex'));
-            dhl = response.data.shipments.filter(shipment => shipment.carrierCode.includes('dhl'));
-            if (fedex.length) {
-              this.trackingCourier = 'fedex';
-              this.getFedexTrackingInfo(fedex);
-            }
-            if (dhl.length) {
-              this.trackingCourier = 'dhl';
-              this.getDHLTrackingInfo(dhl);
+            var fedex = null, dhl = null, stamps_com = null;
+
+            switch (this.trackingCourier) {
+              case 'fedex':
+                fedex = response.data.shipments.filter(shipment => shipment.carrierCode.includes('fedex'));
+                if (fedex.length) {
+                  this.getFedexTrackingInfo(fedex);
+                }
+                break;
+              case 'dhl': 
+                dhl = response.data.shipments.filter(shipment => shipment.carrierCode.includes('dhl'));
+                if (dhl.length) {
+                  this.getDHLTrackingInfo(dhl);
+                }
+                break;
+              case 'stamps_com':
+                stamps_com = response.data.shipments.filter(shipment => shipment.carrierCode.includes('stamps_com'));
+                if (stamps_com.length) {
+                  this.getStampsComTrackingInfo(stamps_com);
+                }
+                break;
             }
           } else {
             this.isLoading = false;
@@ -295,16 +308,30 @@ export default defineComponent({
     getShipstationDetails: function () {
       axios.get(SettingsConstants.SHIPSTATION_BASE_URL +'?op=search_order_by_number&order_number='+this.trackedOrderNumber , { crossdomain: true })
         .then(function (response) {
-          if (response.data) {
+          if (response.data.orders.length) {
+            this.trackingCourier = response.data.orders[0].carrierCode;
+            this.getTrackingNumber();
             this.wooOrderId = response.data.orders[0].orderKey;
             this.getWooOrderDetails(response.data.orders[0].orderKey);
             var timeline = [];
-            timeline.current_location = 'Chatsworth CA, US';
-            timeline.eventDescription = 'Order Being Processed.';
-            timeline.derivedStatus = 'Awaiting Shipment';
-            timeline.shipstation_data = response.data;
-            timeline.date = moment(response.data.orders[0].orderDate).format('L LT');
-            this.trackingTimeLine.push(timeline);
+            if (response.data.orders[0].orderStatus == "cancelled") {
+              timeline.current_location = 'Chatsworth CA, US';
+              timeline.eventDescription = 'Order was Cancelled.';
+              timeline.derivedStatus = 'Cancelled';
+              timeline.shipstation_data = response.data;
+              timeline.date = moment(response.data.orders[0].orderDate).format('L LT');
+              this.trackingTimeLine.push(timeline);
+              this.trackingCourier = 'none';
+            } else {
+              timeline.current_location = 'Chatsworth CA, US';
+              timeline.eventDescription = 'Order Being Processed.';
+              timeline.derivedStatus = 'Awaiting Shipment';
+              timeline.shipstation_data = response.data;
+              timeline.date = moment(response.data.orders[0].orderDate).format('L LT');
+              this.trackingTimeLine.push(timeline);
+            }
+          } else {
+            this.orderDoesnotExist = true;
           }
       }.bind(this));
     },
@@ -381,8 +408,31 @@ export default defineComponent({
           }
       }.bind(this));
     },
+    getStampsComTrackingInfo: function (tracking) {
+      this.trackingNumber = tracking[0].trackingNumber;
+      this.trackingURL = 'https://tools.usps.com/go/TrackConfirmAction?tRef=fullpage&tLc=2&text28777=&tLabels='+this.trackingNumber+'%2C';
+      axios.get(SettingsConstants.STAMPS_COM_BASE_URL + 'op=get_tracking_details&tracking_number='+ this.trackingNumber+'&carrier_code='+this.trackingCourier ,{crossdomain: true ,})
+      .then(function (response) {
+          if (response.data) {
+            if (response.data.carrier_status_description)
+            console.log(response.data);
+            this.trackingResults = response.data.events;
+            var tracking = [];
+            tracking = response.data.events;
+            if (tracking.length) {
+              tracking.forEach(function (timeline){
+                timeline.date = moment(timeline.occurred_at).format('L LT');
+                timeline.eventDescription = timeline.carrier_status_description;
+                timeline.current_location = timeline.city_locality + ', ' + timeline.state_province + ', ' + timeline.postal_code;
+              }.bind(this));
+            }
+            [].push.apply( tracking, this.trackingTimeLine);
+            this.trackingTimeLine = tracking;
+            this.isLoading = false;
+          }
+      }.bind(this));
+    },
     getWooOrderDetails: function (wooOrderId) {
-      this.isLoadingProduct = true;
       var site = null;
       if (this.trackedOrderNumber.toLowerCase().includes('e-')) {
         site = SettingsConstants.ECMSITE;
@@ -396,7 +446,6 @@ export default defineComponent({
       axios.get(SettingsConstants.BASE_URL +'orderREST.php?op=get_order_by_number&site='+site+'&ordernumber='+wooOrderId , { crossdomain: true })
         .then(function (response) {
           if (response.data) {
-            this.isLoadingProduct = false;
             this.wooOrderDetails = response.data;
             this.wooOrderDetails.line_items.forEach(function (order){
               order.name = order.name.replace('LIKE NEW', 'LIKE_NEW');
@@ -484,12 +533,14 @@ export default defineComponent({
   mounted() {
     this.getShipstationDetails();
     this.getFedexAuth();
-    this.getTrackingNumber();
     this.checkifExistInWatchlist();
     //this.customerOrderWatchList = [];
   },
   created () {
-    this.lastPath = this.$router.options.history.state.back
+    this.lastPath = this.$router.options.history.state.back;
+    if (!this.lastPath) {
+      this.lastPath = '/';
+    }
   },
 });
 </script>
@@ -545,6 +596,11 @@ ul.timeline > li.courier-color-fedex:before {
 ul.timeline > li.courier-color-dhl:before {
   background: #FFCB05;
   border: 3px solid #FFCB05;
+}
+
+ul.timeline > li.courier-color-stamps_com:before {
+  background: #0B5B9D;
+  border: 3px solid #0B5B9D;
 }
 
 ul.timeline > li.courier-color-none:before {

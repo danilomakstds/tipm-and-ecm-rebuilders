@@ -588,6 +588,9 @@ export default defineComponent({
                   if (res.Value.includes('JL (Open Body)')) {
                     this.vinTrim = 'jl';
                   }
+                  if (res.Value.toLowerCase() == '300m special') {
+                    this.vinTrim = '300m';
+                  }
                   this.vinTrim = this.vinTrim ? this.vinTrim.toLowerCase() : '';
                 }
                 break;
@@ -608,7 +611,12 @@ export default defineComponent({
             if (idx === array.length - 1) {
               if (this.vinYear && this.vinMake && this.vinModel) {
                 if (this.vinTrim) {
-                  this.vinModel = this.vinModel+'-'+this.vinTrim;
+                  if (this.vinTrim == '300m' && this.vinModel == '300') {
+                    this.vinTrim = null;
+                    this.vinModel = '300m';
+                  } else {
+                    this.vinModel = this.vinModel+'-'+this.vinTrim;
+                  }
                 }
                 this.productSlug = this.vinModel+'-'+this.vinMake+'-'+this.vinYear;
                 if (this.productSlug) {
@@ -689,6 +697,7 @@ export default defineComponent({
       });
     },
     initLogic: function () {
+      this.productList = [];
       if (this.selectedModel) {
         this.getProductsSearchResult();
       }
@@ -706,6 +715,7 @@ export default defineComponent({
   mounted() {
     this.initLogic();
     this.emitter.on('triggerSearch', function () {
+      this.productList = [];
       this.initLogic();
     }.bind(this));
     if (this.$route.fullPath == '/tabs/products') {

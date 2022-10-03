@@ -163,6 +163,10 @@ ion-button {
     border-radius: 20px;
 }
 
+h2.accordion-header {
+    margin: 0px !important
+}
+
 .input-modif input, 
 .native-input {
     height: 50px !important;

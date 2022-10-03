@@ -20,6 +20,8 @@ const SHIPSTATION_ECM_ID = "235901";
 const SHIPSTATION_TIPM_ID = "69270";
 const SHIPSTATION_BASE_URL = 'https://database.tipmrebuilders.com/shipstation/shipment.rest.php';
 const FEDEX_BASE_URL = 'https://database.tipmrebuilders.com/shipstation/fedex.rest.php?';
+const STAMPS_COM_BASE_URL = 'https://database.tipmrebuilders.com/shipstation/stamps_com.rest.php?';
+const SHIP_ENGINE_APIKEY = 'TEST_KCOIwElHX4I/oYEGXgGjeac9ROSMC5iCKmnI2cfvpdo';
 
 const GOOGLE_API = 'AIzaSyDX_bIjjI3y6-CzvDu-p1XAJMeuXyXLxfY';
 const YT_CHANNEL_ID = 'UCzlj19TjvKvJXATcLriv_Bg';
@@ -65,5 +67,7 @@ export default {
     VALID_MAKE: VALID_MAKE,
     //BASIC_AUTH: BASIC_AUTH,
     ADDED_PRICE_OF_LID: ADDED_PRICE_OF_LID,
-    ADDED_PRICE_OF_DEFAULT_COREFEE: ADDED_PRICE_OF_DEFAULT_COREFEE
+    ADDED_PRICE_OF_DEFAULT_COREFEE: ADDED_PRICE_OF_DEFAULT_COREFEE,
+    SHIP_ENGINE_APIKEY: SHIP_ENGINE_APIKEY,
+    STAMPS_COM_BASE_URL: STAMPS_COM_BASE_URL
 }

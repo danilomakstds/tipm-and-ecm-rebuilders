@@ -309,7 +309,10 @@ export default defineComponent({
     this.getAllInstallationData();
   },
   created () {
-    this.lastPath = this.$router.options.history.state.back
+    this.lastPath = this.$router.options.history.state.back;
+    if (!this.lastPath) {
+      this.lastPath = '/';
+    }
   },
 });
 </script>

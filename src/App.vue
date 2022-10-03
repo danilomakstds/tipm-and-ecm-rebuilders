@@ -3,10 +3,6 @@
     <ion-router-outlet :key="$route.fullPath" />
 
     <ion-progress-bar type="indeterminate" v-if="showProgressBar"></ion-progress-bar>
-    <!-- <vueInternetChecker
-      @status="status"
-      @event="event"
-    /> -->
 
     <full-screen-loader v-if="showFullScreenLoader"></full-screen-loader>
 
@@ -28,11 +24,14 @@
               Confirm</ion-button>
             </ion-buttons>
           </ion-toolbar>
+          <ion-toolbar class="p-0">
+            <div class="p-4 text-white" :style="'background-color: '+(productSource == 'ECM' ? '#3A7CA5' : '#487436')+'; font-size: 14px;'" role="alert">
+                {{selectedProduct.name.replace('amp;','')}}
+            </div>
+          </ion-toolbar>
         </ion-header>
         <ion-content>
-          <div class="p-4 text-white" :style="'background-color: '+(productSource == 'ECM' ? '#3A7CA5' : '#487436')+'; font-size: 14px;'" role="alert">
-              {{selectedProduct.name.replace('amp;','')}}
-          </div>
+          
           <div class="p-4 pt-3 mb-5">
 
             <div v-if="isVariationsLoading" class="d-flex justify-content-center align-items-center h-100">
@@ -195,8 +194,36 @@
                   <a href="https://tipmrebuilders.com/core-return/" class="text-decoration-none" target="_blank"><b class="color-primary">Core Buyback Program</b></a>.
                 </span>
               </span>
+              <br/><br/><br/><br/><br/><br/>
             </ion-list>
 
+          </div>
+        </ion-content>
+    </ion-modal>
+
+    <ion-modal ref="scannermodal"
+      :is-open="isScannerModalOpen"
+      @didDismiss="toggleScannerModal()">
+        <ion-header>
+          <ion-toolbar>
+            <ion-buttons slot="start">
+              <ion-button @click="cancelScanner()">Close</ion-button>
+            </ion-buttons>
+          </ion-toolbar>
+        </ion-header>
+        <ion-content :fullscreen="true" class="h-100 position-relative">
+          <div id="interactive" class="viewport h-100"></div>
+
+          <div v-if="isCamLoading" class="d-flex justify-content-center align-items-center h-100 position-absolute top-0 center-absolute bg-light">
+            <dot-loader :loading="isCamLoading" :size="size"></dot-loader>
+          </div>
+          <div v-if="!isCamLoading" class="d-flex justify-content-center align-items-center h-100 position-absolute top-0 center-absolute">
+            <div class="overlay">
+              <p style="writing-mode: vertical-rl; font-size: 1.7vh; z-index: 2" class="text-center mt-5 h-100 text-white position-absolute">
+                Place VIN barcode inside the viewfinder rectangle to scan it.
+              </p>
+            </div>
+            <div class="here h-75"></div>
           </div>
         </ion-content>
     </ion-modal>
@@ -207,7 +234,8 @@
 <script lang="js">
 import { IonApp, IonRouterOutlet, IonModal,
 IonInput, IonLabel, IonItem, IonList, IonHeader, IonToolbar, IonButton, IonButtons,
-IonRange, IonRadio, IonRadioGroup, alertController, IonProgressBar, toastController } from '@ionic/vue';
+IonRange, IonRadio, IonRadioGroup, alertController, IonProgressBar, toastController,
+modalController, IonContent } from '@ionic/vue';
 import axios from 'axios'
 import SettingsConstants from './constants/settings.constants'
 import $ from 'jquery'
@@ -219,6 +247,7 @@ import FullScreenLoader from './components/FullScreenLoader'
 import { defineComponent } from 'vue';
 import { mapState } from 'vuex'
 import Mixin from './mixins/global.mixin'
+import Quagga from 'quagga';
 import DotLoader from 'vue-spinner/src/DotLoader.vue'
 import { Network } from '@capacitor/network';
 // import vueInternetChecker from 'vue-internet-checker';
@@ -270,6 +299,10 @@ export default defineComponent({
   },
   data () {
     return {
+      isScannerModalOpen: false,
+      lastBarcodeResult: null,
+      isCamLoading: false,
+
       showProgressBar: false,
       isRequiredFieldsModalOpen: false,
       isVariationRequired: true,
@@ -329,7 +362,7 @@ export default defineComponent({
     IonModal, IonProgressBar,
     IonInput, IonLabel, IonItem, IonList,
     IonHeader, IonToolbar, IonButton, IonButtons,
-    IonRange, IonRadio, IonRadioGroup,
+    IonRange, IonRadio, IonRadioGroup, IonContent
     
   },
   methods: {
@@ -382,6 +415,75 @@ export default defineComponent({
       });
 
       await alert.present();
+    },
+    async dismiss() {
+      modalController.dismiss({
+        'dismissed': true
+      });
+    },
+    cancelScanner() {
+      Quagga.stop();
+      this.dismiss();
+    },
+    scanResultConfirm(code) {
+      this.cancel();
+      this.emitter.emit('isScannedValueAvailable', code);
+    },
+    toggleScannerModal: function () {
+      this.isScannerModalOpen = !this.isScannerModalOpen;
+      if (this.isScannerModalOpen) {
+        this.initQuagga();
+      }
+    },
+    initQuagga: function () {
+      this.isCamLoading = true;
+      this.lastBarcodeResult = null;
+      setTimeout( function () {
+        Quagga.init({
+          inputStream: {
+              type : "LiveStream"
+          },
+          locator: {
+            patchSize: "medium",
+            halfSample: true
+          },
+          numOfWorkers: 4,
+          frequency: 10,
+          decoder: {
+            readers : [{
+              format: "code_128_reader",
+              config: {}
+            },
+            {
+              format: "code_39_vin_reader",
+              config: {}
+            }
+            ]
+          },
+          locate: true
+        }, function(err) {
+            if (err) {
+              console.log(err);
+              return
+            }
+            console.log("Initialization finished. Ready to start");
+            Quagga.start();
+            this.isCamLoading = false;
+            $('.drawingBuffer').addClass('d-none');
+            $('video').addClass('h-100');
+            Quagga.onDetected(function(result) {
+              var code = result.codeResult.code;
+              if (this.lastBarcodeResult != code && code.length == 17) {
+                var audio = new Audio('./assets/beep-08b.mp3');
+                audio.volume = 0.2;
+                audio.play();
+                this.lastBarcodeResult = code;
+                //Quagga.stop();
+                this.scanResultConfirm(code);
+              }
+            }.bind(this));
+        }.bind(this));
+      }.bind(this), 500);
     },
     updateOnlineStatus: function (status) {
       store.commit("SET_ONLINE_STATUS", status);
@@ -471,6 +573,12 @@ export default defineComponent({
                         break;
                 }
             }
+            switch (trim.toLowerCase()) {
+              case '300m special':
+                trim = '300m';
+                break;
+            }
+            possibleSlugvalues.push(trim+'-'+make+'-'+year);
             possibleSlugvalues.push(model+'-'+trim+'-'+make+'-'+year);
           }
           possibleSlugvalues.push(model+'-'+make+'-'+year);
@@ -557,7 +665,7 @@ export default defineComponent({
             break;
         }
         if (!Object.keys(cart_data).length == 0) {
-          this.addToCart(productID, this.productOrigin, JSON.stringify(cart_data));
+          this.addToCart(productID, this.selectedProduct.source, JSON.stringify(cart_data));
           this.$refs.modalRequiredFieldsAddtocart.$el.dismiss(null, 'confirm');
         } else {
           this.presentAlert();
@@ -567,7 +675,7 @@ export default defineComponent({
     getAllProductsWithCoreRefundProgram: function () {
       axios.get(SettingsConstants.BASE_URL_API_MOBILE+'settings.rest.php?type=get_tipm_settings', { crossdomain: true })
       .then(function (response) {
-        console.log(response);
+        //console.log(response);
         store.commit('SET_PRODUCTS_W_CORE_REFUND', response.data[0].products_with_core_refund.split(','));
         store.commit('SET_PRODUCTS_W_4x4', response.data[0].products_with_4x4.split(','));
         store.commit('SET_PRODUCTS_WOUT_LID_OPTIONS', response.data[0].products_without_lid_options.split(','));
@@ -605,6 +713,9 @@ export default defineComponent({
         this.toggleRequiredFieldsModal(product);
       }
     }.bind(this));
+    this.emitter.on('isShowScannerModal', function () {
+      this.toggleScannerModal();
+    }.bind(this));
     this.emitter.on('showFullScreenLoader', function (show) {
       this.showFullScreenLoader = show;
     }.bind(this));
@@ -613,25 +724,18 @@ export default defineComponent({
     
   },
   created () {
-    // window.addEventListener('online', function (event) {
-    //   this.onLine = true;
-    //   console.log(event);
-    // }.bind(this));
-    // window.addEventListener('offline', function (event) {
-    //   this.onLine = false;
-    //   console.log(event);
-    // }.bind(this));
-
     Network.addListener('networkStatusChange', status => {
       console.log('Network status changed', status);
       this.onLine = status.connected;
     });
 
-    // const logCurrentNetworkStatus = async () => {
-    //   const status = await Network.getStatus();
+    const logCurrentNetworkStatus = async () => {
+      const status = await Network.getStatus();
+      this.onLine = status.connected;
+      //console.log('Network status:', status);
+    };
 
-    //   console.log('Network status:', status);
-    // };
+    logCurrentNetworkStatus();
   }
 });
 </script>
@@ -647,5 +751,53 @@ export default defineComponent({
 
 .header-class-tipm {
   font-size: 17px; color: #487436
+}
+
+.overlay {
+  position: fixed; /* Sit on top of the page content */
+  width: 100%; /* Full width (cover the whole page) */
+  height: 100%; /* Full height (cover the whole page) */
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 2; /* Specify a stack order in case you're using a different order for other elements */
+  cursor: pointer; /* Add a pointer on hover */
+  overflow: hidden;
+}
+
+.overlay::before {
+  content: "";
+  display: block;
+  
+  /* Scale */
+  width: 100%;
+  height: 100%;
+  
+  /* Position */
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  z-index: 2;
+  transform: translate(-50%, -50%);
+  
+  /* Border */
+  border-width: 105px 60px 60px 60px;
+  border-style: solid;
+  border-color: rgba(0,0,0,0.3);
+}
+.here:after {
+    content:"";
+    position: absolute;
+    z-index: 3;
+    top: 0;
+    bottom: 0;
+    left: 50%;
+    border-left: 1px solid #ff0000;
+    transform: translate(-50%);
+}
+.here {
+  height: 100px;
+  position:relative;
 }
 </style>

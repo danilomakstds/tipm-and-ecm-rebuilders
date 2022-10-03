@@ -36,7 +36,7 @@
       <explore-container v-if="!sessionData"></explore-container>
       <div v-else class="mb-5">
 
-      <ion-segment @ionChange="segmentChanged($event)" v-model="selectedSegment">
+      <ion-segment @ionChange="segmentChanged($event)" v-model="selectedSegment" :disabled="isLoading">
         <ion-segment-button value="myOrders">
           <ion-label>My Orders</ion-label>
         </ion-segment-button>
@@ -197,7 +197,7 @@
           </ion-toolbar>
         </ion-header>
         <ion-content>
-          <img src="https://tipmrebuilders.com/wp-content/uploads/2022/01/email_banner.png" style="height: 80px"/>
+          <img src="../../resources/tipm_email_banner.png" style="height: 80px"/>
           <div class="pt-3">
             <ion-item lines="none">
               <ion-label position="stacked">Order Number <span class="text-danger">*</span></ion-label>
@@ -413,8 +413,10 @@ export default defineComponent({
 
             if (orderitem.line_items.length) {
               orderitem.modified_date = moment(orderitem.date_created).format('L LT');
-              this.orderList.push(orderitem);
-              this.customerOrderList.push(orderitem);
+              if (orderitem.status != 'cancelled') {
+                this.orderList.push(orderitem);
+                this.customerOrderList.push(orderitem);
+              }
               if (!this.customerOrderNumberList.includes(orderitem.number)) {
                 this.customerOrderNumberList.push(orderitem.number);
               }
@@ -493,7 +495,10 @@ export default defineComponent({
     }
   },
   created () {
-    this.lastPath = this.$router.options.history.state.back
+    this.lastPath = this.$router.options.history.state.back;
+    if (!this.lastPath) {
+      this.lastPath = '/';
+    }
   },
 });
 </script>

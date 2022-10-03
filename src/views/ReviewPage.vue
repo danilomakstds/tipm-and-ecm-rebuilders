@@ -303,7 +303,7 @@ export default defineComponent({
     this.productID = this.shopperApprovedData.productID;
     this.token = this.shopperApprovedData.token;
     this.isLoading = true;
-    if (this.shopperApprovedData.details.average_rating == '0') {
+    if (this.shopperApprovedData.details.average_rating == '0' || !this.shopperApprovedData.details.length) {
       this.averageRating = 0;
       this.showMessage = true;
       this.getSiteReviews();
@@ -315,7 +315,10 @@ export default defineComponent({
     store.commit('SET_SA_DATA', this.shopperApprovedData);
   },
   created () {
-    this.lastPath = this.$router.options.history.state.back
+    this.lastPath = this.$router.options.history.state.back;
+    if (!this.lastPath) {
+      this.lastPath = '/';
+    }
   },
 });
 </script>

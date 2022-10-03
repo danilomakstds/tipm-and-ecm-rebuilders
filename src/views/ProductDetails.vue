@@ -58,173 +58,7 @@
 
 
 
-        <ion-accordion-group :multiple="true" :value="['information','reviews']" ref="accordionGroup">
-            <!-- <ion-accordion value="fields" class="bg-default" id="requiredFields" v-if="isRequiredFieldsVisible">
-              <ion-item slot="header" color="light">
-                <ion-label>Required Fields / Options</ion-label>
-              </ion-item>
-              <div class="ion-padding bg-white p-4" slot="content">
-
-                <div v-if="isVariationLoading" class="d-flex justify-content-center align-items-center h-100">
-                  <dot-loader :loading="isVariationLoading" :color="color" :size="size" class="mt-3 mb-3"></dot-loader>
-                </div>
-                <ion-list lines="full" class="ion-no-margin" mode="ios" v-if="selectedProduct.variations.length">
-                  <ion-item lines="none" class="ion-no-padding mb-2" style="--inner-padding-end:0" id="variation-items">
-                    <ion-label position="stacked" color="text-dark" class="ion-text-wrap">
-                      <h4 :class="'fw-bold mb-2 header-class-'+(selectedProduct.source == 'TIPM' ? 'tipm' : '')">{{productVariationName}} <span class="text-danger">*</span></h4>
-                    </ion-label>
-                    <ion-radio-group class="w-100" v-model="vehiclePlugsNeeded" v-for="vari in productVariations" :key="vari.id">
-                      <ion-item v-if="vari.name == 'Plug(s) Needed' && vari.purchasable">
-                        <ion-label class="ion-text-wrap">{{vari.title}}</ion-label>
-                        <ion-radio slot="start" :color="(selectedProduct.source == 'TIPM' ? 'primary' : 'tertiary')" :value="vari"></ion-radio>
-                      </ion-item>
-                    </ion-radio-group>
-                    <ion-radio-group class="w-100" v-model="vehicleFCMPartNumber" v-for="vari in productVariations" :key="vari.id">
-                      <ion-item v-if="vari.name == 'FCM Part Number' && vari.purchasable">
-                        <ion-label class="ion-text-wrap">{{vari.title}}</ion-label>
-                        <ion-radio slot="start" :color="(selectedProduct.source == 'TIPM' ? 'primary' : 'tertiary')" :value="vari"></ion-radio>
-                      </ion-item>
-                    </ion-radio-group>
-                  </ion-item>
-                </ion-list>
-
-                <ion-list lines="full" class="ion-no-margin" mode="ios" v-if="selectedProduct.source == 'ECM' && !selectedProduct.isNonECMTIPM">
-                  <ion-item lines="none" class="ion-no-padding mb-2" style="--inner-padding-end:0" id="vinNumber">
-                    <ion-label position="stacked" color="text-dark">
-                      <h4 class="fw-bold mb-2 header-class">17-Digit VIN <span class="text-danger">*</span></h4>
-                      Your VIN# is needed for us to program the unit.
-                    </ion-label>
-                    <ion-input :type="'text'" class="mt-2 text-uppercase bg-light" v-model="vinInput" maxlength="17" placeholder="VIN Nunber" required></ion-input>
-                  </ion-item>
-                  <div>
-                    <div v-if="isVinMatchingLoading" class="d-flex justify-content-center align-items-center h-100">
-                      <dot-loader :loading="isVinMatchingLoading" :color="color" :size="size" class="mt-5"></dot-loader>
-                    </div>
-                    <div :class="'alert alert-'+(vinMatchingResult ? 'success' : 'danger')+' mt-2'" role="alert" v-if="showVinMatchingResult">
-                      Your Vehicle: <br/>{{vehicleNameVinResult}}<br/>
-                      <b>Your vehicle <span v-if="!vinMatchingResult">might not</span> matched this {{this.selectedProduct.source}}!</b>
-                    </div>
-                    <div class="alert alert-danger mt-2" role="alert" v-if="showifVinisInvalid">
-                      <b>You entered an invalid VIN number</b>
-                      <p v-html="vinErrorMessage"></p>
-                    </div>
-                  </div>
-                  <ion-item lines="none" class="ion-no-padding mb-2" style="--inner-padding-end:0">
-                    <ion-label position="stacked" color="text-dark" class="ion-text-wrap">
-                      <h4 class="fw-bold mb-2 header-class">Current Mileage</h4>
-                      Enter mileage and transmission type here or leave blank, and our Customer Service  team will reach out to you if needed for your ECM /PCM.
-                      Mileage entered should be accurate to +/- 10 miles of actual when the ECM is installed.
-                      If you plan to be driving this vehicle, leave blank and we will contact you before shipment or Call Us with Questions.
-                    </ion-label>
-                    <ion-input class="mt-2 bg-light" type="number" placeholder="Current Mileage" v-model="vehicleCurrentMileage"></ion-input>
-                  </ion-item>
-                  <ion-item lines="none" class="ion-no-padding mb-2" style="--inner-padding-end:0">
-                    <ion-label position="stacked" color="text-dark" class="ion-text-wrap">
-                      <h4 class="fw-bold mb-2 header-class">Transmission Type</h4>
-                      Please confirm your Transmission Type:
-                    </ion-label>
-                    <ion-radio-group class="w-100" v-model="vehicleTransmissionType">
-                      <ion-item>
-                        <ion-label>Automatic</ion-label>
-                        <ion-radio slot="start" color="tertiary" value="Automatic_0" ></ion-radio>
-                      </ion-item>
-
-                      <ion-item>
-                        <ion-label>Manual</ion-label>
-                        <ion-radio slot="start" color="tertiary" value="Manual_1"></ion-radio>
-                      </ion-item>
-                    </ion-radio-group>
-                  </ion-item>
-                  <ion-item lines="none" class="ion-no-padding mb-2" style="--inner-padding-end:0">
-                    <ion-label position="stacked" color="text-dark"  class="ion-text-wrap">
-                      <h4 class="fw-bold mb-2 header-class">Rental Program Option</h4>
-                      Sometimes after you purchase an ECM, you discover the real problem was not in the ECM and you just needed it for troubleshooting.
-                      With MAK'S, you may convert your purchase to a rental at any time during the first 30 days.
-                      See our <b>Warranty Information & Returns Policy</b> for more information.
-                    </ion-label>
-                  </ion-item>
-                </ion-list>
-
-                <ion-list lines="full" class="ion-no-margin" mode="ios" v-if="selectedProduct.source == 'TIPM' && !selectedProduct.isNonECMTIPM">
-                  <ion-item lines="none" class="ion-no-padding mb-2" style="--inner-padding-end:0">
-                    <ion-label position="stacked" color="text-dark">
-                      <h4 class="fw-bold mb-2 header-class-tipm">Verify VIN (Optional)</h4>
-                    </ion-label>
-                    <ion-input type="text" class="mt-2 text-uppercase bg-light" v-model="vinInput" maxlength="17" placeholder="VIN Nunber"></ion-input>
-                  </ion-item>
-                  <div>
-                    <div v-if="isVinMatchingLoading" class="d-flex justify-content-center align-items-center h-100">
-                      <dot-loader :loading="isVinMatchingLoading" :color="color" :size="size" class="mt-5"></dot-loader>
-                    </div>
-                    <div :class="'alert alert-'+(vinMatchingResult ? 'success' : 'danger')+' mt-2'" role="alert" v-if="showVinMatchingResult">
-                      Your Vehicle: <br/>{{vehicleNameVinResult}}<br/>
-                      <b>Your vehicle <span v-if="!vinMatchingResult">might not</span> matched this {{this.selectedProduct.source}}!</b>
-                    </div>
-                    <div class="alert alert-danger mt-2" role="alert" v-if="showifVinisInvalid">
-                      <b>You entered an invalid VIN number</b>
-                      <p v-html="vinErrorMessage"></p>
-                    </div>
-                  </div>
-                  <ion-item lines="none" class="ion-no-padding mb-2" style="--inner-padding-end:0" id="4x4checker">
-                    <ion-label position="stacked" color="text-dark" class="ion-text-wrap">
-                      <h4 class="fw-bold mb-2 header-class-tipm">4x4 Check <span class="text-danger">*</span></h4>
-                      Please confirm if your vehicle has 4x4 or not:
-                    </ion-label>
-                    <ion-radio-group class="w-100" v-model="vehicle4by4Check">
-                      <ion-item>
-                        <ion-label>With 4x4</ion-label>
-                        <ion-radio slot="start" color="primary" value="W/ 4x4_0"></ion-radio>
-                      </ion-item>
-
-                      <ion-item>
-                        <ion-label>Without 4x4</ion-label>
-                        <ion-radio slot="start" color="primary" value="W/O 4x4_1"></ion-radio>
-                      </ion-item>
-                    </ion-radio-group>
-                  </ion-item>
-                  <ion-item lines="none" class="ion-no-padding mb-2" style="--inner-padding-end:0" v-if="!selectedProduct.isNew">
-                    <ion-label position="stacked" color="text-dark" class="ion-text-wrap">
-                      <h4 class="fw-bold mb-2 header-class-tipm">Lid Options <span class="text-danger">*</span></h4>
-                      TIPM lids are not included in the price. The majority of TIPMs we rebuild come to us with missing or broken lids.
-                      Re-using your old lid will help us and the environment. You may request a lid for a $15.00 surcharge.<br/><br/>
-                      Re-using your old lid will not lower the value of your old TIPM under our Core Buyback Program.
-                    </ion-label>
-                    <ion-radio-group class="w-100" v-model="vehicleLidOptions">
-                      <ion-item>
-                        <ion-label>Include a Lid <b class="ms-2">$15.00</b></ion-label>
-                        <ion-radio slot="start" color="primary" value="Include a Lid_0"></ion-radio>
-                      </ion-item>
-
-                      <ion-item>
-                        <ion-label>No Lid Needed <b class="ms-2">$0.00</b></ion-label>
-                        <ion-radio slot="start" color="primary" value="No Lid Needed_1"></ion-radio>
-                      </ion-item>
-                    </ion-radio-group>
-                  </ion-item>
-                  <ion-item lines="none" class="ion-no-padding mb-2" style="--inner-padding-end:0">
-                    <ion-label position="stacked" color="text-dark"  class="ion-text-wrap">
-                      <h4 class="fw-bold mb-2 header-class-tipm">Rental Program Option</h4>
-                      Sometimes after you purchase a TIPM, you discover the real problem was not in the TIPM and you just needed it for troubleshooting.
-                      With MAK'S, you may convert your purchase to a rental at any time during the first 30 days.
-                      See our <b>Warranty Information & Returns Policy</b> for more information.
-                    </ion-label>
-                  </ion-item>
-                  <ion-item lines="none" class="ion-no-padding mb-2" style="--inner-padding-end:0" v-if="productsWithCoreRefund.includes(productID)">
-                    <ion-label position="stacked" color="text-dark"  class="ion-text-wrap">
-                      <h4 class="fw-bold mb-2 header-class-tipm">Core Refund Program</h4>
-                      Use slider to set your own core fee and get double your money back!
-                    </ion-label>
-                  </ion-item>
-                  <span v-if="productsWithCoreRefund.includes(productID)">
-                    <ion-range :min="0" :max="75" v-model="vehicleCoreFee">
-                        <ion-label slot="end">Core Fee: $ {{parseInt(vehicleCoreFee)}}.00</ion-label>
-                    </ion-range>
-                    <span>You get back <b>${{parseInt(vehicleCoreFee)*2}}.00</b> when you send in your old core under our <b class="color-primary">Core Buyback Program</b>.</span>
-                  </span>
-                </ion-list>
-
-              </div>
-            </ion-accordion> -->
+        <ion-accordion-group :multiple="true" :value="['information','reviews']" ref="accordionGroup" @ionChange="accordionGroupChange($event)">
             <ion-accordion value="description" class="bg-default">
               <ion-item slot="header" color="light">
                 <ion-label>Description</ion-label>
@@ -365,7 +199,7 @@
 
           <ion-button class="w-100"
           style="height: 6vh"
-          :color="selectedProduct.badge.includes('ecm') ? 'tertiary' : ''"
+          :color="defaultColor"
           :disabled="isOutofStock" v-if="!isOutofStock"
           @click="showRequiredFieldsModal(selectedProduct)">
             <ion-icon :icon="cartOutline" class="me-2"></ion-icon>
@@ -429,8 +263,7 @@ export default defineComponent({
     DotLoader
   },
   computed: mapState([
-    'sessionDataTIPM',
-    'sessionDataECM',
+    'sessionData',
     'selectedProduct',
     'shopperApprovedData',
     'productBackRoute',
@@ -439,9 +272,9 @@ export default defineComponent({
   ]),
   data() {
     return {
+      session_Data: null,
       productID: null,
       site: null,
-      sessionData: null,
       productOrigin: null,
       shopperapprovedStoreID: null,
       shopperapprovedToken: null,
@@ -474,33 +307,6 @@ export default defineComponent({
         keyboard: false,
       },
       color: null,
-      // ninthDigitVinError: false,
-      // vinInput: null,
-      // showVinMatchingResult: false,
-      // vehicleNameVinResult: null,
-      // vehicleCurrentMileage: null,
-      // vehicleTransmissionType: null,
-      // vinMatchingResult: false,
-      // isVinMatchingLoading: false,
-      // isVariationLoading: false,
-      // hardwareCodes: null,
-      // vehicleLidOptions: null,
-      // lidOptionsPrice: 0,
-      // coreFeePrice: 0,
-      // productOptionsTotalPrice: 0,
-      // vehicle4by4Check: null,
-      // vehicleCoreFee: 0,
-      // vehiclePlugsNeeded: null,
-      // vehicleFCMPartNumber: null,
-      // addPriceifLidIncluded: 0,
-      // defaultCoreFee: 0,
-      // defaultOpen: [],
-      // vinErrorMessage: null,
-      // showifVinisInvalid: false,
-      // isVariationRequired: true,
-      // productVariationName: null,
-      // isRequiredFieldsVisible: false,
-      // productVariations: [],
     }
   },
   setup() {
@@ -510,21 +316,8 @@ export default defineComponent({
         event.target.complete();
       }, 2000);
     }
-    // const accordionGroup = ref(null);
-    // const toggleAccordion = function () {
-    //   if (!accordionGroup.value) {
-    //     return;
-    //   }
-    //   const nativeEl = accordionGroup.value.$el;
-    //   if (!nativeEl.value.includes('fields')) {
-    //     nativeEl.value = undefined;
-    //     nativeEl.value = ['fields'];
-    //   }
-
-    // };
     return {
       doRefresh, arrowBackOutline,
-      //accordionGroup, toggleAccordion,
       starOutline, star, chevronBackOutline,
       heartOutline, cartOutline, enterOutline,
       openOutline
@@ -538,43 +331,6 @@ export default defineComponent({
         this.color = '#568E3E';
       }
     },
-    // vinInput: function (newVal) {
-    //   if (newVal.length == 17) {
-    //     if (this.validateVin(newVal)) {
-    //       this.showifVinisInvalid = false;
-    //       this.getVinDetails(newVal);
-    //     } else {
-    //       this.showifVinisInvalid = true;
-    //       this.vinErrorMessage = 'Double check your VIN or <a target="_blank" href="https://vpic.nhtsa.dot.gov/decoder/CheckDigit/Index/'+newVal+'" class="text-decoration-none">Click here</a> for more details';
-    //     }
-    //   } else {
-    //     this.showVinMatchingResult = false,
-    //     this.vehicleNameVinResult = null,
-    //     this.vinMatchingResult = false,
-    //     this.isVinMatchingLoading = false;
-    //     this.showifVinisInvalid = false;
-    //   }
-    // },
-    // vehicleLidOptions: function (newVal) {
-    //   var price = this.selectedProduct.price.includes('.') ? this.selectedProduct.price : this.selectedProduct.price+'.00';
-    //   if (newVal == 'Include a Lid_0') {
-    //     this.lidOptionsPrice = this.addPriceifLidIncluded;
-    //   } else {
-    //     this.lidOptionsPrice = 0;
-    //   }
-    //   this.productPrice = this.computePriceAddToCart(price);
-    // },
-    // vehicleCoreFee: function (newVal) {
-    //   var price = this.selectedProduct.price.includes('.') ? this.selectedProduct.price : this.selectedProduct.price+'.00';
-    //   this.coreFeePrice  = parseInt(newVal);
-    //   this.productPrice = this.computePriceAddToCart(price);
-    // },
-    // vehiclePlugsNeeded: function () {
-    //   this.isVariationRequired = false;
-    // },
-    // vehicleFCMPartNumber: function () {
-    //   this.isVariationRequired = false;
-    // }
   },
   methods: {
     async dismiss() {
@@ -650,15 +406,6 @@ export default defineComponent({
 
       this.getProductRatings();
       this.getProductReviews();
-      // if (this.selectedProduct.variations.length) {
-      //   this.getProductVariations(this.selectedProduct.id);
-      // }
-      // if ((this.selectedProduct.variations.length == 0) && this.selectedProduct.isNonECMTIPM) {
-      //   this.isVariationRequired = false;
-      // }
-      // if (this.selectedProduct.variations.length || !this.selectedProduct.isNonECMTIPM) {
-      //   this.isRequiredFieldsVisible = true;
-      // }
       
       setTimeout(() => {
         this.changePaginationBulletColors();
@@ -669,6 +416,11 @@ export default defineComponent({
       axios.get(SettingsConstants.BASE_URL + 'productREST.php?op=get_details&site='+site+'&product_id='+productId, { crossdomain: true })
         .then(function (response) {
           var prod = response.data;
+          if (site.includes('ecm')) {
+            prod.source = 'ECM';
+          } else {
+            prod.source = 'TIPM';
+          }
           prod.name = prod.name.replace('LIKE NEW', 'LIKE_NEW');
           prod.name_title = '';
           prod.name_subtitle = '';
@@ -723,10 +475,10 @@ export default defineComponent({
     },
     waitListButtonClicked: function () {
       if (this.sessionData) {
-        this.checkIfUserIsAlreadyInWaitlist(this.sessionData);
-      } else {
-        this.toggleWaitlistModal();
+        this.waitListEmail = this.sessionData.email;
+        //this.checkIfUserIsAlreadyInWaitlist(this.sessionData);
       }
+      this.toggleWaitlistModal();
     },
     cancel() {
       this.$refs.waitlistModal.$el.dismiss(null, 'cancel');
@@ -747,14 +499,9 @@ export default defineComponent({
             response.data.forEach(function (cust){
               cust._yoast_wpseo_profile_updated = cust.meta_data.filter((met) => met.key == '_yoast_wpseo_profile_updated')[0].value;
             });
+            // this.session_Data = response.data[0];
+            store.commit('SET_SESSION_DATA', { 'email': email});
             this.checkIfUserIsAlreadyInWaitlist(response.data[0]);
-            // store.commit('SET_SESSION_DATA', response.data[0]);
-            if (this.selectedProduct.source == 'ECM') {
-              store.commit('SET_SESSION_DATA_ECM', response.data[0]);
-            } else {
-              store.commit('SET_SESSION_DATA_TIPM', response.data[0]);
-            }
-            this.sessionData = response.data[0];
           } else {
             this.checkIfUserIsAdmin(email);
           }
@@ -772,6 +519,14 @@ export default defineComponent({
         .then(function (response) {
           if (!response.data) {
             this.createCustomerAccount(email, null, this.color, false);
+          } else {
+            Swal.fire({
+              title: 'Error!',
+              text: 'Unable to add an Admin account to waitlist, only customers are allowed to use this feature!',
+              icon:'error',
+              confirmButtonColor: this.color,
+            });
+            this.isAddingToWaitlistLoading = false;
           }
         }.bind(this));
     },
@@ -785,7 +540,7 @@ export default defineComponent({
         }
         axios({
             method: "post",
-            url: SettingsConstants.BASE_URL + "customerREST.php?op=create_customer&site="+SettingsConstants.TIPMSITE,
+            url: SettingsConstants.BASE_URL + "customerREST.php?op=create_customer&site="+this.site,
             data: bodyFormData,
             headers: { "Content-Type": "multipart/form-data" },
         })
@@ -800,14 +555,8 @@ export default defineComponent({
                 });
             }
             response.data._yoast_wpseo_profile_updated = response.data.meta_data.filter((met) => met.key == '_yoast_wpseo_profile_updated')[0].value;
-            // store.commit('SET_SESSION_DATA', response.data);
-            if (this.selectedProduct.source == 'ECM') {
-              store.commit('SET_SESSION_DATA_ECM', response.data);
-            } else {
-              store.commit('SET_SESSION_DATA_TIPM', response.data);
-            }
-            this.sessionData = response.data[0];
-            this.addUserToWaitlistTEST();
+            store.commit('SET_SESSION_DATA', { 'email' : email});
+            this.addUserToWaitlist(response.data);
         }
         }.bind(this));
     },
@@ -816,7 +565,6 @@ export default defineComponent({
       var exist = false;
       this.selectedProduct.meta_data.forEach(function (key){
         if (key.key == "woocommerce_waitlist"){
-          //exist = key.value.filter((waitlist) => (waitlist[user.id]) == user._yoast_wpseo_profile_updated);
           exist = key.value[user.id]; 
         }
       }.bind(this));
@@ -824,19 +572,19 @@ export default defineComponent({
       if (exist) {
         Swal.fire({
           title: 'Already on waitlist!',
-          text: 'Your email is already on the waitlist for this product.',
+          text: user.email+' is already on the waitlist for this product.',
           icon:'success',
           confirmButtonColor: this.color,
         });
         this.isAddingToWaitlistLoading = false;
       } else {
-        this.addUserToWaitlistTEST();
+        this.addUserToWaitlist(user);
       }
     },
-    addUserToWaitlistTEST: function () {
+    addUserToWaitlist: function (user) {
       this.selectedProduct.meta_data.forEach(function (key){
         if (key.key == "woocommerce_waitlist"){
-            key.value[this.sessionData.id] = parseInt(this.sessionData._yoast_wpseo_profile_updated);
+          key.value[user.id] = parseInt(user._yoast_wpseo_profile_updated);
         }
       }.bind(this));
       var bodyFormData = new FormData();
@@ -849,8 +597,6 @@ export default defineComponent({
       })
           .then(function (response) {
             if (response.data) {
-              //console.log('Success!');
-              //console.log(JSON.stringify(response.data));
               Swal.fire({
                 title: 'Great!',
                 text: 'Email has been added to waitlist',
@@ -866,202 +612,20 @@ export default defineComponent({
     toggleWaitlistModal: function () {
       this.isWaitlistModalOpen = !this.isWaitlistModalOpen;
     },
-    // getAllProductsWithCoreRefundProgram: function () {
-    //   if (this.productsWithCoreRefund.includes(this.productID)) {
-    //     this.coreFeePrice = this.defaultCoreFee;
-    //     this.vehicleCoreFee = this.defaultCoreFee;
-    //   }
-    // },
-    // addProductToCart: function () {
-    //   var cart_data = new Object();
-    //   var productID = null;
-    //   if (this.vehiclePlugsNeeded || this.vehicleFCMPartNumber) {
-    //     (this.vehiclePlugsNeeded ? productID = this.vehiclePlugsNeeded.id : productID = this.vehicleFCMPartNumber.id);
-    //   } else {
-    //     productID = this.productID;
-    //   }
-    //   if (!this.isVariationRequired) {
-    //     this.addToCart(productID, this.productOrigin, cart_data);
-    //   } else {
-    //     switch (this.productOrigin) {
-    //       case 'ECM':
-    //         if (this.vinInput && (this.vinInput.length == 17) && this.vinMatchingResult) {
-    //           cart_data = {
-    //             'Enter_Your_17_digit_VIN': this.vinInput,
-    //             'This_Vehicle' : this.vehicleNameVinResult,
-    //             'Transmission_Type': this.vehicleTransmissionType,
-    //             'Current_Mileage' : this.vehicleCurrentMileage,
-    //             'FxF_Check': this.vehicle4by4Check,
-    //             'Lid_Options': this.vehicleLidOptions
-    //           }
-    //         }
-    //         break;
-    //       case 'TIPM':
-    //         var logic = this.selectedProduct.isNew ? (this.vehicle4by4Check) : (this.vehicle4by4Check && this.vehicleLidOptions); 
-    //         if (logic) {
-    //           cart_data = {
-    //             'Enter_Your_17_digit_VIN': this.vinInput,
-    //             'This_Vehicle' : this.vehicleNameVinResult,
-    //             'FxF_Check': this.vehicle4by4Check,
-    //             'Lid_Options': this.vehicleLidOptions,
-    //             'Core_Fee': this.vehicleCoreFee
-    //           }
-    //         }
-    //         break;
-    //     }
-    //     if (!Object.keys(cart_data).length == 0) {
-    //       this.addToCart(productID, this.productOrigin, JSON.stringify(cart_data));
-    //     } else {
-    //       this.presentAlert();
-    //     }
-    //   }
-    // },
-    // getProductVariations: function (productId) {
-    //   this.isVariationLoading = true;
-    //   //var url = this.selectedProduct.permalink.split('.com/')[0]+'.com/wp-json/wc/v3/products/'+productId+'/variations';
-    //   axios.get(SettingsConstants.BASE_URL + 'productREST.php?op=get_product_variation_byid&site='+this.site+'&product_id='+productId, { crossdomain: true })
-    //     .then(function (response) {
-    //       if (response.data) {
-    //         this.isVariationLoading = false;
-    //         this.productVariations = response.data;
-    //         this.productVariations.forEach(function (variation) {
-    //           variation.title = variation.attributes[0].option;
-    //           variation.name = variation.attributes[0].name;
-    //           this.productVariationName = variation.attributes[0].name;
-    //         }.bind(this));
-    //       }
-    //     }.bind(this));
-    // },
-    // getVinDetails: function (vin) {
-    //   this.isVinMatchingLoading = true;
-    //   this.showVinMatchingResult = false;
-    //   axios.get('https://vpic.nhtsa.dot.gov/api/vehicles/decodevin/'+vin+'?format=json', { crossdomain: true })
-    //   .then(function (response) {
-    //     if (response.data) {
-    //       var trim = ``;
-    //       var possibleSlugvalues = [];
-    //       var year = response.data.Results.filter(function (vin) { return vin.Variable == 'Model Year'})[0].Value;
-    //       if (year) {
-    //         var make = response.data.Results.filter(function (vin) { return vin.Variable == 'Make'})[0].Value.toLowerCase();
-    //         var model = response.data.Results.filter(function (vin) { return vin.Variable == 'Model'})[0].Value.replace(' and ',' ').toLowerCase();
-    //         var engine = response.data.Results.filter(function (vin) { return vin.Variable == 'Displacement (L)'})[0].Value;
-    //         if (engine == '5.9' && make.toLowerCase() == 'dodge') {
-    //           model = model + ' 2500';
-    //         }
-    //         if (!engine.includes('.')) {
-    //           engine = engine+'.0L';
-    //         } else {
-    //           engine = engine+'L';
-    //         }
-    //         if (response.data.Results.filter(function (vin) { return vin.Variable == 'Trim'})[0].Value) {
-    //           trim = response.data.Results.filter(function (vin) { return vin.Variable == 'Trim'})[0].Value.toLowerCase();
-    //           if (model.toLowerCase() == 'ram') {
-    //               switch (trim.toLowerCase()) {
-    //                   case 'cargo van':
-    //                       trim = 'c-v';
-    //                       break;
-    //                   case 'dt':
-    //                       trim = '';
-    //                       break;
-    //                   default:
-    //                       trim = trim.replace(/\D/g, '');
-    //                       break;
-    //               }
-    //           }
-    //           possibleSlugvalues.push(model+'-'+trim+'-'+make+'-'+year);
-    //         }
-    //         possibleSlugvalues.push(model+'-'+make+'-'+year);
-    //         if (model.split(' ').length > 1) {
-    //           model.split(' ').forEach( function (m){
-    //               possibleSlugvalues.push(m+'-'+make+'-'+year);
-    //               if (trim) {
-    //                   possibleSlugvalues.push(m+'-'+trim+'-'+make+'-'+year);
-    //               }
-    //           })
-    //         }
-    //         if (model.split('/').length > 1) {
-    //             possibleSlugvalues.push(model.split('/')[0].replace(/\s/g,'-')+'-'+make+'-'+year);
-    //             possibleSlugvalues.push(model.split('/')[1].replace(/\s/g,'-')+'-'+make+'-'+year);
-    //         }
-    //         var matchCount = 0;
-    //         possibleSlugvalues.forEach( function (slug, idx, array){
-    //           slug = slug.replace(/\s/g,'-');
-    //           this.vehicleNameVinResult = (year+` `+response.data.Results.filter(function (vin) { return vin.Variable == 'Make'})[0].Value+` `+response.data.Results.filter(function (vin) { return vin.Variable == 'Model'})[0].Value+` `+trim+` `+engine).toUpperCase();
-    //           if (this.selectedProduct.source == 'ECM') {
-    //             if (this.selectedProduct.categories.filter((cat) => cat.slug == slug).length && this.selectedProduct.name.includes(engine)) {
-    //               matchCount++;
-    //               this.vinMatchingResult = true;
-    //             }
-    //           } else {
-    //             if (this.selectedProduct.categories.filter((cat) => cat.slug == slug).length) {
-    //               matchCount++;
-    //               this.vinMatchingResult = true;
-    //             }
-    //           }
-    //           if (idx === array.length - 1 && matchCount == 0) {
-    //             this.vinMatchingResult = false;
-    //           }
-    //           if (idx === array.length - 1) {
-    //             this.showVinMatchingResult = true;
-    //           }
-    //           this.isVinMatchingLoading = false;
-    //         }.bind(this));
-    //       } else {
-    //         this.isVinMatchingLoading = false;
-    //       }
-    //     }
-    //   }.bind(this));
-    // },
-    // async presentAlert() {
-    //   var message = null;
-    //   var elementToScroll = document.getElementById("requiredFields");
-    //   if (this.productOrigin == 'TIPM') {
-    //     if (this.selectedProduct.isNonECMTIPM) {
-    //       message = 'Some fields are required!';
-    //     } else if (this.selectedProduct.isNew) {
-    //       message = '<b>4x4 Check</b> is required!';
-    //     }
-    //     else {
-    //       message = '<b>4x4 Check</b> and <b>Lid Options</b> are required!';
-    //     }
-    //   } else {
-    //     if (this.selectedProduct.isNonECMTIPM) {
-    //       message = 'Some fields are required!';
-    //     } else {
-    //       message = 'Your <b>VIN Number</b> is needed for us to program the unit.';
-    //     }
-    //   }
-    //   const alert = await alertController.create({
-    //     header: 'Required Fields!',
-    //     message: message,
-    //     buttons: [
-    //       {
-    //         text: 'OK',
-    //         role: 'confirm',
-    //         handler: () => {
-    //           this.toggleAccordion();
-    //           elementToScroll.scrollIntoView();
-    //         },
-    //       },
-    //     ],
-    //   });
-
-    //   await alert.present();
-    // },
+    accordionGroupChange: function (event) {
+      console.log(event);
+      $('h2.accordion-header br').remove();
+      $('.accordion-item p').remove();
+    }
   },
   mounted () {
-    // this.addPriceifLidIncluded = SettingsConstants.ADDED_PRICE_OF_LID;
-    // this.defaultCoreFee = SettingsConstants.ADDED_PRICE_OF_DEFAULT_COREFEE;
     if (this.selectedProduct && this.selectedProduct.source == 'ECM') {
       this.getHardwareCodes();
       this.color = '#3A7CA5';
       this.site = SettingsConstants.ECMSITE;
-      this.sessionData = this.sessionDataECM;
     } else {
-      //this.getAllProductsWithCoreRefundProgram();
       this.color = '#487436';
       this.site = SettingsConstants.TIPMSITE;
-      this.sessionData = this.sessionDataTIPM;
     }
     if (this.selectedProduct.id) {
       this.initProduct();
@@ -1079,13 +643,6 @@ export default defineComponent({
       this.waitListBanner = 'https://tipmrebuilders.com/wp-content/uploads/2022/01/email_banner.png';
     }
 
-    
-    //this.defaultOpen = ;
-    // if (!this.isOutofStock && this.isVariationRequired) {
-    //   this.defaultOpen = ['fields', 'reviews'];
-    // } else {
-    //   this.defaultOpen = ['information','reviews'];
-    // }
   },
   created () {
     this.lastPath = this.$router.options.history.state.back;

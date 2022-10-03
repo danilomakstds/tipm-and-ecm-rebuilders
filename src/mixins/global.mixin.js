@@ -549,9 +549,12 @@ export default {
             productPrice = this.formatRegularPrice(productPrice.toString());
             return productPrice;
         },
-        createAccount: function (email, password, color, showAlert) {
+        createAccount: function (email, password, color, showAlert, site) {
             if (!color) {
                 color = '#4b7838';
+            }
+            if (!site) {
+                site = SettingsConstants.TIPMSITE;
             }
             var bodyFormData = new FormData();
             bodyFormData.append('email', email);
@@ -562,7 +565,7 @@ export default {
             }
             axios({
                 method: "post",
-                url: SettingsConstants.BASE_URL + "customerREST.php?op=create_customer&site="+SettingsConstants.TIPMSITE,
+                url: SettingsConstants.BASE_URL + "customerREST.php?op=create_customer&site="+site,
                 data: bodyFormData,
                 headers: { "Content-Type": "multipart/form-data" },
             })
@@ -576,7 +579,7 @@ export default {
                         confirmButtonColor: color,
                     });
                 }
-                store.commit('SET_SESSION_DATA', response.data);
+                store.commit('SET_SESSION_DATA', { email : response.data.email});
                 console.log(response.data)
             }
             }.bind(this));

@@ -27,7 +27,7 @@
         <ion-refresher-content></ion-refresher-content>
       </ion-refresher>
 
-      <ion-segment @change="segmentChanged(event)" v-model="selectedSegment">
+      <ion-segment @change="segmentChanged(event)" v-model="selectedSegment" :disabled="isLoading">
         <ion-segment-button value="tipm">
           <ion-label>TIPM
             <span class="badge rounded-pill bg-danger" v-if="cartItemsTIPMCount">{{cartItemsTIPMCount}}</span></ion-label>
@@ -434,6 +434,9 @@ export default defineComponent({
   },
   created () {
     this.lastPath = this.$router.options.history.state.back;
+    if (!this.lastPath) {
+      this.lastPath = '/';
+    }
   },
 });
 </script>
