@@ -34,7 +34,7 @@
                 <ion-label color="light">{{selectedProduct.name.split(' ')[0].replace('_',' ')}}</ion-label>
             </ion-chip>
 
-            <ion-chip class="bg-white float-end" @click="seeAllReviews()">
+            <ion-chip class="bg-white float-end" @click="seeAllReviews()" :disabled="!isPurchasable">
                 <ion-icon :icon="star" color="warning"></ion-icon>
                 <ion-label color="dark">{{productRatings}}</ion-label>
             </ion-chip>
@@ -50,7 +50,7 @@
 
           <p class="affirm-as-low-as" data-page-type="product"
           :data-amount="productPrice.toString().replace('.','')"
-          style="font-size:11px" v-if="!isOutofStock && productPrice"></p>
+          style="font-size:11px" v-if="!isOutofStock && productPrice && isPurchasable"></p>
 
           <p v-html="selectedProduct.short_description" style="font-size: 15px" class="text-muted fst-italic">
           </p>
@@ -58,7 +58,7 @@
 
 
 
-        <ion-accordion-group :multiple="true" :value="['information','reviews']" ref="accordionGroup" @ionChange="accordionGroupChange($event)">
+        <ion-accordion-group :multiple="true" :value="['information','reviews']" ref="accordionGroup" @ionChange="accordionGroupChange($event)" v-if="isPurchasable">
             <ion-accordion value="description" class="bg-default">
               <ion-item slot="header" color="light">
                 <ion-label>Description</ion-label>
@@ -200,7 +200,7 @@
           <ion-button class="w-100"
           style="height: 6vh"
           :color="defaultColor"
-          :disabled="isOutofStock" v-if="!isOutofStock"
+          :disabled="isOutofStock || !isPurchasable" v-if="!isOutofStock"
           @click="showRequiredFieldsModal(selectedProduct)">
             <ion-icon :icon="cartOutline" class="me-2"></ion-icon>
             Add to cart
@@ -265,6 +265,7 @@ export default defineComponent({
   computed: mapState([
     'sessionData',
     'selectedProduct',
+    'sessionDataVIN',
     'shopperApprovedData',
     'productBackRoute',
     'productsWithCoreRefund',
@@ -285,6 +286,7 @@ export default defineComponent({
       defaultColor: null,
       productReviews: [],
       isOutofStock: false,
+      isPurchasable: true,
       isOnSale: false,
       lastPath: null,
       isLoading: false,
@@ -385,6 +387,7 @@ export default defineComponent({
       this.productID = this.selectedProduct.id.toString();
       this.isOnSale = this.selectedProduct.on_sale;
       this.isOutofStock = (this.selectedProduct.stock_status == 'outofstock') ? true: false;
+      this.isPurchasable = (this.selectedProduct.purchasable == true) ? true: false;
       
       this.productPrice = this.formatRegularPrice(this.selectedProduct.price);
       this.productDescription = this.updateWarantyImage(this.selectedProduct.description);

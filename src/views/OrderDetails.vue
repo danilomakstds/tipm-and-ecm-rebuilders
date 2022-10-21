@@ -56,12 +56,12 @@
                     <div class="col-4 d-flex align-items-center">
                       <img :src="order.image.src"/>
                     </div>
-                    <div class="col-12 text-end">
+                    <!-- <div class="col-12 text-end">
                       <ion-chip class="bg-light float-end" style="font-size:1.5vh;">
                           <ion-icon :icon="star" color="warning"></ion-icon>
                           <ion-label color="dark">Rating</ion-label>
                       </ion-chip>
-                    </div>
+                    </div> -->
                 </div>
               </ion-item>
             </div>
@@ -71,7 +71,8 @@
             <div class="overflow-hidden mt-2" v-if="trackingCourier != 'none'">
               <img src="../../resources/FedEx_logo_orange-purple-700x196.png" style="height:20px" v-if="trackingCourier == 'fedex'" class="float-start"/>
               <img src="../../resources/DHL-Emblem.png" style="height:20px" v-if="trackingCourier == 'dhl'" class="float-start"/>
-              <img src="../../resources/usps-logo.png" style="height:35px" v-if="trackingCourier == 'stamps_com'" class="float-start"/>
+              <img src="../../resources/Stamps_com_logo.png" style="height:25px" v-if="trackingCourier == 'stamps_com'" class="float-start"/>
+              <img src="../../resources/usps-logo.png" style="height:35px" v-if="trackingCourier == 'usps'" class="float-start"/>
             </div>
             <h5 class="overflow-hidden">
                 <span v-if="trackingNumber">
@@ -93,16 +94,24 @@
             <div class="container" v-if="!isLoading">
               <div class="row">
                 <div class="col-12 offset-md-3">
-                  <ul class="timeline">
+                  <ul class="timeline" v-if="!showErrorMessage">
                     <li v-for="(timeline, index) in trackingTimeLine" :key="index" :class="'courier-color-'+trackingCourier">
-                      <span class="fw-bold">{{timeline.derivedStatus}}</span><br/>
+                      <span class="fw-bold">{{timeline.derivedStatus}}</span><br v-if="timeline.derivedStatus"/>
                       <span>{{timeline.eventDescription}}</span>
-                      <p>{{timeline.current_location}}</p>
+                      <p v-if="timeline.current_location">{{timeline.current_location}}</p>
+                      <br v-else/>
                       <span class="text-muted2">
                         {{timeline.date}}
                       </span>
                     </li>
                   </ul>
+
+                  <div class="alert alert-danger" role="alert" v-if="showErrorMessage">
+                    No tracking information is available for this order number. Click <a class="fw-bold text-decoration-none" target="_blank" :href="'https://www.stamps.com/tracking-details/?t='+trackingNumber">here</a> to track using the stamp.com tracker.
+                  </div>
+                  <!-- <div class="alert alert-info" role="alert" v-if="showErrorMessageNoCarrier">
+                    No tracking information is available for this order number. Order might be on .
+                  </div> -->
                 </div>
               </div>
             </div>
@@ -117,10 +126,17 @@
         <div class="order-1 bd-highlight">
           <div class="mapouter overflow-hidden" style="">
             <div class="gmap_canvas h-100">
-              <iframe height="500" id="gmap_canvas"
-              src="https://maps.google.com/maps?q=9531%20Cozycroft%20Ave,%20Chatsworth,%20CA%2091311,%20United%20States&t=&z=16&ie=UTF8&iwloc=&output=embed"
+              <iframe height="500" id="gmap_canvas" v-if="mapURL"
+              :src="mapURL"
               frameborder="0" scrolling="no" marginheight="0" marginwidth="0" ></iframe>
+              <iframe height="500" id="gmap_canvas" v-else
+              :src="'https://maps.google.com/maps?q='+latitude+','+longitude+'&t=&z=16&ie=UTF8&iwloc=&output=embed'"
+              frameborder="0" scrolling="no" marginheight="0" marginwidth="0" ></iframe>
+              <!-- src="https://maps.google.com/maps?q=9531%20Cozycroft%20Ave,%20Chatsworth,%20CA%2091311,%20United%20States&t=&z=16&ie=UTF8&iwloc=&output=embed" -->
             </div>
+            <div> <!--
+              mapURL
+            --></div>
           </div>
         </div>
       </div>
@@ -172,7 +188,8 @@ import { defineComponent } from 'vue';
 import { IonPage,
 IonHeader, IonToolbar,
 // IonTitle, IonButtons,
-IonButton, IonChip, IonLabel,
+IonButton,
+//IonChip, IonLabel,
 IonIcon, IonItem,
 IonContent, IonRefresher, IonRefresherContent,
 IonFab, IonFabButton,
@@ -200,7 +217,8 @@ export default defineComponent({
   components: {
     IonHeader, IonToolbar,
     // IonTitle, IonButtons,
-    IonButton, IonChip, IonLabel,
+    IonButton,
+    //IonChip, IonLabel,
     IonIcon, IonItem,
     IonPage, IonContent, DotLoader,
     IonRefresher, IonRefresherContent,
@@ -209,6 +227,7 @@ export default defineComponent({
   },
   computed: mapState([
     'trackedOrderNumber',
+    'trackedOrderReview',
     'customerOrderNumberList',
     'customerOrderWatchList',
     'onlineStatus'
@@ -230,15 +249,6 @@ export default defineComponent({
   },
   data() {
     return {
-      center: {lat: 51.093048, lng: 6.842120},
-      markers: [
-        {
-          position: {
-            lat: 51.093048, lng: 6.842120
-          },
-        }
-        , // Along list of clusters
-      ],
       lastPath: null,
       fedexToken: null,
       trackingResults: null,
@@ -254,6 +264,11 @@ export default defineComponent({
       productBadge: null,
       productType: null,
       orderDoesnotExist: false,
+      showErrorMessage: false,
+      latitude: '34.24373',
+      longitude: '-118.5828095',
+      isMapSet: false,
+      mapURL: null,
     }
   },
   methods: {
@@ -306,30 +321,52 @@ export default defineComponent({
       }.bind(this));
     },
     getShipstationDetails: function () {
+      this.isLoading = true;
       axios.get(SettingsConstants.SHIPSTATION_BASE_URL +'?op=search_order_by_number&order_number='+this.trackedOrderNumber , { crossdomain: true })
         .then(function (response) {
           if (response.data.orders.length) {
-            this.trackingCourier = response.data.orders[0].carrierCode;
+
+            if (!response.data.orders[0].carrierCode) {
+              this.isLoading = false;
+            } else {
+              switch (true) {
+                case response.data.orders[0].carrierCode.toLowerCase().includes('dhl'):
+                  this.trackingCourier = 'dhl';
+                  this.trackingURL = 'https://www.dhl.com/global-en/home/tracking/tracking-express.html?submit=1&tracking-id=';
+                  break;
+                case response.data.orders[0].carrierCode.toLowerCase().includes('fedex'):
+                  this.trackingCourier = 'fedex';
+                  this.trackingURL = 'https://www.fedex.com/fedextrack/?trknbr=';
+                  break;
+                case response.data.orders[0].carrierCode.toLowerCase().includes('stamps_com'):
+                  this.trackingCourier = 'stamps_com';
+                  this.trackingURL = 'https://tools.usps.com/go/TrackConfirmAction?tRef=fullpage&tLc=2&text28777=&tLabels=';
+                  break;
+              }
+            }
+
+            
+            
             this.getTrackingNumber();
             this.wooOrderId = response.data.orders[0].orderKey;
             this.getWooOrderDetails(response.data.orders[0].orderKey);
             var timeline = [];
-            if (response.data.orders[0].orderStatus == "cancelled") {
-              timeline.current_location = 'Chatsworth CA, US';
-              timeline.eventDescription = 'Order was Cancelled.';
-              timeline.derivedStatus = 'Cancelled';
-              timeline.shipstation_data = response.data;
-              timeline.date = moment(response.data.orders[0].orderDate).format('L LT');
-              this.trackingTimeLine.push(timeline);
-              this.trackingCourier = 'none';
-            } else {
-              timeline.current_location = 'Chatsworth CA, US';
-              timeline.eventDescription = 'Order Being Processed.';
-              timeline.derivedStatus = 'Awaiting Shipment';
-              timeline.shipstation_data = response.data;
-              timeline.date = moment(response.data.orders[0].orderDate).format('L LT');
-              this.trackingTimeLine.push(timeline);
-            }
+              if (response.data.orders[0].orderStatus == "cancelled") {
+                timeline.current_location = 'Chatsworth CA, US';
+                timeline.eventDescription = 'Order was Cancelled.';
+                timeline.derivedStatus = 'Cancelled';
+                timeline.shipstation_data = response.data;
+                timeline.date = moment(response.data.orders[0].orderDate).format('L LT');
+                this.trackingTimeLine.push(timeline);
+                this.trackingCourier = 'none';
+              } else {
+                timeline.current_location = 'Chatsworth CA, US';
+                timeline.eventDescription = 'Order Being Processed.';
+                timeline.derivedStatus = 'Awaiting Shipment';
+                timeline.shipstation_data = response.data;
+                timeline.date = moment(response.data.orders[0].orderDate).format('L LT');
+                this.trackingTimeLine.push(timeline);
+              }
           } else {
             this.orderDoesnotExist = true;
           }
@@ -353,12 +390,14 @@ export default defineComponent({
           if (idx == 0) {
             timeline.derivedStatus = this.trackingResults.status.remark;
             timeline.eventDescription = this.trackingResults.status.description;
-            timeline.date = moment(timeline.timestamp).format('L LT');
-            timeline.current_location = timeline.location.address.addressLocality;
           } else {
             timeline.eventDescription = timeline.description;
-            timeline.date = moment(timeline.timestamp).format('L LT');
-            timeline.current_location = timeline.location.address.addressLocality;    
+          }
+          timeline.date = moment(timeline.timestamp).format('L LT');
+          timeline.current_location = timeline.location.address.addressLocality;
+          if (!this.isMapSet) {
+            this.isMapSet = true;
+            this.mapURL = 'https://maps.google.com/maps?q='+this.trackingResults.destination.address.addressLocality.replace(/ /g,'%20')+'&t=&z=12&ie=UTF8&iwloc=&output=embed'
           }
           this.isLoading = false;
         }.bind(this));
@@ -395,6 +434,10 @@ export default defineComponent({
               } else {
                 timeline.current_location = timeline.scanLocation.city + ', ' + timeline.scanLocation.stateOrProvinceCode;
               }
+              if (!this.isMapSet) {
+                this.isMapSet = true;
+                this.mapURL = 'https://maps.google.com/maps?q='+timeline.current_location.replace(/ /g,'%20')+'&t=&z=12&ie=UTF8&iwloc=&output=embed'
+              }
               if (timeline.eventDescription == 'Picked up') {
                 timeline.eventDescription = 'PACKAGE RECEIVED BY FEDEX';
               }
@@ -409,8 +452,10 @@ export default defineComponent({
       }.bind(this));
     },
     getStampsComTrackingInfo: function (tracking) {
+      this.showErrorMessage = false;
       this.trackingNumber = tracking[0].trackingNumber;
-      this.trackingURL = 'https://tools.usps.com/go/TrackConfirmAction?tRef=fullpage&tLc=2&text28777=&tLabels='+this.trackingNumber+'%2C';
+      
+      this.trackingURL = this.trackingURL+this.trackingNumber;
       axios.get(SettingsConstants.STAMPS_COM_BASE_URL + 'op=get_tracking_details&tracking_number='+ this.trackingNumber+'&carrier_code='+this.trackingCourier ,{crossdomain: true ,})
       .then(function (response) {
           if (response.data) {
@@ -423,14 +468,25 @@ export default defineComponent({
               tracking.forEach(function (timeline){
                 timeline.date = moment(timeline.occurred_at).format('L LT');
                 timeline.eventDescription = timeline.carrier_status_description;
-                timeline.current_location = timeline.city_locality + ', ' + timeline.state_province + ', ' + timeline.postal_code;
+                if (timeline.city_locality) {
+                  timeline.current_location = timeline.city_locality + ', ' + timeline.state_province + ', ' + timeline.postal_code;
+                }
+                if (timeline.latitude && timeline.longitude && !this.isMapSet) {
+                  this.isMapSet = true;
+                  this.latitude = timeline.latitude;
+                  this.longitude = timeline.longitude;
+                }
               }.bind(this));
             }
             [].push.apply( tracking, this.trackingTimeLine);
             this.trackingTimeLine = tracking;
             this.isLoading = false;
           }
-      }.bind(this));
+      }.bind(this))
+      .catch ( () => {
+        this.isLoading = false;
+        this.showErrorMessage = true;
+      });
     },
     getWooOrderDetails: function (wooOrderId) {
       var site = null;

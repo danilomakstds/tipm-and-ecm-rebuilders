@@ -169,10 +169,12 @@ import store from '../store'
 import $ from 'jquery'
 import Swal from 'sweetalert2'
 import { mapState } from 'vuex'
+import Mixin from '../mixins/global.mixin'
 
 
 export default defineComponent({
   name: 'TabsPage',
+  mixins: [Mixin],
   components: {
     DotLoader,
     IonTabs, IonTabBar, IonTabButton,
@@ -263,8 +265,7 @@ export default defineComponent({
     },
     searchVinNumber: function (newVal) {
       if (newVal) {
-        store.commit('SET_SEARCH_VIN_NUMBER', newVal);
-
+          store.commit('SET_SEARCH_VIN_NUMBER', this.cleanVinNumber(newVal));
           store.commit('SET_SEARCH_KEYWORD', null);
           store.commit('SET_SELECTED_MODEL', null);
           store.commit('SET_SELECTED_MAKE', null);
@@ -275,6 +276,7 @@ export default defineComponent({
           this.searchKeywordPartNumber = null;
         
         if (newVal.length == 17) {
+          store.commit('SET_SESSION_DATA_VIN', this.cleanVinNumber(newVal));
           this.isSearchDisabled = false;
         } else {
           this.isSearchDisabled = true;
@@ -376,9 +378,9 @@ export default defineComponent({
       this.emitter.emit('triggerSearch');
       if (this.searchVinNumber) {
         if (this.sessionData) {
-          this.$router.push({path: '/tabs/products', query: {part___or_vin: this.searchVinNumber, email: this.sessionData.email} });
+          this.$router.push({path: '/tabs/products', query: {part___or_vin: this.cleanVinNumber(this.searchVinNumber), email: this.sessionData.email} });
         } else {
-          this.$router.push({path: '/tabs/products', query: {part___or_vin: this.searchVinNumber} });
+          this.$router.push({path: '/tabs/products', query: {part___or_vin: this.cleanVinNumber(this.searchVinNumber)} });
         }
       } else {
         if (this.sessionData) {

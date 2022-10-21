@@ -14,6 +14,7 @@ export default createStore({
     searchVinNumber: null,
     fedexToken: null,
     trackedOrderNumber: null,
+    trackedOrderReview: null,
     youtubeVideoList: [],
     youtubeChannelInfo: null,
     customerOrderNumberList: [],
@@ -32,7 +33,8 @@ export default createStore({
     productsWith4x4: [],
     productsWithOutLidOptions: [],
     onlineStatus: false,
-    
+    allSiteReviewsTIPM: [],
+    allSiteReviewsECM: [],
   },
   mutations: {
     SET_SESSION_DATA: function (state, sessionData) {
@@ -76,6 +78,9 @@ export default createStore({
     },
     SET_TRACKED_ORDER_NUMBER: function (state, trackedOrderNumber) {
       state.trackedOrderNumber = trackedOrderNumber;
+    },
+    SET_TRACKED_ORDER_REVIEW: function (state, trackedOrderReview) {
+      state.trackedOrderReview = trackedOrderReview;
     },
     SET_YOUTUBE_VIDEOLIST: function (state, youtubeVideoList) {
       state.youtubeVideoList = youtubeVideoList;
@@ -164,7 +169,19 @@ export default createStore({
     },
     SET_ONLINE_STATUS: function (state, onlineStatus) {
       state.onlineStatus = onlineStatus;
-    }
+    },
+    SET_SITE_REVIEWS_TIPM: function (state, allSiteReviewsTIPM) {
+      state.allSiteReviewsTIPM = allSiteReviewsTIPM;
+    },
+    RESET_SITE_REVIEWS_TIPM: function (state) {
+      state.allSiteReviewsTIPM = [];
+    },
+    SET_SITE_REVIEWS_ECM: function (state, allSiteReviewsECM) {
+      state.allSiteReviewsECM = allSiteReviewsECM;
+    },
+    RESET_SITE_REVIEWS_ECM: function (state) {
+      state.allSiteReviewsECM = [];
+    },
   },
   getters: {
 

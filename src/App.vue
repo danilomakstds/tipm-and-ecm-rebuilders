@@ -19,14 +19,16 @@
             <ion-title class="text-center">$ {{productPrice}}</ion-title>
             <ion-buttons slot="end">
               <ion-button :strong="true" @click="addProductToCart()"
-              :style="'--color:' + (productSource == 'ECM' ? '#3A7CA5' : '#487436')">
+              :style="'--color:' + (productSource == 'ECM' ? '#3A7CA5' : '#487436')"
+              :disabled="isTIPMVinNumberRequired && !vinMatchingResult"
+              >
               <!-- <ion-icon :icon="cartOutline" class="me-2"></ion-icon> -->
               Confirm</ion-button>
             </ion-buttons>
           </ion-toolbar>
           <ion-toolbar class="p-0">
             <div class="p-4 text-white" :style="'background-color: '+(productSource == 'ECM' ? '#3A7CA5' : '#487436')+'; font-size: 14px;'" role="alert">
-                {{selectedProduct.name.replace('amp;','')}}
+                {{selectedProductData.name.replace('amp;','')}}
             </div>
           </ion-toolbar>
         </ion-header>
@@ -38,27 +40,27 @@
               <dot-loader :loading="isVariationsLoading" :color="color" :size="size" class="mt-3 mb-3"></dot-loader>
             </div>
 
-            <ion-list lines="full" class="ion-no-margin" mode="ios" v-if="selectedProduct.variations.length">
+            <ion-list lines="full" class="ion-no-margin" mode="ios" v-if="selectedProductData.variations.length">
               <ion-item lines="none" class="ion-no-padding mb-2" style="--inner-padding-end:0" id="variation-items">
                 <ion-label position="stacked" color="text-dark" class="ion-text-wrap">
-                  <h4 :class="'fw-bold mb-2 header-class-'+(selectedProduct.source == 'TIPM' ? 'tipm' : '')">{{productVariationName}} <span class="text-danger" v-if="productVariationName">*</span></h4>
+                  <h4 :class="'fw-bold mb-2 header-class-'+(selectedProductData.source == 'TIPM' ? 'tipm' : '')">{{productVariationName}} <span class="text-danger" v-if="productVariationName">*</span></h4>
                 </ion-label>
                 <ion-radio-group class="w-100" v-model="vehiclePlugsNeeded" v-for="vari in productVariations" :key="vari.id">
                   <ion-item v-if="vari.name == 'Plug(s) Needed' && vari.purchasable">
                     <ion-label class="ion-text-wrap">{{vari.title}}</ion-label>
-                    <ion-radio slot="start" :color="(selectedProduct.source == 'TIPM' ? 'primary' : 'tertiary')" :value="vari"></ion-radio>
+                    <ion-radio slot="start" :color="(selectedProductData.source == 'TIPM' ? 'primary' : 'tertiary')" :value="vari"></ion-radio>
                   </ion-item>
                 </ion-radio-group>
                 <ion-radio-group class="w-100" v-model="vehicleFCMPartNumber" v-for="vari in productVariations" :key="vari.id">
                   <ion-item v-if="vari.name == 'FCM Part Number' && vari.purchasable">
                     <ion-label class="ion-text-wrap">{{vari.title}}</ion-label>
-                    <ion-radio slot="start" :color="(selectedProduct.source == 'TIPM' ? 'primary' : 'tertiary')" :value="vari"></ion-radio>
+                    <ion-radio slot="start" :color="(selectedProductData.source == 'TIPM' ? 'primary' : 'tertiary')" :value="vari"></ion-radio>
                   </ion-item>
                 </ion-radio-group>
               </ion-item>
             </ion-list>
 
-            <ion-list lines="full" class="ion-no-margin" mode="ios" v-if="productSource == 'ECM' && !selectedProduct.isNonECMTIPM">
+            <ion-list lines="full" class="ion-no-margin" mode="ios" v-if="productSource == 'ECM' && !selectedProductData.isNonECMTIPM">
               <ion-item lines="none" class="ion-no-padding mb-2" style="--inner-padding-end:0" id="vinNumber">
                 <ion-label position="stacked" color="text-dark">
                   <h4 class="fw-bold mb-2 header-class">17-Digit VIN <span class="text-danger">*</span></h4>
@@ -72,7 +74,7 @@
                 </div>
                 <div :class="'alert alert-'+(vinMatchingResult ? 'success' : 'danger')+' mt-2'" role="alert" v-if="showVinMatchingResult">
                   Your Vehicle: <br/>{{vehicleNameVinResult}}<br/>
-                  <b>Your vehicle <span v-if="!vinMatchingResult">might not</span> matched this {{selectedProduct.source}}!</b>
+                  <b>Your vehicle <span v-if="!vinMatchingResult">might not</span> matched this {{selectedProductData.source}}!</b>
                 </div>
                 <div class="alert alert-danger mt-2" role="alert" v-if="showifVinisInvalid">
                   <b>You entered an invalid VIN number</b>
@@ -116,10 +118,18 @@
               </ion-item>
               <br/><br/><br/>
             </ion-list>
-            <ion-list lines="full" class="ion-no-margin" mode="ios" v-if="productSource == 'TIPM' && !selectedProduct.isNonECMTIPM">
+            <ion-list lines="full" class="ion-no-margin" mode="ios" v-if="productSource == 'TIPM' && !selectedProductData.isNonECMTIPM">
+
+              <div class="alert alert-danger" role="alert" v-if="isTIPMVinNumberRequired && !vinMatchingResult">
+                VIN Number is required.
+              </div>
+
               <ion-item lines="none" class="ion-no-padding mb-2" style="--inner-padding-end:0">
                 <ion-label position="stacked" color="text-dark">
-                  <h4 class="fw-bold mb-2 header-class-tipm">Verify VIN (Optional)</h4>
+                  <h4 class="fw-bold mb-2 header-class-tipm">Verify VIN
+                    <span class="text-danger" v-if="isTIPMVinNumberRequired">*</span>
+                    <span v-else>(Optional)</span>
+                  </h4>
                 </ion-label>
                 <ion-input class="mt-2 text-uppercase bg-white vin-input-field" v-model="vinInput" maxlength="17" placeholder="VIN Nunber"></ion-input>
               </ion-item>
@@ -129,7 +139,7 @@
                 </div>
                 <div :class="'alert alert-'+(vinMatchingResult ? 'success' : 'danger')+' mt-2'" role="alert" v-if="showVinMatchingResult">
                   Your Vehicle: <br/>{{vehicleNameVinResult}}<br/>
-                  <b>Your vehicle <span v-if="!vinMatchingResult">might not</span> matched this {{selectedProduct.source}}!</b>
+                  <b>Your vehicle <span v-if="!vinMatchingResult">might not</span> matched this {{selectedProductData.source}}!</b>
                 </div>
                 <div class="alert alert-danger mt-2" role="alert" v-if="showifVinisInvalid">
                   <b>You entered an invalid VIN number</b>
@@ -150,6 +160,32 @@
                   <ion-item>
                     <ion-label>Without 4x4</ion-label>
                     <ion-radio slot="start" color="primary" value="W/O 4x4_1"></ion-radio>
+                  </ion-item>
+                </ion-radio-group>
+              </ion-item>
+              <ion-item lines="none" class="ion-no-padding mb-2" style="--inner-padding-end:0" id="vehicle-config" v-if="isVehicleConfigVisible">
+                <ion-label position="stacked" color="text-dark">
+                  <h4 class="fw-bold mb-2 header-class-tipm">Vehicle Configuration <span class="text-danger">*</span></h4>
+                </ion-label>
+                <ion-radio-group class="w-100" v-model="vehicleConfig">
+                  <ion-item>
+                    <ion-label class="ion-text-wrap">Purchase <strong>${{addedPriceVehicleConfig}}.00</strong>
+                    <br />
+                    <span class="fst-italic">
+                    Using your unique VIN, this service will configure your TIPM to all the current settings of your vehicle - pulled straight from the manufacturer’s database!
+                    </span>
+                    </ion-label>
+                    <ion-radio slot="start" color="primary" value="Purchase_0"></ion-radio>
+                  </ion-item>
+
+                  <ion-item>
+                    <ion-label class="ion-text-wrap">Decline <strong>$0.00</strong>
+                      <br />
+                      <span class="fst-italic">
+                      I acknowledge by declining this service, a vehicle configuration may still be required even after following Mak’s provided installation instructions. 
+                      </span>
+                    </ion-label>
+                    <ion-radio slot="start" color="primary" value="Decline_1"></ion-radio>
                   </ion-item>
                 </ion-radio-group>
               </ion-item>
@@ -257,7 +293,7 @@ export default defineComponent({
   mixins: [Mixin],
   watch: {
     vehicleLidOptions: function (newVal) {
-      var price = this.selectedProduct.price.includes('.') ? this.selectedProduct.price : this.selectedProduct.price+'.00';
+      var price = this.selectedProductData.price.includes('.') ? this.selectedProductData.price : this.selectedProductData.price+'.00';
       if (newVal == 'Include a Lid_0') {
         this.lidOptionsPrice = this.addPriceifLidIncluded;
       } else {
@@ -266,12 +302,27 @@ export default defineComponent({
       this.productPrice = this.computePriceAddToCart(price);
     },
     vehicleCoreFee: function (newVal) {
-      var price = this.selectedProduct.price.includes('.') ? this.selectedProduct.price : this.selectedProduct.price+'.00';
+      var price = this.selectedProductData.price.includes('.') ? this.selectedProductData.price : this.selectedProductData.price+'.00';
       this.coreFeePrice  = parseInt(newVal);
+      this.productPrice = this.computePriceAddToCart(price);
+    },
+    vehicleConfig: function (newVal) {
+      var price = this.selectedProductData.price.includes('.') ? this.selectedProductData.price : this.selectedProductData.price+'.00';
+      if (newVal == 'Purchase_0') {
+        this.vehicleConfigPrice = this.addedPriceVehicleConfig;
+        this.isTIPMVinNumberRequired = true;
+        //console.log(this.vinMatchingResult);
+      } else {
+        this.vehicleConfigPrice = 0;
+        this.isTIPMVinNumberRequired = false;
+        //console.log(this.vinMatchingResult);
+      }
       this.productPrice = this.computePriceAddToCart(price);
     },
     vinInput: function (newVal) {
       if (newVal.length == 17) {
+        newVal = newVal.replace(/I/gi,'1').replace(/O/gi,'0').replace(/Q/gi,'0');
+        this.vinInput = newVal;
         if (this.validateVin(newVal)) {
           this.showifVinisInvalid = false;
           this.getVinDetails(newVal);
@@ -307,7 +358,7 @@ export default defineComponent({
       isRequiredFieldsModalOpen: false,
       isVariationRequired: true,
       isVariationsLoading: false,
-      selectedProduct: null,
+      selectedProductData: null,
       productSource: null,
       showFullScreenLoader: false,
       productVariations: [],
@@ -323,12 +374,15 @@ export default defineComponent({
       isVinMatchingLoading: false,
       vehicleLidOptions: null,
       lidOptionsPrice: 0,
+      vehicleConfigPrice: 0,
       coreFeePrice: 0,
       productOptionsTotalPrice: 0,
       vehicle4by4Check: null,
+      vehicleConfig: null,
       vehicleCoreFee: 0,
       vehicleFCMPartNumber: null,
       addPriceifLidIncluded: 0,
+      addedPriceVehicleConfig: 0,
       defaultCoreFee: 0,
       productPrice: null,
       showifVinisInvalid: false,
@@ -338,6 +392,8 @@ export default defineComponent({
       color: null,
       is4x4Visible: true,
       isLidOptionsVisible: true,
+      isVehicleConfigVisible: true,
+      isTIPMVinNumberRequired: false,
 
       onLine: null,
     }
@@ -346,7 +402,8 @@ export default defineComponent({
     'productsWithCoreRefund',
     'productsWithOutLidOptions',
     'productsWith4x4',
-    'onlineStatus'
+    'onlineStatus',
+    'sessionDataVIN',
   ]),
   setup() {
     return {
@@ -379,22 +436,27 @@ export default defineComponent({
     },
     async presentAlert() {
       var message = null;
-      if (this.selectedProduct.source == 'TIPM') {
-        if (this.selectedProduct.isNonECMTIPM) {
+      if (this.selectedProductData.source == 'TIPM') {
+        if (this.selectedProductData.isNonECMTIPM) {
           message = 'Some fields are required!';
         } else {
-          if (this.is4x4Visible && this.isLidOptionsVisible) {
-            message = '<b>4x4 Check</b> and <b>Lid Options</b> are required!';
-          }
-          if (this.is4x4Visible && !this.isLidOptionsVisible) {
-            message = '<b>4x4 Check</b> is required!';
-          }
-          if (!this.is4x4Visible && this.isLidOptionsVisible) {
-            message = '<b>Lid Options</b> is required!';
+          switch (true) {
+            case (this.is4x4Visible && this.isLidOptionsVisible && this.isVehicleConfigVisible):
+              message = '<b>4x4 Check</b>, <b>Vehicle Configuration</b> and <b>Lid Options</b> are required!';
+              break;
+            case (this.is4x4Visible && this.isLidOptionsVisible):
+              message = '<b>4x4 Check</b> and <b>Lid Options</b> are required!';
+              break;
+            case (this.isVehicleConfigVisible && this.isLidOptionsVisible):
+              message = '<b>Vehicle Configuration</b> and <b>Lid Options</b> are required!';
+              break;
+            case (!this.is4x4Visible && !this.isVehicleConfigVisible && this.isLidOptionsVisible):
+              message = '<b>Lid Options</b> is required!';
+              break;
           }
         }
       } else {
-        if (this.selectedProduct.isNonECMTIPM) {
+        if (this.selectedProductData.isNonECMTIPM) {
           message = 'Some fields are required!';
         } else {
           message = 'Your <b>VIN Number</b> is needed for us to program the unit. Make sure your VIN matches this ECM!';
@@ -426,6 +488,7 @@ export default defineComponent({
       this.dismiss();
     },
     scanResultConfirm(code) {
+      store.commit('SET_SESSION_DATA_VIN', this.cleanVinNumber(code));
       this.cancel();
       this.emitter.emit('isScannedValueAvailable', code);
     },
@@ -475,7 +538,7 @@ export default defineComponent({
               var code = result.codeResult.code;
               if (this.lastBarcodeResult != code && code.length == 17) {
                 var audio = new Audio('./assets/beep-08b.mp3');
-                audio.volume = 0.2;
+                audio.volume = 0.1;
                 audio.play();
                 this.lastBarcodeResult = code;
                 //Quagga.stop();
@@ -492,6 +555,12 @@ export default defineComponent({
       if (product) {
         (!this.productsWith4x4.includes(product.id.toString())) ? this.is4x4Visible = false: this.is4x4Visible = true;
         (this.productsWithOutLidOptions.includes(product.id.toString())) ? this.isLidOptionsVisible = false : this.isLidOptionsVisible = true;
+        if (product.tags.find(tag => tag.name == 'TYPE_D')) {
+          this.isVehicleConfigVisible = true;
+        } else {
+          this.isVehicleConfigVisible = false;
+        }
+
         if (product.variations.length) {
           this.productVariations = [];
           this.getProductVariations(product.id, product.source);
@@ -500,9 +569,11 @@ export default defineComponent({
           this.isVariationRequired = false;
         }
         this.resetFields();
-        this.selectedProduct = product;
+        this.vinInput = this.sessionDataVIN;
+        this.selectedProductData = product;
         this.addPriceifLidIncluded = SettingsConstants.ADDED_PRICE_OF_LID;
         this.defaultCoreFee = SettingsConstants.ADDED_PRICE_OF_DEFAULT_COREFEE;
+        this.addedPriceVehicleConfig = SettingsConstants.ADDED_PRICE_OF_VEHICLE_CONFIG;
         this.productSource = product.source;
         product.source == 'TIPM' ? this.color = '#568E3E' :  this.color = '#348CA6';
         if (this.productsWithCoreRefund.includes(product.id.toString()) && product.source == 'TIPM') {
@@ -530,9 +601,9 @@ export default defineComponent({
       this.lidOptionsPrice = 0;
       this.coreFeePrice = 0;
       this.productOptionsTotalPrice = 0;
-      this.vehicle4by4Check = null;
       this.vehicleCoreFee = 0;
       this.addPriceifLidIncluded = 0;
+      this.addedPriceVehicleConfig = 0;
       this.defaultCoreFee = 0;
     },
     cancel() {
@@ -550,16 +621,22 @@ export default defineComponent({
           var make = response.data.Results.filter(function (vin) { return vin.Variable == 'Make'})[0].Value.toLowerCase();
           var model = response.data.Results.filter(function (vin) { return vin.Variable == 'Model'})[0].Value.replace(' and ',' ').toLowerCase();
           var engine = response.data.Results.filter(function (vin) { return vin.Variable == 'Displacement (L)'})[0].Value;
-          if (engine == '5.9' && make.toLowerCase() == 'dodge') {
-            model = model + ' 2500';
-          }
+          
           if (!engine.includes('.')) {
             engine = engine+'.0L';
           } else {
             engine = engine+'L';
           }
+          if (model == '300c') {
+            model = '300';
+          }
+          
           if (response.data.Results.filter(function (vin) { return vin.Variable == 'Trim'})[0].Value) {
             trim = response.data.Results.filter(function (vin) { return vin.Variable == 'Trim'})[0].Value.toLowerCase();
+            var series = null;
+            if (response.data.Results.filter(function (vin) { return vin.Variable == 'Series'})[0].Value) {
+              series = response.data.Results.filter(function (vin) { return vin.Variable == 'Series'})[0].Value.toLowerCase();
+            }
             if (model.toLowerCase() == 'ram') {
                 switch (trim.toLowerCase()) {
                     case 'cargo van':
@@ -572,12 +649,21 @@ export default defineComponent({
                         trim = trim.replace(/\D/g, '');
                         break;
                 }
+                switch (series) {
+                    case '3500w':
+                        trim = '3500';
+                        break;
+                    case '3500':
+                        trim = '3500';
+                        break;
+                }
             }
             switch (trim.toLowerCase()) {
               case '300m special':
                 trim = '300m';
                 break;
             }
+            
             possibleSlugvalues.push(trim+'-'+make+'-'+year);
             possibleSlugvalues.push(model+'-'+trim+'-'+make+'-'+year);
           }
@@ -598,13 +684,13 @@ export default defineComponent({
           possibleSlugvalues.forEach( function (slug, idx, array){
             slug = slug.replace(/\s/g,'-');
             this.vehicleNameVinResult = (year+` `+response.data.Results.filter(function (vin) { return vin.Variable == 'Make'})[0].Value+` `+response.data.Results.filter(function (vin) { return vin.Variable == 'Model'})[0].Value+` `+trim+` `+engine).toUpperCase();
-            if (this.selectedProduct.source == 'ECM') {
-              if (this.selectedProduct.categories.filter((cat) => cat.slug == slug).length && this.selectedProduct.name.includes(engine)) {
+            if (this.selectedProductData.source == 'ECM') {
+              if (this.selectedProductData.categories.filter((cat) => cat.slug == slug).length && this.selectedProductData.name.includes(engine)) {
                 matchCount++;
                 this.vinMatchingResult = true;
               }
             } else {
-              if (this.selectedProduct.categories.filter((cat) => cat.slug == slug).length) {
+              if (this.selectedProductData.categories.filter((cat) => cat.slug == slug).length) {
                 matchCount++;
                 this.vinMatchingResult = true;
               }
@@ -628,20 +714,31 @@ export default defineComponent({
       if (this.vehiclePlugsNeeded || this.vehicleFCMPartNumber) {
         (this.vehiclePlugsNeeded ? productID = this.vehiclePlugsNeeded.id : productID = this.vehicleFCMPartNumber.id);
       } else {
-        productID = this.selectedProduct.id;
+        productID = this.selectedProductData.id;
       }
-      if (!this.isVariationRequired || (!this.is4x4Visible && !this.isLidOptionsVisible)) {
-        this.addToCart(productID, this.selectedProduct.source, cart_data);
+      if (!this.isVariationRequired || (!this.is4x4Visible && !this.isLidOptionsVisible && !this.isVehicleConfigVisible)) {
+        this.addToCart(productID, this.selectedProductData.source, cart_data);
         this.$refs.modalRequiredFieldsAddtocart.$el.dismiss(null, 'confirm');
       } else {
         (this.is4x4Visible) ? requiredLength = requiredLength + 1: '';
         (this.isLidOptionsVisible) ? requiredLength = requiredLength + 1: '';
-        if (requiredLength == 2) {
-          logic = (this.vehicle4by4Check && this.vehicleLidOptions)
-        } else {
-          logic = (this.vehicle4by4Check || this.vehicleLidOptions)
+        (this.isVehicleConfigVisible) ? requiredLength = requiredLength + 1: '';
+        switch (requiredLength) {
+          case 1:
+            logic = (this.vehicle4by4Check || this.vehicleLidOptions || this.vehicleConfig)
+            break;
+          case 2:
+            if (this.isVehicleConfigVisible) {
+              logic = (this.vehicleConfig && this.vehicleLidOptions)
+            } else {
+              logic = (this.vehicle4by4Check && this.vehicleLidOptions)
+            }
+            break;
+          case 3:
+            logic = (this.vehicle4by4Check && this.vehicleLidOptions && this.vehicleConfig)
+            break;
         }
-        switch (this.selectedProduct.source) {
+        switch (this.selectedProductData.source) {
           case 'ECM':
             if (this.vinInput && (this.vinInput.length == 17) && this.vinMatchingResult) {
               cart_data = {
@@ -656,6 +753,7 @@ export default defineComponent({
             if (logic) {
               cart_data = {
                 'Enter_Your_17_digit_VIN': this.vinInput,
+                'vehicle_Config' : this.vehicleConfig,
                 'This_Vehicle' : this.vehicleNameVinResult,
                 'FxF_Check': this.vehicle4by4Check,
                 'Lid_Options': this.vehicleLidOptions,
@@ -665,7 +763,7 @@ export default defineComponent({
             break;
         }
         if (!Object.keys(cart_data).length == 0) {
-          this.addToCart(productID, this.selectedProduct.source, JSON.stringify(cart_data));
+          this.addToCart(productID, this.selectedProductData.source, JSON.stringify(cart_data));
           this.$refs.modalRequiredFieldsAddtocart.$el.dismiss(null, 'confirm');
         } else {
           this.presentAlert();
@@ -706,6 +804,7 @@ export default defineComponent({
     }
   },
   mounted () {
+    
     this.emitter.on('isShowRequiredFieldsModal', function (product) {
       if ((product.variations.length == 0) && product.isNonECMTIPM) {
         this.addToCart(product.id, product.source, new Object());

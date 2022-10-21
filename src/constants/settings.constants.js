@@ -38,6 +38,7 @@ const VIN_DECODE_URL = 'https://vpic.nhtsa.dot.gov/api/vehicles/decodevin/';
 const VALID_MAKE = ['chrysler','dodge', 'ram', 'jeep', 'volkswagen', 'fiat', 'plymouth'];
 //const BASIC_AUTH = 'Basic ZGFuaWxvQG1ha3NkdHMuY29tOmNob2NvUm9hc3QyMw==';
 const ADDED_PRICE_OF_LID = 15;
+const ADDED_PRICE_OF_VEHICLE_CONFIG = 75;
 const ADDED_PRICE_OF_DEFAULT_COREFEE = 40;
 
 export default {
@@ -69,5 +70,6 @@ export default {
     ADDED_PRICE_OF_LID: ADDED_PRICE_OF_LID,
     ADDED_PRICE_OF_DEFAULT_COREFEE: ADDED_PRICE_OF_DEFAULT_COREFEE,
     SHIP_ENGINE_APIKEY: SHIP_ENGINE_APIKEY,
-    STAMPS_COM_BASE_URL: STAMPS_COM_BASE_URL
+    STAMPS_COM_BASE_URL: STAMPS_COM_BASE_URL,
+    ADDED_PRICE_OF_VEHICLE_CONFIG: ADDED_PRICE_OF_VEHICLE_CONFIG
 }

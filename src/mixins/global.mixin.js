@@ -29,6 +29,9 @@ export default {
                 return null;
             }
         },
+        cleanVinNumber: function (vin) {
+            return vin.replace(/I/gi,'1').replace(/O/gi,'0').replace(/Q/gi,'0');
+        },
         formatRegularPrice (price) {
             var finalPrice = null;
             if (!price.includes('.')) {
@@ -299,7 +302,7 @@ export default {
 
                     item_data = {
                         "tmcartepo": [],
-                       'tmpost_data' : {
+                        'tmpost_data' : {
                             "tm-epo-counter": "1",
                             "tcaddtocart": id,
                             "quantity": "1",
@@ -314,6 +317,87 @@ export default {
                             "tc_default_currency": "USD",
                             "tmcartepo_data": []
                         },
+                    }
+
+                    if (cartdata.Enter_Your_17_digit_VIN && cartdata.vehicle_Config) {
+                        var VIN = {
+                            "mode": "builder",
+                            "element": {
+                                "type": "textfield",
+                                "_": {
+                                    "price_type": false
+                                }
+                            },
+                            "name": "VIN",
+                            "value": cartdata.Enter_Your_17_digit_VIN,
+                            "price": 0,
+                            "section": "632ba425c2a207.83054059",
+                            "section_label": "VIN",
+                            "percentcurrenttotal": 0,
+                            "fixedcurrenttotal": 0,
+                            "currencies": [],
+                            "quantity": 1,
+                            "key_id": 0,
+                            "keyvalue_id": 0
+                        }
+                        item_data.tmcartepo.push(VIN);
+                        item_data.tmpost_data.tmcp_textfield_3 = cartdata.Enter_Your_17_digit_VIN;
+                        item_data.tmdata.tmcp_post_fields.tmcp_textfield_3 = cartdata.Enter_Your_17_digit_VIN;
+                        item_data.tmdata.tmcartepo_data.push({
+                            "key": cartdata.Enter_Your_17_digit_VIN,
+                            "attribute": "tmcp_textfield_3"
+                        });
+                    }
+
+                    if (cartdata.vehicle_Config) {
+                        var vehicle_config = {
+                            "mode": "builder",
+                            "element": {
+                                "type": "radio",
+                                "rules": {
+                                    "Decline_1": [
+                                        "0"
+                                    ],
+                                    "Purchase_0": [
+                                        SettingsConstants.ADDED_PRICE_OF_VEHICLE_CONFIG.toString()
+                                    ]
+                                },
+                                "rules_type": {
+                                    "Decline_1": [
+                                        ""
+                                    ],
+                                    "Purchase_0": [
+                                        ""
+                                    ]
+                                },
+                                "_": {
+                                    "price_type": false
+                                }
+                            },
+                            "name": "Vehicle Configuration",
+                            "value": cartdata.vehicle_Config,
+                            "price": SettingsConstants.ADDED_PRICE_OF_VEHICLE_CONFIG,
+                            "section": "63476aefa92860.01180238",
+                            "section_label": "Vehicle Configuration",
+                            "percentcurrenttotal": 0,
+                            "fixedcurrenttotal": 0,
+                            "currencies": [],
+                            "price_per_currency": {
+                                "USD": SettingsConstants.ADDED_PRICE_OF_VEHICLE_CONFIG
+                            },
+                            "quantity": 1,
+                            "multiple": "1",
+                            "key": cartdata.vehicle_Config,
+                            "key_id": 0,
+                            "keyvalue_id": 0
+                        }
+                        item_data.tmcartepo.push(vehicle_config);
+                        item_data.tmpost_data.tmcp_radio_0 = cartdata.vehicle_Config;
+                        item_data.tmdata.tmcp_post_fields.tmcp_radio_0 = cartdata.vehicle_Config;
+                        item_data.tmdata.tmcartepo_data.push({
+                            "key": cartdata.vehicle_Config,
+                            "attribute": "tmcp_radio_0"
+                        });
                     }
 
                     if (cartdata.Core_Fee) {
@@ -436,14 +520,14 @@ export default {
                             },
                             "name": "Lid Options",
                             "value": cartdata.Lid_Options.split('_')[0],
-                            "price": 15,
+                            "price": SettingsConstants.ADDED_PRICE_OF_LID,
                             "section": "5e0a4fea7ba940.51559257",
                             "section_label": "Lid Options",
                             "percentcurrenttotal": 0,
                             "fixedcurrenttotal": 0,
                             "currencies": [],
                             "price_per_currency": {
-                                "USD": 15
+                                "USD": SettingsConstants.ADDED_PRICE_OF_LID
                             },
                             "quantity": 1,
                             "multiple": "1",
@@ -544,7 +628,7 @@ export default {
             return (vin.charAt(8) == (checksum < 10 ? checksum.toString() : "X"));
         },
         computePriceAddToCart: function (price) {
-            var addedPrice = this.coreFeePrice + this.lidOptionsPrice;
+            var addedPrice = this.coreFeePrice + this.lidOptionsPrice + this.vehicleConfigPrice;
             var productPrice = parseFloat(price) + parseFloat(addedPrice);
             productPrice = this.formatRegularPrice(productPrice.toString());
             return productPrice;

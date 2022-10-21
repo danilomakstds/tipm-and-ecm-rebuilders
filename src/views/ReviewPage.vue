@@ -176,7 +176,9 @@ export default defineComponent({
   computed: mapState([
       'shopperApprovedData',
       'selectedProduct',
-      'onlineStatus'
+      'onlineStatus',
+      'allSiteReviewsTIPM',
+      'allSiteReviewsECM'
   ]),
   setup() {
     const doRefresh = function (event) {
@@ -236,7 +238,7 @@ export default defineComponent({
   },
   methods: {
     getAllReviews: function () {
-      axios.get(SettingsConstants.SA_PRODUCT_REVIEWS +'/'+this.storeID +'/'+this.productID+this.token+'&limit=2000&asArray=true', { crossdomain: true })
+      axios.get(SettingsConstants.SA_PRODUCT_REVIEWS +'/'+this.storeID +'/'+this.productID+this.token+'&limit=3000&asArray=true', { crossdomain: true })
           .then(function (response) {
             if (response.data) {
               this.initReviews(response.data, 'rating');
@@ -244,25 +246,36 @@ export default defineComponent({
           }.bind(this));
     },
     getSiteReviews: function () {
-      axios.get(SettingsConstants.SA_SITE_REVIEWS +'/'+this.storeID +'/'+this.token+'&asArray=false&limit=2000', { crossdomain: true })
+      axios.get(SettingsConstants.SA_SITE_REVIEWS +'/'+this.storeID +'/'+this.token+'&asArray=false&limit=3000', { crossdomain: true })
           .then(function (response) {
             if (response.data) {
-              this.totalReviews = response.data.total_count;
-              var arr = [];
-              var total = 0;
-              for (const item in response.data) {
-                if (response.data[item]['overall']) {
-                  arr.push(response.data[item]);
-                  total = total + response.data[item]['overall'];
-                  if (response.data[item]['images']) {
-                    console.log('with images');
-                  }
-                }
+              switch (this.storeID) {
+                case SettingsConstants.SA_TIPM_ID:
+                  store.commit('SET_SITE_REVIEWS_TIPM', response.data);
+                  break;
+                case SettingsConstants.SA_ECM_ID:
+                  store.commit('SET_SITE_REVIEWS_ECM', response.data);
+                  break;
               }
-              this.averageRating = Math.round((total/this.totalReviews) * 10) / 10;
-              this.initReviews(arr, 'overall');
+              this.processSiteReviews(response);
             }
           }.bind(this));
+    },
+    processSiteReviews: function (response) {
+      this.totalReviews = response.data.total_count;
+      var arr = [];
+      var total = 0;
+      for (const item in response.data) {
+        if (response.data[item]['overall']) {
+          arr.push(response.data[item]);
+          total = total + response.data[item]['overall'];
+          if (response.data[item]['images']) {
+            console.log('with images');
+          }
+        }
+      }
+      this.averageRating = Math.round((total/this.totalReviews) * 10) / 10;
+      this.initReviews(arr, 'overall');
     },
     initReviews: function (data, type) {
       this.productReviews = data;
@@ -303,7 +316,7 @@ export default defineComponent({
     this.productID = this.shopperApprovedData.productID;
     this.token = this.shopperApprovedData.token;
     this.isLoading = true;
-    if (this.shopperApprovedData.details.average_rating == '0' || !this.shopperApprovedData.details.length) {
+    if (this.shopperApprovedData.details.average_rating == '0' || !this.shopperApprovedData.details) {
       this.averageRating = 0;
       this.showMessage = true;
       this.getSiteReviews();

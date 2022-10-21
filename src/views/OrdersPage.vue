@@ -26,7 +26,7 @@
         </ion-toolbar>
       </ion-header> -->
 
-    
+
       <div class="order-page">
         <div class="d-flex justify-content-center">
           <dot-loader :loading="isLoading" :color="color" :size="size"></dot-loader>
@@ -44,7 +44,7 @@
           <ion-label>Order Watchlist</ion-label>
         </ion-segment-button>
       </ion-segment>
-        
+
       <section v-if="!isLoading">
         <ion-list v-if="orderList.length && selectedSegment =='myOrders'" lines="none" class="mb-0 p-0">
           <ion-item-group>
@@ -63,8 +63,8 @@
                         <div class="col-4 p-3 pt-0 pe-0 pb-3">
                           <img :src="order.image.src"/>
                         </div>
-                        <div class="col-8 p-3 pt-0 pe-0 pb-3" style="font-size:1.8vh">  
-                          <span @click="setSelectedProduct(order.product_id, orderitem.number)">     
+                        <div class="col-8 p-3 pt-0 pe-0 pb-3" style="font-size:1.8vh">
+                          <span @click="setSelectedProduct(order.product_id, orderitem.number)">
                             <section v-if="!order.isNonECMTIPM">
                               <span :class="'badge rounded-pill text-white me-1 '+ order.pr_badge">{{order.badge.replace('_',' ')}}</span>
                               <span class="fw-normal">{{cleanString(order.name_title)}}</span>
@@ -73,12 +73,13 @@
                             <section v-else>
                               <span>{{order.name}}</span>
                             </section>
-                          </span> 
+                          </span>
                           <section class="d-flex justify-content-between">
                             <span class="float-start fw-bold mt-3" style="font-size: 1.4vh" @click="setSelectedProduct(order.product_id, orderitem.number)">$ {{order.total}}</span>
-                            <ion-chip class="bg-light mt-2" style="font-size:1.5vh">
+                            <ion-chip class="bg-light mt-2" style="font-size:1.5vh" >
                                 <ion-icon :icon="star" color="warning"></ion-icon>
-                                <ion-label color="dark">Review</ion-label>
+                                <ion-label color="dark" v-if="order.review">{{order.review.overall}}.0</ion-label>
+                                <ion-label color="dark" v-else>Review</ion-label>
                             </ion-chip>
                           </section>
                         </div>
@@ -87,8 +88,6 @@
                     </div>
                     <div class="col-3 price-div">
                       <div class="text-center d-flex flex-column align-items-center justify-content-center h-100">
-                        <ion-icon id="more-options" :icon="ellipsisHorizontal" color="medium" style="font-size: 24px;" @click="presentActionSheet"></ion-icon>
-                        
                         <section @click="trackOrder(orderitem.number)" class="d-flex flex-column">
                           <span style="font-size: 1.2vh">Total (1 item)</span>
                           <span class="fw-bold" style="font-size: 2vh"  >$ {{orderitem.total}}</span>
@@ -101,12 +100,12 @@
                     </div>
                   </div>
                 </ion-card-content>
-              
+
               </section>
             </ion-item>
           </ion-item-group>
         </ion-list>
-        
+
         <ion-list v-if="watchList.length && selectedSegment =='orderWatchlist'" lines="none" class="mb-0 p-0">
           <ion-item-group>
             <ion-item v-for="orderitem in watchList" :key="orderitem.id" class="ion-no-padding" style="--inner-padding-end:0">
@@ -124,7 +123,7 @@
                         <div class="col-4 p-3 pt-0 pe-0 pb-3">
                           <img :src="order.image.src"/>
                         </div>
-                        <div class="col-8 p-3 pt-0 pe-0 pb-3" style="font-size:1.8vh">        
+                        <div class="col-8 p-3 pt-0 pe-0 pb-3" style="font-size:1.8vh">
                           <span @click="setSelectedProduct(order.product_id, orderitem.number)">
                             <section v-if="!order.isNonECMTIPM">
                               <span :class="'badge rounded-pill text-white me-1 '+ order.pr_badge">{{order.badge.replace('_',' ')}}</span>
@@ -149,7 +148,7 @@
                     <div class="col-3 price-div">
                       <div class="text-center d-flex flex-column align-items-center justify-content-center h-100">
                         <ion-icon id="more-options" :icon="ellipsisHorizontal" color="medium" style="font-size: 24px;" @click="presentActionSheet"></ion-icon>
-                        
+
                         <section @click="trackOrder(orderitem.number)" class="d-flex flex-column">
                           <span style="font-size: 1.2vh">Total (1 item)</span>
                           <span class="fw-bold" style="font-size: 2vh">$ {{orderitem.total}}</span>
@@ -162,7 +161,7 @@
                     </div>
                   </div>
                 </ion-card-content>
-              
+
               </section>
             </ion-item>
           </ion-item-group>
@@ -174,10 +173,10 @@
         </div>
       </section>
 
-        
+
       </div>
       <br/>
-      
+
 
       <ion-fab vertical="bottom" horizontal="end" slot="fixed">
         <ion-fab-button id="open-modal">
@@ -206,8 +205,8 @@
           </div>
         </ion-content>
       </ion-modal>
-    
-      
+
+
     </ion-content>
   </ion-page>
 </template>
@@ -223,7 +222,7 @@ import { IonPage, IonHeader, IonToolbar, actionSheetController,
   //IonItemDivider,
   IonItemGroup
 } from '@ionic/vue';
-import { 
+import {
   arrowBackOutline, locateOutline, carSportOutline,
   listOutline, starOutline, arrowForwardOutline, star,
   mapOutline, navigateOutline, timeOutline, calendarOutline,
@@ -279,7 +278,7 @@ export default defineComponent({
       watchList: [],
       lastPath: null,
       selectedSegment: 'myOrders',
-      showZeroResult: false
+      showZeroResult: false,
     }
   },
   computed: mapState([
@@ -289,7 +288,9 @@ export default defineComponent({
     'customerOrderList',
     'customerOrderWatchList',
     'selectedProduct',
-    'onlineStatus'
+    'onlineStatus',
+    'allSiteReviewsTIPM',
+    'allSiteReviewsECM'
   ]),
   watch: {
     orderNumber: function (newVal) {
@@ -304,7 +305,7 @@ export default defineComponent({
       }
     }
   },
-  
+
   methods: {
     async presentActionSheet() {
         const actionSheet = await actionSheetController
@@ -316,7 +317,7 @@ export default defineComponent({
               text: 'Remove',
               icon: trashOutline,
               id: 'delete-button',
-              role: 'destructive', 
+              role: 'destructive',
               data: null,
               htmlAttributes: { disabled: 'true' },
               handler: () => {
@@ -382,34 +383,53 @@ export default defineComponent({
       .then(function (response) {
         if (response.data) {
           this.queryCounter = this.queryCounter+1;
-          console.log(response.data);
+          //console.log(response.data);
           response.data.forEach(function (orderitem) {
             orderitem.line_items.forEach(function (order){
               order.name = order.name.replace('LIKE NEW', 'LIKE_NEW');
               order.badge = order.name.split(' ')[0];
               order.name_title = '';
               order.name_subtitle = '';
+              var arr = [];
               var nonTIPMECM = ['repair', 'custom line', 'expedited', 'eddies'];
               order.isNonECMTIPM = false;
               var name = null;
-              if (!nonTIPMECM.find( function (arr) {
-                 return order.name.toLowerCase().includes(arr)
-                })) {
+              if (!nonTIPMECM.find( function (arr) { return order.name.toLowerCase().includes(arr) })) {
                 if (!orderitem.number.toLowerCase().includes('e-')) {
+                  order.review = null;
                   order.pr_badge = 'tipm-badge';
                   name = order.name.substr(order.name.indexOf(' ')+1).replace(/–/g,'-');
                   order.name_title = name.split('- Part')[0];
                   order.name_subtitle = '- Part' + name.split('- Part')[1];
+                  //store.commit('RESET_SITE_REVIEWS_TIPM');
+                  if (!this.allSiteReviewsTIPM) {
+                    this.getAllSiteReviews(SettingsConstants.SA_TIPM_ID, SettingsConstants.SA_TIPM_TOKEN);
+                  } else {
+                    for (const item in this.allSiteReviewsTIPM) {
+                      arr.push(this.allSiteReviewsTIPM[item]);
+                    }
+                    order.review = arr.filter( (rev) => rev.order_id == orderitem.number)[0];
+                  }
                 } else {
+                  order.review = null;
                   order.pr_badge = 'ecm-badge';
                   name = order.name.substr(order.name.indexOf(' ')+1).replace(/–/g,'-');
                   order.name_title = name.split('with')[0];
                   order.name_subtitle = 'with' + name.split('with')[1];
+                  //store.commit('RESET_SITE_REVIEWS_ECM');
+                  if (!this.allSiteReviewsECM) {
+                    this.getAllSiteReviews(SettingsConstants.SA_ECM_ID, SettingsConstants.SA_ECM_TOKEN);
+                  } else {
+                    for (const item in this.allSiteReviewsECM) {
+                      arr.push(this.allSiteReviewsECM[item]);
+                    }
+                    order.review = arr.filter( (rev) => rev.order_id == orderitem.number)[0];
+                  }
                 }
               } else {
                 order.isNonECMTIPM = true;
               }
-            }.bind(orderitem));
+            }.bind(this).bind(orderitem));
 
             if (orderitem.line_items.length) {
               orderitem.modified_date = moment(orderitem.date_created).format('L LT');
@@ -449,6 +469,7 @@ export default defineComponent({
                 name = order.name.substr(order.name.indexOf(' ')+1).replace(/–/g,'-');
                 order.name_title = name.split('- Part')[0];
                 order.name_subtitle = '- Part' + name.split('- Part')[1];
+                //this.getAllProductReviews(SettingsConstants.SA_ECM_ID, SettingsConstants.SA_ECM_TOKEN);
               } else {
                 order.pr_badge = 'ecm-badge';
                 name = order.name.substr(order.name.indexOf(' ')+1).replace(/–/g,'-');
@@ -464,8 +485,23 @@ export default defineComponent({
           orderitem.modified_date = moment(orderitem.date_created).format('L LT');
         }
         this.watchList.push(orderitem);
-          
+
         }.bind(this));
+    },
+    getAllSiteReviews: function (storeid, token) {
+      axios.get(SettingsConstants.SA_SITE_REVIEWS +'/'+storeid+'/'+token+'&asArray=false&limit=3000', { crossdomain: true })
+          .then(function (response) {
+            if (response.data) {
+              switch (storeid) {
+                case SettingsConstants.SA_TIPM_ID:
+                  store.commit('SET_SITE_REVIEWS_TIPM', response.data);
+                  break;
+                case SettingsConstants.SA_ECM_ID:
+                  store.commit('SET_SITE_REVIEWS_ECM', response.data);
+                  break;
+              }
+            }
+          }.bind(this));
     },
     setSelectedProduct: function (product, orderNumber) {
       var data = [];

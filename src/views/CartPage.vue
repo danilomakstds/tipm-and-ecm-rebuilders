@@ -314,7 +314,7 @@ export default defineComponent({
           this.processCartData(response, source);
           this.cartProcessCounter = this.cartProcessCounter + 1;
           if (this.cartProcessCounter == 2) {
-            setTimeout(this.setDefaultSegment(), 500);
+            setTimeout(this.setDefaultSegment(), 400);
           }
           this.isLoading = false;
         }.bind(this));

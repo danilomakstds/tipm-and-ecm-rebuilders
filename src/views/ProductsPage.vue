@@ -84,7 +84,7 @@
                     <ion-button
                     :color="(product.badge == 'ecm-badge') ? 'tertiary': ''"
                     class="float-end add-dimentions"
-                    :disabled="product.stock_status == 'outofstock'"
+                    :disabled="product.stock_status == 'outofstock' || product.purchasable == false"
                     @click="showRequiredFieldsModal(product)"
                     >
                         <ion-icon :icon="add"></ion-icon>
@@ -567,6 +567,9 @@ export default defineComponent({
                     if (this.vinModel.toLowerCase() == '500l') {
                       this.vinModel = '500';
                     }
+                    if (this.vinModel.toLowerCase() == '300c') {
+                      this.vinModel = '300';
+										}
                   }
                   
                   this.vinModel = this.vinModel.toLowerCase();
@@ -588,12 +591,23 @@ export default defineComponent({
                   if (res.Value.includes('JL (Open Body)')) {
                     this.vinTrim = 'jl';
                   }
-                  if (res.Value.toLowerCase() == '300m special') {
-                    this.vinTrim = '300m';
+                  if (res.Value.toLowerCase().includes('300m')) {
+                    this.vinTrim  = '';
+										this.vinModel = '300m';
                   }
                   this.vinTrim = this.vinTrim ? this.vinTrim.toLowerCase() : '';
                 }
                 break;
+              case "Series":
+                  if (res.Value) {
+                    if (res.Value.includes('1500') || res.Value.includes('2500') || res.Value.includes('3500') || res.Value.includes('4500') || res.Value.includes('5500')) {
+                      this.vinTrim = res.Value.toLowerCase().replace('-longhorn','');
+                      if (this.vinTrim == '3500w') {
+												this.vinTrim = '3500';
+											}
+                    }
+                  }
+                 break;
               case "Displacement (L)":
                 if (res.Value) {
                   if (res.Value.length == 1) {
@@ -602,15 +616,12 @@ export default defineComponent({
                     this.vinEngine = res.Value+'L';
                   }
                 }
-                if (res.Value == '5.9' && this.vinMake.toLowerCase() == 'dodge') {
-                  this.vinTrim = '2500';
-                }
                 break;
 						}
             
             if (idx === array.length - 1) {
               if (this.vinYear && this.vinMake && this.vinModel) {
-                if (this.vinTrim) {
+                if (this.vinTrim && this.vinModel != 'ram-van') {
                   if (this.vinTrim == '300m' && this.vinModel == '300') {
                     this.vinTrim = null;
                     this.vinModel = '300m';
@@ -716,7 +727,11 @@ export default defineComponent({
     this.initLogic();
     this.emitter.on('triggerSearch', function () {
       this.productList = [];
+      
       this.initLogic();
+      if (this.$router.currentRoute.value.path == '/tabs/products') {
+        location.reload(true);
+      }
     }.bind(this));
     if (this.$route.fullPath == '/tabs/products') {
       $('ion-tab-button#tab-button-products').addClass('tab-selected');
